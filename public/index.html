@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#08050a">
+  <title>Studio RB • Emilly Ribeiro</title>
+  <meta name="description" content="Studio RB — cílios, sobrancelhas e micropigmentação com atendimento da Emilly Ribeiro.">
+  <link rel="icon" href="assets/logo-premium-v4.svg?v=23">
+  <link rel="stylesheet" href="studio-rb-v18.css?v=51">
+</head>
+<body>
+  <header class="topbar">
+    <a href="#inicio" class="brand"><span class="brand-mark">RB</span><span><b>Studio RB</b><small>Emilly Ribeiro</small></span></a>
+    <nav><a href="#catalogo">Serviços</a><a href="#portfolio">Resultados</a><a href="/admin.html" class="admin-link" aria-label="Abrir painel administrativo" title="Painel administrativo"><span class="admin-link-text">Painel</span><span class="admin-link-icon">⚙</span></a><a href="#agendar" class="nav-cta">Agendar</a></nav>
+  </header>
+
+  <main>
+    <section id="inicio" class="hero section-dark">
+      <div class="neon-orbit orbit-a"></div><div class="neon-orbit orbit-b"></div>
+      <div class="hero-copy">
+        <span class="kicker">CATÁLOGO • STUDIO RB</span>
+        <h1>Beleza que <em>valoriza</em> o seu olhar.</h1>
+        <p>Atendimento pensado para realçar sua beleza natural com cuidado, técnica e personalidade.</p>
+        <div class="hero-actions"><a class="btn btn-hot" href="#agendar">Agendar horário</a><a class="btn btn-line" href="#catalogo">Ver catálogo</a></div>
+      </div>
+      <div class="hero-photo-wrap"><div class="blob-frame"><img src="assets/proprietaria-lsh.webp" alt="Emilly Ribeiro, Studio RB"></div><span class="spark s1">✦</span><span class="spark s2">✦</span></div>
+    </section>
+
+    <section class="about section-dark">
+      <div class="about-photo"><img src="assets/proprietaria-lsh.webp" alt="Emilly Ribeiro"></div>
+      <div class="about-copy"><span class="kicker">PRAZER, ME CHAMO</span><h2>Emilly Ribeiro <span>✦</span></h2><p>Sou lash designer apaixonada por realçar a beleza e a autoestima através do olhar. Trabalho com dedicação, cuidado e técnicas que valorizam cada cliente de forma única.</p><div class="mini-tags"><span>Cílios</span><span>Sobrancelhas</span><span>Micropigmentação</span></div></div>
+    </section>
+
+    <section id="catalogo" class="catalog section-dark">
+      <div class="section-head"><span class="kicker">TABELA DE VALORES</span><h2>Escolha seu procedimento</h2><p>Todos os valores e procedimentos podem ser atualizados pela proprietária no painel.</p></div>
+      <div id="servicesGrid" class="services-grid"><div class="loading-card">Carregando serviços...</div></div>
+    </section>
+
+    <section id="portfolio" class="portfolio section-dark">
+      <div class="section-head"><span class="kicker">RESULTADOS</span><h2>Trabalhos do Studio RB</h2></div>
+      <div id="galleryTabs" class="gallery-tabs"></div>
+      <div id="galleryGrid" class="gallery-grid"></div>
+    </section>
+
+    <section class="procedure-info section-dark">
+      <div class="info-card">
+        <span class="kicker">SOBRE O PROCEDIMENTO</span>
+        <h2>Antes do seu atendimento</h2>
+        <p>Para que o procedimento seja realizado da melhor forma, siga essas orientações antes de vir ao Studio RB.</p>
+        <div class="rules">
+          <div><b>01</b><span>Vir sem maquiagem: RÍMEL, base, pó, sombra, etc. Sem produto algum no rosto, inclusive creme ou protetor solar.</span></div>
+          <div><b>02</b><span>Vir sem lente de contato.</span></div>
+          <div><b>03</b><span>Não trazer acompanhante 🥰</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="space-section section-dark">
+      <div class="section-head">
+        <span class="kicker">NOSSO ESPAÇO</span>
+        <h2>Um cantinho pensado para você</h2>
+        <p>Atendimento com conforto, cuidado e privacidade em cada detalhe.</p>
+      </div>
+      <div class="space-grid">
+        <article class="space-card"><span>✦</span><h3>Ambiente acolhedor</h3><p>Um espaço preparado para você se sentir confortável do início ao fim.</p></article>
+        <article class="space-card"><span>♡</span><h3>Atendimento individual</h3><p>Cada cliente recebe atenção exclusiva durante o procedimento.</p></article>
+        <article class="space-card"><span>⌖</span><h3>Studio RB</h3><p>Rua Tereza de Oliveira Prado, 145 — Dom Pedro II.</p></article>
+      </div>
+    </section>
+
+    <section id="agendar" class="booking-section section-dark">
+      <div class="section-head"><span class="kicker">AGENDE SEU HORÁRIO</span><h2>Reserva rápida e segura</h2><p>Escolha o procedimento, a data e o horário. Depois faça o sinal PIX e envie o comprovante.</p></div>
+      <div class="booking-shell">
+        <form id="bookingForm" class="booking-form">
+          <div class="form-block"><div class="block-title"><span>1</span><div><b>Procedimentos</b><small>Você pode selecionar mais de um</small></div></div><div id="bookingServices" class="booking-services"></div><strong id="bookingTotal" class="sr-only">R$ 0,00</strong></div>
+          <div class="form-block"><div class="block-title"><span>2</span><div><b>Data e horário</b><small>Horários liberados pela Emilly</small></div></div><input id="bookingDate" type="date" required><div id="timeSlots" class="time-slots"><span class="muted">Escolha uma data.</span></div><input id="bookingTime" type="hidden" required></div>
+          <div class="form-block"><div class="block-title"><span>3</span><div><b>Seus dados</b><small>Usados para confirmar a reserva</small></div></div><div class="field-grid"><input name="name" placeholder="Seu nome" required><input name="phone" inputmode="tel" placeholder="WhatsApp com DDD" required><input name="email" type="email" placeholder="E-mail" required></div></div>
+          <button class="btn btn-hot full" type="submit" id="bookingSubmit">CONTINUAR PARA O PIX</button>
+        </form>
+
+        <aside class="pix-card" id="pixPreview"><span class="kicker">✨ POLÍTICA DE AGENDAMENTO – STUDIO RB ✨</span><div class="pix-value" id="pixValue">R$ 20,00</div><p>Para confirmar seu horário, solicitamos um sinal de R$ 20,00, que será descontado do valor total no dia do procedimento. 💕</p><ul><li>Em caso de falta sem aviso prévio, o valor do sinal não será reembolsado, pois o horário foi reservado exclusivamente para você.</li><li>Caso precise cancelar ou remarcar, pedimos que nos avise com antecedência para que possamos reorganizar a agenda. 🤍</li><li>Agradecemos a compreensão e esperamos você! ✨<br><strong>Studio RB</strong></li></ul></aside>
+      </div>
+    </section>
+
+    <section class="lookup section-dark"><div class="lookup-card"><span class="kicker">MEUS AGENDAMENTOS</span><h2>Consulte sua reserva</h2><form id="lookupForm"><input id="lookupQuery" placeholder="Digite seu WhatsApp ou nome"><button class="btn btn-line" type="submit">Consultar</button></form><div id="lookupResults"></div></div></section>
+  </main>
+
+  <dialog id="paymentDialog" class="payment-dialog">
+    <button class="dialog-close" id="closePayment" type="button">×</button>
+    <div class="payment-head"><span class="kicker">RESERVA CRIADA</span><h2>Agora faça o sinal</h2><p>O horário fica reservado para análise do comprovante.</p></div>
+    <div class="pix-pay-box"><small>Valor do sinal</small><strong id="dialogDeposit">R$ 20,00</strong><small>Chave PIX</small><div class="copy-row"><code id="pixKeyText">Configure a chave PIX no painel</code><button id="copyPix" type="button">Copiar</button></div><p id="pixRecipientText"></p></div>
+    <button id="paymentDoneBtn" class="btn btn-hot full payment-done-btn" type="button">PAGAMENTO REALIZADO</button>
+
+    <div id="whatsappProofBox" class="whatsapp-proof-box hidden">
+      <p class="whatsapp-proof-title">Agora envie o comprovante pelo WhatsApp</p>
+      <label class="proof-drop proof-drop-whatsapp">
+        <input id="proofFile" type="file" accept="image/*,.heic,.heif">
+        <span>📎 Escolher imagem do comprovante</span>
+        <small id="proofFileName">Nenhuma imagem escolhida</small>
+      </label>
+      <button id="sendWhatsappProof" class="btn btn-whatsapp full" type="button">ENVIAR COMPROVANTE NO WHATSAPP</button>
+      <small class="whatsapp-proof-help">No celular, o site abre o compartilhamento com a mensagem pronta e a imagem do comprovante.</small>
+    </div>
+
+    <div id="paymentStatus" class="payment-status"></div>
+  </dialog>
+
+  <footer><div><b>Studio RB</b><span>Emilly Ribeiro</span><a class="footer-admin" href="/admin.html">Acessar painel administrativo</a></div><div id="footerContact"></div></footer>
+  <a id="floatingWhatsapp" class="float-wa" target="_blank" rel="noopener" aria-label="WhatsApp">WA</a>
+  <div id="toast" class="toast"></div>
+  <script src="studio-rb-v18.js?v=51" defer></script>
+</body>
+</html>

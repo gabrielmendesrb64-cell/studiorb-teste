@@ -1,24 +1,26 @@
 {
-  "name": "controle-dividas-pessoal",
-  "version": "3.0.0",
+  "name": "lsh-studio-rb",
+  "version": "8.0.0",
   "private": true,
-  "description": "Painel privado profissional em tema claro para controle de recebíveis, pagamentos, comprovantes e conta administrativa",
+  "description": "Studio RB V51 TESTE - Admin 2.0, dashboard e promoções automáticas",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
-  },
-  "engines": {
-    "node": "22.16.0",
-    "npm": ">=10 <11"
+    "dev": "node --watch server.js",
+    "check": "node --check server.js && node --check public/studio-rb-v18.js && node --check public/admin-v18.js"
   },
   "dependencies": {
-    "better-sqlite3": "11.10.0",
-    "dotenv": "16.5.0",
-    "express": "5.1.0",
-    "express-rate-limit": "7.5.0",
-    "express-session": "1.18.1",
-    "helmet": "8.1.0",
-    "multer": "2.0.1"
+    "compression": "^1.7.4",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "express-session": "^1.18.0",
+    "helmet": "^7.1.0",
+    "memorystore": "^1.6.7",
+    "nodemailer": "^6.9.15",
+    "pg": "^8.13.1",
+    "express-async-errors": "^3.1.1",
+    "multer": "^2.0.2",
+    "sharp": "^0.34.3"
   }
 }

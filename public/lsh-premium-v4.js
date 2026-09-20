@@ -106,6 +106,56 @@ $('#newBooking')?.addEventListener('click',()=>location.reload());
 const year = $('#year'); if(year) year.textContent=new Date().getFullYear();
 
 loadConfig();
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js'));
-}
+
+
+
+/* ===== álbum interativo ===== */
+(function(){
+  const album = document.querySelector('[data-album]');
+  if(!album) return;
+
+  const mainImage = document.getElementById('albumMainImage');
+  const mainTitle = document.getElementById('albumMainTitle');
+  const mainText = document.getElementById('albumMainText');
+  const mainTag = document.getElementById('albumMainTag');
+  const current = document.getElementById('albumCurrent');
+  const thumbs = [...album.querySelectorAll('.album-thumb')];
+  const prev = album.querySelector('.album-nav.prev');
+  const next = album.querySelector('.album-nav.next');
+  let index = thumbs.findIndex(t => t.classList.contains('active'));
+  if(index < 0) index = 0;
+
+  function apply(i){
+    const item = thumbs[i];
+    if(!item) return;
+    thumbs.forEach(t => t.classList.remove('active'));
+    item.classList.add('active');
+
+    const image = item.dataset.image;
+    const title = item.dataset.title;
+    const text = item.dataset.text;
+    const tag = item.dataset.tag;
+
+    mainImage.style.opacity = '0.55';
+    setTimeout(() => {
+      mainImage.src = image;
+      mainImage.alt = title;
+      mainTitle.textContent = title;
+      mainText.textContent = text;
+      mainTag.textContent = tag;
+      current.textContent = String(i + 1).padStart(2, '0');
+      mainImage.style.opacity = '1';
+    }, 120);
+
+    index = i;
+  }
+
+  thumbs.forEach((thumb, i) => {
+    thumb.addEventListener('click', () => apply(i));
+  });
+
+  prev?.addEventListener('click', () => apply((index - 1 + thumbs.length) % thumbs.length));
+  next?.addEventListener('click', () => apply((index + 1) % thumbs.length));
+
+  apply(index);
+})();

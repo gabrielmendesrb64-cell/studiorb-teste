@@ -1,0 +1,294 @@
+{
+  "businessName": "Studio RB",
+  "whatsapp": "5512997940880",
+  "email": "emilly.vivi124@icloud.com",
+  "instagram": "@studio.__rb",
+  "tiktok": "",
+  "address": "Rua Tereza de Oliveira Prado, 145 — Dom Pedro II",
+  "openingHours": "Horários definidos pela proprietária no painel",
+  "weeklyHours": {
+    "0": [],
+    "1": [],
+    "2": [],
+    "3": [],
+    "4": [],
+    "5": [],
+    "6": []
+  },
+  "blockedDates": [],
+  "blockedSlots": [],
+  "services": [
+    {
+      "id": "volume-brasileiro",
+      "name": "Volume Brasileiro",
+      "price": 110,
+      "duration": 120,
+      "active": true,
+      "image": "assets/services/volume-brasileiro.webp",
+      "description": "Entrega volume e delicadeza ao olhar."
+    },
+    {
+      "id": "manut-brasileiro",
+      "name": "Manutenção — Volume Brasileiro",
+      "price": 90,
+      "duration": 90,
+      "active": true
+    },
+    {
+      "id": "volume-3d",
+      "name": "Volume 3D",
+      "price": 110,
+      "duration": 120,
+      "active": true,
+      "image": "assets/services/volume-3d.webp",
+      "description": "Olhar preenchido, delicado e apaixonante."
+    },
+    {
+      "id": "manut-3d",
+      "name": "Manutenção — Volume 3D",
+      "price": 90,
+      "duration": 90,
+      "active": true
+    },
+    {
+      "id": "lash-lifting",
+      "name": "Lash Lifting",
+      "price": 100,
+      "duration": 90,
+      "active": true,
+      "image": "assets/services/lash-lifting.webp",
+      "description": "Curva, alonga e levanta os cílios naturais."
+    },
+    {
+      "id": "volume-5d",
+      "name": "Volume 5D",
+      "price": 120,
+      "duration": 120,
+      "active": true,
+      "image": "assets/services/volume-5d.webp",
+      "description": "Efeito volumoso e marcante no olhar."
+    },
+    {
+      "id": "manut-5d",
+      "name": "Manutenção — Volume 5D",
+      "price": 100,
+      "duration": 90,
+      "active": true
+    },
+    {
+      "id": "volume-8d",
+      "name": "Volume 8D",
+      "price": 120,
+      "duration": 120,
+      "active": true,
+      "image": "assets/services/volume-8d.webp",
+      "description": "Olhar alongado, sensual e bem definido."
+    },
+    {
+      "id": "manut-8d",
+      "name": "Manutenção — Volume 8D",
+      "price": 100,
+      "duration": 90,
+      "active": true
+    },
+    {
+      "id": "volume-fox",
+      "name": "Volume Fox",
+      "price": 120,
+      "duration": 120,
+      "active": true,
+      "image": "assets/services/volume-fox.webp",
+      "description": "Olhar alongado e marcante."
+    },
+    {
+      "id": "manut-fox",
+      "name": "Manutenção — Volume Fox",
+      "price": 100,
+      "duration": 90,
+      "active": true
+    },
+    {
+      "id": "mega-brasileiro",
+      "name": "Mega Brasileiro",
+      "price": 130,
+      "duration": 120,
+      "active": true,
+      "image": "assets/services/mega-brasileiro.webp",
+      "description": "Olhar dramático e volumoso."
+    },
+    {
+      "id": "manut-mega-brasileiro",
+      "name": "Manutenção — Mega Brasileiro",
+      "price": 110,
+      "duration": 90,
+      "active": true
+    },
+    {
+      "id": "volume-luxo",
+      "name": "Volume Luxo",
+      "price": 140,
+      "duration": 120,
+      "active": true,
+      "image": "assets/services/volume-luxo.webp",
+      "description": "Olhar marcante e volumoso."
+    },
+    {
+      "id": "manut-volume-luxo",
+      "name": "Manutenção — Volume Luxo",
+      "price": 115,
+      "duration": 90,
+      "active": true
+    },
+    {
+      "id": "mega-fox",
+      "name": "Mega Fox",
+      "price": 150,
+      "duration": 120,
+      "active": true,
+      "image": "assets/services/mega-fox.webp",
+      "description": "Alongado nos cantos externos, com efeito puxado."
+    },
+    {
+      "id": "manut-mega-fox",
+      "name": "Manutenção — Mega Fox",
+      "price": 120,
+      "duration": 90,
+      "active": true
+    },
+    {
+      "id": "design-sobrancelha",
+      "name": "Design de Sobrancelha",
+      "price": 30,
+      "duration": 45,
+      "active": true,
+      "image": "assets/services/design.webp",
+      "description": "Valoriza o olhar e harmoniza o rosto."
+    },
+    {
+      "id": "design-henna",
+      "name": "Design de Sobrancelha com Henna",
+      "price": 40,
+      "duration": 60,
+      "active": true,
+      "image": "assets/services/henna.webp",
+      "description": "Realça o formato da sobrancelha e corrige pequenas falhas."
+    },
+    {
+      "id": "brow-lamination",
+      "name": "Brow Lamination",
+      "price": 80,
+      "duration": 75,
+      "active": true,
+      "image": "assets/services/brow-lamination.webp",
+      "description": "Alinha os fios e proporciona volume e efeito penteado."
+    },
+    {
+      "id": "micro-shadow",
+      "name": "Micropigmentação Shadow",
+      "price": 299.99,
+      "duration": 120,
+      "active": true,
+      "image": "assets/services/micro-shadow.webp",
+      "description": "Efeito sombreado suave e sofisticado."
+    },
+    {
+      "id": "micro-fio",
+      "name": "Micropigmentação Fio a Fio",
+      "price": 299.99,
+      "duration": 120,
+      "active": true,
+      "image": "assets/services/micro-fio.webp",
+      "description": "Simula fios naturais para corrigir falhas com naturalidade."
+    },
+    {
+      "id": "micro-labial",
+      "name": "Micropigmentação Labial",
+      "price": 299.99,
+      "duration": 120,
+      "active": true,
+      "image": "assets/services/micro-labial.webp",
+      "description": "Realça a cor natural dos lábios e melhora o contorno."
+    },
+    {
+      "id": "hidraglos",
+      "name": "Hidraglos",
+      "price": 100,
+      "duration": 60,
+      "active": true,
+      "image": "assets/services/hidraglos.webp",
+      "description": "Hidratação profunda e aparência renovada para os lábios."
+    },
+    {
+      "id": "spa-labial-henna",
+      "name": "Spa Labial com Henna",
+      "price": 25,
+      "duration": 45,
+      "active": true,
+      "image": "assets/services/spa-labial.webp",
+      "description": "Esfoliação, hidratação e pigmentação temporária."
+    },
+    {
+      "id": "depilacao-buco",
+      "name": "Depilação de Buço",
+      "price": 10,
+      "duration": 30,
+      "active": true,
+      "image": "assets/services/depilacao-buco.webp",
+      "description": "Depilação de buço com acabamento delicado."
+    }
+  ],
+  "gallery": [
+    {
+      "id": "resultado-1",
+      "src": "assets/depois-01.webp",
+      "title": "Resultado 01",
+      "caption": "Acabamento delicado e elegante",
+      "active": true,
+      "categoryId": "sobrancelhas"
+    },
+    {
+      "id": "resultado-2",
+      "src": "assets/resultado-02.webp",
+      "title": "Resultado 02",
+      "caption": "Natural e sofisticado",
+      "active": true,
+      "categoryId": "sobrancelhas"
+    },
+    {
+      "id": "resultado-3",
+      "src": "assets/resultado-03.webp",
+      "title": "Resultado 03",
+      "caption": "Mais um trabalho da Emilly",
+      "active": true,
+      "categoryId": "sobrancelhas"
+    }
+  ],
+  "galleryCategories": [
+    {
+      "id": "cilios",
+      "name": "Cílios",
+      "active": true
+    },
+    {
+      "id": "sobrancelhas",
+      "name": "Sobrancelhas",
+      "active": true
+    },
+    {
+      "id": "labios",
+      "name": "Lábios",
+      "active": true
+    },
+    {
+      "id": "epilacao",
+      "name": "Epilação",
+      "active": true
+    }
+  ],
+  "dateHours": {},
+  "depositAmount": 20,
+  "pixKey": "",
+  "pixRecipient": "Emilly Ribeiro",
+  "pixCity": "",
+  "paymentInstructions": "O horário só é confirmado após o envio e aprovação do comprovante do sinal."
+}

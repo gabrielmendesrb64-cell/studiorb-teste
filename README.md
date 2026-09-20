@@ -1,54 +1,41 @@
-# Controle de Recebíveis — Gabriel Mendes Correa
+# Studio RB — V18 Catálogo + PIX
 
-Versão personalizada V4 com identidade profissional de Gabriel Mendes Correa.
+Versão redesenhada com base no catálogo enviado pela cliente.
 
-# Controle de Dívidas — PRO V3
+## Principais mudanças
+- Visual preto, rosa/pink e branco, inspirado no PDF da Studio RB.
+- Catálogo de procedimentos com os valores do material de referência.
+- Fluxo de reserva com sinal PIX (padrão R$ 20,00).
+- Cliente pode enviar comprovante pelo próprio site ou seguir para o WhatsApp.
+- Agendamento fica como **Comprovante enviado** até aprovação da Emilly.
+- Painel admin possui **Aprovar / Confirmar**, **Recusar PIX** e **Ver comprovante**.
+- Chave PIX, valor do sinal, recebedor, cidade e instruções são configuráveis no painel.
+- Uploads de fotos do celular agora usam multipart e otimização no servidor com Sharp. O servidor aceita imagem de até 20 MB e reduz automaticamente para WebP.
+- Fotos de portfólio também são otimizadas automaticamente no servidor.
+- PostgreSQL/Supabase continua sendo a fonte persistente dos dados.
 
-Painel privado para controle de recebíveis, pagamentos e comprovantes.
-
-## O que mudou nesta versão
-
-- Visual totalmente refeito em tema claro: branco, cinza suave e verde petróleo.
-- Menu lateral compacto com ícones no tamanho correto.
-- Dashboard mais limpo, cards financeiros e fichas individuais mais profissionais.
-- Tela de login refeita.
-- Área **Minha conta** para alterar usuário e senha.
-- Ao alterar a senha, **todas as sessões são encerradas**, inclusive a atual, e o sistema volta para a tela de login. A senha antiga deixa de autenticar naquela base de dados.
-- CSS e JavaScript sem cache forte no navegador. Isso evita o problema de HTML novo carregar junto com CSS/JS antigo após um deploy no Render.
-- Assets usam versão (`?v=3.0.0`) para forçar a atualização visual após o deploy.
-
-## Dados iniciais
-
-- Vinicius: R$ 29.000,00 pendentes.
-- Guilherme: R$ 13.000,00 original / R$ 1.000,00 pago / R$ 12.000,00 pendentes.
-- Paulo: R$ 800,00 original / R$ 350,00 pago / R$ 450,00 pendentes.
+## Banco
+Ao iniciar, `database.sql` cria/atualiza as tabelas. A V18 adiciona:
+- campos de status PIX no agendamento;
+- tabela `lsh_payment_proofs` para os comprovantes.
 
 ## Render
+Build command: `npm install`
+Start command: `npm start`
 
-Build Command:
+Variável obrigatória:
+`DATABASE_URL=<Session Pooler do Supabase>`
 
-```bash
-npm install
-```
+Mantenha também as variáveis de admin, e-mail e WhatsApp já configuradas.
 
-Start Command:
+## Primeiro acesso após deploy
+1. Abra o painel `/admin.html`.
+2. Vá em **PIX & Sinal**.
+3. Coloque a chave PIX correta e confirme o valor do sinal.
+4. Confira os procedimentos/valores.
+5. Libere os horários.
+6. Faça um agendamento de teste e envie um comprovante de teste.
+7. No painel, abra o comprovante e aprove.
 
-```bash
-npm start
-```
-
-Variáveis de ambiente:
-
-```text
-NODE_VERSION=22.16.0
-NODE_ENV=production
-ADMIN_USER=admin
-ADMIN_PASSWORD=SUA_SENHA_INICIAL
-SESSION_SECRET=UMA_CHAVE_GRANDE_E_ALEATORIA_COM_32_OU_MAIS_CARACTERES
-```
-
-Use **Manual Deploy > Clear build cache & deploy** quando substituir uma versão antiga.
-
-## Importante sobre o Render gratuito
-
-O projeto atualmente usa SQLite e armazena comprovantes no disco local. Em serviços com armazenamento efêmero, um novo deploy/restart pode recriar a base a partir das variáveis de ambiente e apagar alterações locais. Para uso definitivo, o ideal é conectar um banco e armazenamento persistentes. Isso é especialmente importante para preservar pagamentos, comprovantes e alterações de senha.
+## Segurança
+Nunca envie `DATABASE_URL`, `SMTP_PASS`, senha de admin ou outras credenciais ao GitHub público.

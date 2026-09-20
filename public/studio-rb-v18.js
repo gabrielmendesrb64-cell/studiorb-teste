@@ -1,0 +1,209 @@
+'use strict';
+let cfg={}, selectedServices=new Set(), currentBooking=null, activeCategory='';
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');clearTimeout(window.__t);window.__t=setTimeout(()=>el.classList.remove('show'),3500)}
+async function api(url,opts={}){const r=await fetch(url,{cache:'no-store',...opts,headers:{...(opts.body instanceof FormData?{}:{'Content-Type':'application/json'}),...(opts.headers||{})}});let d={};try{d=await r.json()}catch{}if(!r.ok)throw new Error(d.error||`Erro ${r.status}`);return d}
+function duration(){return (cfg.services||[]).filter(s=>selectedServices.has(s.id)).reduce((a,s)=>a+Number(s.duration||60),0)}
+function total(){return (cfg.services||[]).filter(s=>selectedServices.has(s.id)).reduce((a,s)=>a+Number(s.price||0),0)}
+function serviceVisual(s){
+  if (s.image || s.description) return {image:s.image || 'assets/service-placeholder.svg',description:s.description || 'Procedimento realizado com cuidado e técnica no Studio RB.'};
+  const n=String(s.name||'').toLowerCase();
+  const rules=[
+    [/volume brasileiro/,['assets/services/volume-brasileiro.webp','Entrega volume e delicadeza ao olhar.']],
+    [/volume (bela|3d)/,['assets/services/volume-3d.webp','Olhar preenchido, delicado e apaixonante.']],
+    [/lash lifting/,['assets/services/lash-lifting.webp','Curva, alonga e levanta os cílios naturais.']],
+    [/volume (ruby|5d)/,['assets/services/volume-5d.webp','Efeito volumoso e marcante no olhar.']],
+    [/volume (diva|8d)/,['assets/services/volume-8d.webp','Olhar alongado, sensual e bem definido.']],
+    [/volume fox/,['assets/services/volume-fox.webp','Olhar alongado e marcante.']],
+    [/mega brasileiro/,['assets/services/mega-brasileiro.webp','Olhar dramático e volumoso.']],
+    [/volume luxo/,['assets/services/volume-luxo.webp','Olhar marcante e volumoso.']],
+    [/mega fox/,['assets/services/mega-fox.webp','Alongado nos cantos externos, com efeito puxado.']],
+    [/design.*henna|henna/,['assets/services/henna.webp','Realça o formato da sobrancelha e corrige pequenas falhas.']],
+    [/design.*sobrancelha/,['assets/services/design.webp','Valoriza o olhar e harmoniza o rosto.']],
+    [/brow lamination/,['assets/services/brow-lamination.webp','Alinha os fios e dá volume com efeito penteado.']],
+    [/shadow/,['assets/services/micro-shadow.webp','Efeito sombreado suave e sofisticado.']],
+    [/fio a fio|fio.*fio/,['assets/services/micro-fio.webp','Simula fios naturais para corrigir falhas com naturalidade.']],
+    [/micropigmentação labial|micro.*labial/,['assets/services/micro-labial.webp','Realça a cor natural dos lábios e melhora o contorno.']],
+    [/hidraglos/,['assets/services/hidraglos.webp','Hidratação profunda e aparência renovada para os lábios.']],
+    [/spa labial/,['assets/services/spa-labial.webp','Esfoliação, hidratação e pigmentação temporária.']],
+    [/buço|depilação/,['assets/services/depilacao-buco.webp','Depilação de buço com acabamento delicado.']]
+  ];
+  for(const [re,v] of rules) if(re.test(n)) return {image:v[0],description:v[1]};
+  return {image:'assets/service-placeholder.svg',description:'Procedimento realizado com cuidado e técnica no Studio RB.'};
+}
+function isMaintenanceService(s){
+  return /^manut/i.test(String(s.id||'')) || /^manuten[cç][aã]o\b/i.test(String(s.name||'').trim());
+}
+function normalizeServiceName(v){
+  return String(v||'').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/^manutencao\s*[-—:]?\s*/,'')
+    .replace(/[^a-z0-9]+/g,' ')
+    .trim();
+}
+const maintenancePairs={
+  'volume-brasileiro':'manut-brasileiro',
+  'volume-3d':'manut-3d',
+  'volume-5d':'manut-5d',
+  'volume-8d':'manut-8d',
+  'volume-fox':'manut-fox',
+  'mega-brasileiro':'manut-mega-brasileiro',
+  'volume-luxo':'manut-volume-luxo',
+  'mega-fox':'manut-mega-fox'
+};
+function findMaintenance(base, all){
+  const baseId=String(base.id||'').toLowerCase();
+  const exactId=maintenancePairs[baseId];
+  if(exactId){
+    const exact=all.find(x=>String(x.id||'').toLowerCase()===exactId && x.active!==false);
+    if(exact)return exact;
+  }
+  const baseName=normalizeServiceName(base.name)
+    .replace(/^volume\s+/,'')
+    .replace(/^mega\s+/,'mega ');
+  return all.find(m=>{
+    if(!isMaintenanceService(m)||m.active===false)return false;
+    const mn=normalizeServiceName(m.name)
+      .replace(/^volume\s+/,'')
+      .replace(/^mega\s+/,'mega ');
+    return mn===baseName || mn.includes(baseName) || baseName.includes(mn);
+  }) || null;
+}
+function renderBookingMenu(){
+  const all=(cfg.services||[]).filter(s=>s.active!==false);
+  const catalog=all.filter(s=>!isMaintenanceService(s));
+  const mode=window.bookingMode||'';
+  if(!mode){
+    $('#bookingServices').innerHTML=`<div class="booking-mode-picker">
+      <button type="button" data-booking-mode="complete"><b>✨ Procedimento completo</b><small>Primeira aplicação ou procedimento normal</small></button>
+      <button type="button" data-booking-mode="maintenance"><b>↻ Manutenção</b><small>Para quem já realizou o procedimento</small></button>
+    </div>`;
+    return;
+  }
+  const rows=mode==='maintenance'
+    ? catalog
+        .filter(base=>base.bookingMaintenance!==false)
+        .map(base=>({base,item:findMaintenance(base,all)}))
+        .filter(x=>x.item)
+    : catalog
+        .filter(base=>base.bookingComplete!==false)
+        .map(base=>({base,item:base}));
+  $('#bookingServices').innerHTML=`<div class="booking-mode-head"><button type="button" id="bookingModeBack">‹</button><div><b>${mode==='maintenance'?'Manutenção':'Procedimento completo'}</b><small>Escolha o serviço</small></div></div>
+  <div class="booking-simple-list">${rows.map(({base,item})=>`<label><input type="checkbox" value="${esc(item.id)}"><span>${esc(base.name)}</span></label>`).join('')}</div>`;
+}
+function renderServices(){
+  const all=(cfg.services||[]).filter(s=>s.active!==false);
+  const catalog=all.filter(s=>!isMaintenanceService(s));
+  $('#servicesGrid').innerHTML=catalog.map(s=>{
+    const v=serviceVisual(s),maintenance=findMaintenance(s,all);
+    const maintenanceHtml=maintenance?`<div class="maintenance-price"><span>Manutenção</span><strong>${money(maintenance.price)}</strong></div>`:'';
+    const promo=s.onPromotion?`<div class="promo-public-badge">PROMOÇÃO</div>`:'';
+    const priceHtml=s.onPromotion?`<div class="price promo-price"><del>${money(s.originalPrice)}</del><strong>${money(s.price)}</strong></div>`:`<div class="price">${money(s.price)}</div>`;
+    return `<article class="service-card ${s.onPromotion?'is-promo':''}" data-service="${esc(s.id)}">${promo}<img class="service-photo" src="${esc(v.image)}" alt="${esc(s.name)}" loading="lazy"><div class="service-info"><span class="kicker">STUDIO RB</span><h3>${esc(s.name)}</h3><p>${esc(v.description)}</p><div class="service-bottom"><div class="price-wrap">${priceHtml}${maintenanceHtml}</div><span class="service-select-hint">Selecionar</span></div></div></article>`;
+  }).join('')||'<div class="loading-card">Nenhum procedimento cadastrado.</div>';
+  renderBookingMenu();
+}
+function syncServiceUI(){$$('[data-service]').forEach(x=>x.classList.toggle('selected',selectedServices.has(x.dataset.service)));$$('#bookingServices input').forEach(x=>x.checked=selectedServices.has(x.value));$('#bookingTotal').textContent=money(total())}
+document.addEventListener('click',e=>{const card=e.target.closest('[data-service]');if(card){const id=card.dataset.service;selectedServices.clear();selectedServices.add(id);syncServiceUI();document.querySelector('#agendar')?.scrollIntoView({behavior:'smooth',block:'start'})}});
+$('#bookingServices')?.addEventListener('click',e=>{
+  const b=e.target.closest('[data-booking-mode]');
+  if(b){window.bookingMode=b.dataset.bookingMode;selectedServices.clear();renderBookingMenu();syncServiceUI();return}
+  if(e.target.closest('#bookingModeBack')){window.bookingMode='';selectedServices.clear();renderBookingMenu();syncServiceUI()}
+});
+
+function renderGallery(){const cats=cfg.galleryCategories||[];if(!activeCategory)activeCategory=cats[0]?.id||'';$('#galleryTabs').innerHTML=cats.map(c=>`<button type="button" class="${c.id===activeCategory?'active':''}" data-cat="${esc(c.id)}">${esc(c.name)}</button>`).join('');const items=(cfg.gallery||[]).filter(x=>!activeCategory||x.categoryId===activeCategory);$('#galleryGrid').innerHTML=items.map(x=>`<figure class="gallery-item"><img src="${esc(x.src)}" alt="${esc(x.title||'Resultado Studio RB')}" loading="lazy"><figcaption><b>${esc(x.title||'Resultado')}</b><small>${esc(x.caption||'')}</small></figcaption></figure>`).join('')||'<div class="loading-card">Em breve novos resultados nesta categoria.</div>'}
+$('#galleryTabs')?.addEventListener('click',e=>{const b=e.target.closest('[data-cat]');if(!b)return;activeCategory=b.dataset.cat;renderGallery()});
+async function loadAvailability(){const date=$('#bookingDate').value;$('#bookingTime').value='';if(!date){$('#timeSlots').innerHTML='<span class="muted">Escolha uma data.</span>';return}if(!selectedServices.size){$('#timeSlots').innerHTML='<span class="muted">Selecione pelo menos um procedimento primeiro.</span>';return}try{const d=await api(`/api/availability?date=${encodeURIComponent(date)}&duration=${duration()}`);$('#timeSlots').innerHTML=d.slots.length?d.slots.map(x=>`<button type="button" data-time="${x.time}" ${x.available?'':'disabled'}>${x.time}</button>`).join(''):'<span class="muted">Nenhum horário liberado para este dia.</span>'}catch(e){$('#timeSlots').innerHTML=`<span class="muted">${esc(e.message)}</span>`}}
+$('#bookingServices')?.addEventListener('change',e=>{
+  const input=e.target;
+  if(!input.matches('.booking-simple-list input[type="checkbox"]'))return;
+  if(input.checked){
+    selectedServices.clear();
+    selectedServices.add(String(input.value));
+  }else selectedServices.delete(String(input.value));
+  syncServiceUI();
+  if($('#bookingDate').value) loadAvailability();
+});
+$('#bookingDate')?.addEventListener('change',loadAvailability);$('#bookingServices')?.addEventListener('change',()=>{$('#bookingDate').value&&loadAvailability()});$('#timeSlots')?.addEventListener('click',e=>{const b=e.target.closest('[data-time]');if(!b||b.disabled)return;$$('#timeSlots button').forEach(x=>x.classList.remove('active'));b.classList.add('active');$('#bookingTime').value=b.dataset.time});
+$('#bookingForm')?.addEventListener('submit',async e=>{
+  e.preventDefault();
+  const btn=$('#bookingSubmit');
+  if(!selectedServices.size)return toast('Escolha pelo menos um procedimento.');
+  if(!$('#bookingTime').value)return toast('Escolha um horário.');
+  btn.disabled=true;btn.textContent='CRIANDO RESERVA...';
+  try{
+    const fd=new FormData(e.currentTarget);
+    const payload={
+      name:fd.get('name'),
+      phone:fd.get('phone'),
+      email:fd.get('email'),
+      date:$('#bookingDate').value,
+      time:$('#bookingTime').value,
+      services:[...selectedServices]
+    };
+    const d=await api('/api/bookings',{method:'POST',body:JSON.stringify(payload)});
+    const selectedNames=(cfg.services||[])
+      .filter(x=>payload.services.includes(String(x.id)))
+      .map(x=>x.name);
+    currentBooking={
+      id:d.id,
+      phone:payload.phone,
+      name:payload.name,
+      date:payload.date,
+      time:payload.time,
+      services:selectedNames
+    };
+    openPayment();
+  }catch(err){toast(err.message)}
+  finally{btn.disabled=false;btn.textContent='CONTINUAR PARA O PIX'}
+});
+function openPayment(){
+  if(!currentBooking)return;
+  $('#dialogDeposit').textContent=money(cfg.depositAmount||20);
+  $('#pixKeyText').textContent=cfg.pixKey||'Configure a chave PIX no painel';
+  $('#pixRecipientText').textContent=[cfg.pixRecipient,cfg.pixCity].filter(Boolean).join(' • ');
+  $('#paymentStatus').textContent='';
+  $('#whatsappProofBox')?.classList.add('hidden');
+  $('#paymentDoneBtn').style.display='';
+  const file=$('#proofFile'); if(file) file.value='';
+  const fileName=$('#proofFileName'); if(fileName) fileName.textContent='Nenhuma imagem escolhida';
+  $('#paymentDialog').showModal();
+}
+$('#closePayment')?.addEventListener('click',()=>$('#paymentDialog').close());$('#copyPix')?.addEventListener('click',async()=>{if(!cfg.pixKey)return toast('A chave PIX ainda não foi configurada.');await navigator.clipboard.writeText(cfg.pixKey);toast('Chave PIX copiada.')});
+$('#paymentDoneBtn')?.addEventListener('click',()=>{
+  $('#paymentDoneBtn').style.display='none';
+  $('#whatsappProofBox')?.classList.remove('hidden');
+  $('#paymentStatus').textContent='Pagamento marcado como realizado. Envie o comprovante para concluir a confirmação.';
+});
+$('#proofFile')?.addEventListener('change',e=>{
+  const file=e.target.files?.[0];
+  $('#proofFileName').textContent=file?file.name:'Nenhuma imagem escolhida';
+});
+function whatsappProofMessage(){
+  if(!currentBooking)return '';
+  const services=(currentBooking.services||[]).join(' + ')||'Procedimento não informado';
+  return `Olá! Segue meu comprovante de pagamento do Studio RB.
+
+Nome: ${currentBooking.name}
+Data: ${currentBooking.date}
+Horário: ${currentBooking.time}
+Procedimento: ${services}
+
+Código da reserva: ${currentBooking.id}`;
+}
+$('#sendWhatsappProof')?.addEventListener('click',()=>{
+  if(!currentBooking)return toast('Reserva não encontrada.');
+  const file=$('#proofFile')?.files?.[0];
+  if(!file)return toast('Escolha a imagem do comprovante.');
+  const msg=whatsappProofMessage();
+  const number=String(cfg.whatsapp||'').replace(/\D/g,'');
+  if(!number)return toast('WhatsApp da proprietária não configurado.');
+  window.location.href=`https://wa.me/${number}?text=${encodeURIComponent(msg)}`;
+});
+
+$('#lookupForm')?.addEventListener('submit',async e=>{e.preventDefault();const q=$('#lookupQuery').value.trim();if(!q)return;try{const d=await api(`/api/my-bookings?q=${encodeURIComponent(q)}`);$('#lookupResults').innerHTML=(d.bookings||[]).map(b=>`<div class="lookup-item"><b>${esc((b.services||[]).map(s=>s.name).join(' + '))}</b><div>${esc(b.date)} • ${esc(b.time)}</div><div class="status">${esc(b.status)}</div><small>${b.paymentStatus?`Pagamento: ${esc(b.paymentStatus)}`:''}</small></div>`).join('')||'<p class="muted">Nenhum agendamento encontrado.</p>'}catch(err){toast(err.message)}});
+async function init(){try{cfg=await api('/api/config');const dep=money(cfg.depositAmount||20);if($('#heroDeposit'))$('#heroDeposit').textContent=dep;if($('#pixValue'))$('#pixValue').textContent=dep;renderServices();renderGallery();const phone=String(cfg.whatsapp||'').replace(/\D/g,'');$('#floatingWhatsapp').href=`https://wa.me/${phone}`;$('#footerContact').innerHTML=`<span>${esc(cfg.address||'')}</span><span>${esc(cfg.instagram||'')}</span>`;const today=new Date();$('#bookingDate').min=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`}catch(e){toast('Não foi possível carregar o site.')}}
+init();
+
