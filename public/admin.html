@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b080a">
   <title>Painel • Studio RB</title>
   <link rel="stylesheet" href="styles.css?v=23">
-  <link rel="stylesheet" href="admin.css?v=51">
+  <link rel="stylesheet" href="admin.css?v=52">
   <link rel="icon" href="assets/logo-premium-v4.svg?v=23">
 </head>
 <body class="admin-body admin-v15">
@@ -56,6 +56,7 @@
         <button type="button" data-admin-section="procedimentos"><span>✦</span> Procedimentos</button>
         <button type="button" data-admin-section="promocoes"><span>◇</span> Promoções <i>Novo</i></button>
         <button type="button" data-admin-section="financeiro"><span>◫</span> Financeiro</button>
+        <button type="button" data-admin-section="avaliacoes"><span>★</span> Avaliações <i>Novo</i></button>
         <button type="button" data-admin-section="horarios"><span>◷</span> Horários</button>
         <button type="button" data-admin-section="pix"><span>◆</span> PIX</button>
         <button type="button" data-admin-section="portfolio"><span>▧</span> Portfólio</button>
@@ -214,6 +215,12 @@
         </form>
       </section>
 
+
+      <section class="panel-card admin-section-view admin-view-hidden reviews-admin-panel" data-admin-view="avaliacoes">
+        <div class="panel-head"><div><span class="eyebrow">AVALIAÇÕES</span><h2>Depoimentos das clientes</h2><p class="panel-desc">Avaliações vêm apenas de atendimentos concluídos. Aprove para aparecer no site público.</p></div></div>
+        <div id="adminReviewsList" class="admin-reviews-list"><div class="empty-state">Carregando avaliações...</div></div>
+      </section>
+
       <section class="panel-card admin-section-view admin-view-hidden finance-panel" data-admin-view="financeiro">
         <div class="panel-head">
           <div>
@@ -275,6 +282,6 @@
     </form>
   </dialog>
 
-  <script src="admin-v18.js?v=51" defer></script>
+  <script src="admin-v18.js?v=52" defer></script>
 </body>
 </html>

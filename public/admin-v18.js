@@ -1,3 +1,10 @@
+
+async function renderAdminReviews(){
+ const box=document.querySelector('#adminReviewsList');if(!box)return;
+ try{const d=await api('/api/admin/reviews');const rows=d.reviews||[];box.innerHTML=rows.length?rows.map(r=>`<article class="admin-review-card"><div><div class="stars">${'★'.repeat(Number(r.rating||5))}</div><h3>${esc(r.client_name)}</h3><small>${esc(r.service_name)}</small><p>“${esc(r.comment)}”</p></div><div class="review-admin-actions"><span class="${r.approved?'approved':'pending'}">${r.approved?'Publicado':'Aguardando'}</span><button data-review-approve="${r.id}" data-value="${r.approved?'0':'1'}" class="btn ${r.approved?'btn-ghost':'btn-pink'}" type="button">${r.approved?'Ocultar':'Publicar'}</button><button data-review-delete="${r.id}" class="btn btn-ghost" type="button">Excluir</button></div></article>`).join(''):'<div class="empty-state">Nenhuma avaliação recebida ainda.</div>'}catch(e){box.innerHTML=`<div class="empty-state">${esc(e.message)}</div>`}
+}
+document.querySelector('#adminReviewsList')?.addEventListener('click',async e=>{const approve=e.target.closest('[data-review-approve]'),del=e.target.closest('[data-review-delete]');try{if(approve)await api('/api/admin/reviews/'+approve.dataset.reviewApprove,{method:'PATCH',body:JSON.stringify({approved:approve.dataset.value==='1'})});if(del){if(!confirm('Excluir esta avaliação?'))return;await api('/api/admin/reviews/'+del.dataset.reviewDelete,{method:'DELETE'});}if(approve||del){await renderAdminReviews();toast('Avaliações atualizadas.')}}catch(err){toast(err.message)}});
+
 'use strict';
 let bookings=[], adminConfig=null, currentFilter='all', calendarCursor=new Date(), selectedCalendarDate='', financePeriod='month', selectedClientKey='';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -468,6 +475,7 @@ function showAdminSection(name){
   if(name==='clientes')renderClientSearch();
   if(name==='promocoes')renderPromotion();
   if(name==='financeiro')renderFinance();
+  if(name==='avaliacoes')renderAdminReviews();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 document.querySelector('.admin-section-menu')?.addEventListener('click',e=>{

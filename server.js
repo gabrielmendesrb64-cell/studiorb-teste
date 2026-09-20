@@ -619,7 +619,8 @@ function publicBooking(b) {
     createdAt: b.createdAt,
     depositAmount:Number(b.depositAmount || 20),
     paymentStatus:b.paymentStatus || 'Aguardando pagamento',
-    proofUploadedAt:b.proofUploadedAt || null
+    proofUploadedAt:b.proofUploadedAt || null,
+    canReview:b.status === 'Concluído'
   };
 }
 
@@ -1474,6 +1475,50 @@ app.use((err, req, res, next) => {
   if (err.code === '22P02') return res.status(400).json({ error:'Algum dado enviado é inválido.' });
   res.status(500).json({ error:'Não foi possível concluir esta ação. Tente novamente.' });
 });
+
+
+// V52 — avaliações verificadas de clientes
+app.get('/api/reviews', async (req,res) => {
+  if (!pgPool || !dbReady) return res.json({reviews:[]});
+  const r=await pgPool.query(`SELECT id,client_name,service_name,rating,comment,created_at FROM lsh_reviews WHERE approved=TRUE ORDER BY created_at DESC LIMIT 30`);
+  res.json({reviews:r.rows});
+});
+app.post('/api/my-bookings/:id/review', async (req,res) => {
+  if (!pgPool || !dbReady) return res.status(503).json({error:'Banco de dados indisponível.'});
+  const q=String(req.body.q||'').trim();
+  const rating=Number(req.body.rating||0);
+  const comment=String(req.body.comment||'').trim().slice(0,500);
+  if(!Number.isInteger(rating)||rating<1||rating>5||comment.length<3) return res.status(400).json({error:'Escolha de 1 a 5 estrelas e escreva sua avaliação.'});
+  const bookings=await getState('bookings');
+  const b=bookings.find(x=>x.id===req.params.id);
+  if(!b) return res.status(404).json({error:'Atendimento não encontrado.'});
+  const digits=cleanPhone(q), nameQ=normalizeName(q);
+  const owner=(digits.length>=8 && cleanPhone(b.phone).endsWith(digits)) || (!digits && nameQ.length>=3 && normalizeName(b.name)===nameQ);
+  if(!owner) return res.status(403).json({error:'Os dados não conferem com esse atendimento.'});
+  if(b.status!=='Concluído') return res.status(409).json({error:'A avaliação é liberada após o procedimento ser concluído.'});
+  const serviceName=(b.services||[]).map(x=>x.name).filter(Boolean).join(' + ') || 'Procedimento Studio RB';
+  try{
+    await pgPool.query(`INSERT INTO lsh_reviews(booking_id,client_name,service_name,rating,comment) VALUES($1,$2,$3,$4,$5)`,[b.id,String(b.name||'Cliente').slice(0,80),serviceName.slice(0,180),rating,comment]);
+  }catch(e){ if(e.code==='23505') return res.status(409).json({error:'Você já avaliou esse atendimento.'}); throw e; }
+  res.status(201).json({ok:true,message:'Avaliação enviada para aprovação da Emilly.'});
+});
+app.get('/api/admin/reviews', auth, async (req,res) => {
+  if (!pgPool || !dbReady) return res.json({reviews:[]});
+  const r=await pgPool.query(`SELECT id,booking_id,client_name,service_name,rating,comment,approved,created_at FROM lsh_reviews ORDER BY created_at DESC`);
+  res.json({reviews:r.rows});
+});
+app.patch('/api/admin/reviews/:id', auth, async (req,res) => {
+  if (!pgPool || !dbReady) return res.status(503).json({error:'Banco de dados indisponível.'});
+  const approved=req.body.approved===true;
+  const r=await pgPool.query(`UPDATE lsh_reviews SET approved=$1,approved_at=CASE WHEN $1 THEN NOW() ELSE NULL END WHERE id=$2 RETURNING *`,[approved,req.params.id]);
+  if(!r.rowCount)return res.status(404).json({error:'Avaliação não encontrada.'});
+  res.json({ok:true,review:r.rows[0]});
+});
+app.delete('/api/admin/reviews/:id', auth, async (req,res) => {
+  if (!pgPool || !dbReady) return res.status(503).json({error:'Banco de dados indisponível.'});
+  await pgPool.query('DELETE FROM lsh_reviews WHERE id=$1',[req.params.id]); res.json({ok:true});
+});
+app.get('/admin', (req,res)=>res.sendFile(path.join(__dirname,'public','admin.html')));
 
 app.get('/api/health', async (req,res) => res.json({ ok:true, database:!!(pgPool && dbReady) }));
 

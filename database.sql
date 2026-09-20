@@ -115,3 +115,18 @@ CREATE TABLE IF NOT EXISTS lsh_payment_proofs (
 );
 
 -- V51: promoções são persistidas em lsh_settings com key='promotion'.
+
+
+-- V52: avaliações verificadas por atendimento concluído
+CREATE TABLE IF NOT EXISTS lsh_reviews (
+  id BIGSERIAL PRIMARY KEY,
+  booking_id TEXT UNIQUE NOT NULL REFERENCES lsh_bookings(id) ON DELETE CASCADE,
+  client_name TEXT NOT NULL,
+  service_name TEXT NOT NULL,
+  rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  comment TEXT NOT NULL,
+  approved BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  approved_at TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS idx_lsh_reviews_approved ON lsh_reviews(approved, created_at DESC);
