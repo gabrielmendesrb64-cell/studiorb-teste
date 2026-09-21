@@ -63,7 +63,10 @@ app.use(session({
 
 const bookingLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 20, standardHeaders: true, legacyHeaders: false });
 const lookupLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 40, standardHeaders: true, legacyHeaders: false });
-const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 10, standardHeaders: true, legacyHeaders: false });
+const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 30, standardHeaders: true, legacyHeaders: false });
+const adminLoginAttempts = new Map();
+const ADMIN_MAX_LOGIN_ATTEMPTS = 3;
+const ADMIN_LOCK_MS = 15 * 60 * 1000;
 app.use('/api/bookings', bookingLimiter);
 app.use('/api/my-bookings', lookupLimiter);
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1h', etag:true }));
@@ -938,16 +941,25 @@ app.post('/api/my-bookings/:id/cancel', async (req, res) => {
   res.json({ ok:true, booking: publicBooking(b) });
 });
 
-app.post('/api/admin/login', loginLimiter, (req, res) => {
-  const user = String(req.body.username || '');
+app.post('/api/admin/login', loginLimiter, async (req, res) => {
+  const user = String(req.body.username || '').trim();
   const pass = String(req.body.password || '');
   const eu = process.env.ADMIN_USER || 'admin';
   const ep = process.env.ADMIN_PASSWORD || 'troque-esta-senha';
+  const ip = String(req.ip || req.socket?.remoteAddress || 'desconhecido');
+  const now = Date.now();
+  const state = adminLoginAttempts.get(ip) || { count:0, lockedUntil:0 };
+  if (state.lockedUntil > now) {
+    const minutes = Math.max(1, Math.ceil((state.lockedUntil-now)/60000));
+    return res.status(429).json({ error:`Acesso temporariamente bloqueado. Tente novamente em ${minutes} minuto(s).` });
+  }
+  if (state.lockedUntil && state.lockedUntil <= now) adminLoginAttempts.delete(ip);
   const safeEqual = (a,b) => {
     const A=Buffer.from(String(a)), B=Buffer.from(String(b));
     return A.length === B.length && crypto.timingSafeEqual(A,B);
   };
   if (safeEqual(user, eu) && safeEqual(pass, ep)) {
+    adminLoginAttempts.delete(ip);
     req.session.regenerate(err => {
       if (err) return res.status(500).json({ error:'Falha ao iniciar sessão' });
       req.session.admin = true;
@@ -955,7 +967,20 @@ app.post('/api/admin/login', loginLimiter, (req, res) => {
     });
     return;
   }
-  res.status(401).json({ error:'Credenciais inválidas' });
+  const nextCount = (state.count || 0) + 1;
+  const locked = nextCount >= ADMIN_MAX_LOGIN_ATTEMPTS;
+  adminLoginAttempts.set(ip, { count: locked ? 0 : nextCount, lockedUntil: locked ? now + ADMIN_LOCK_MS : 0 });
+  if (locked) {
+    try {
+      const cfg = await getState('config');
+      const alerts = Array.isArray(cfg.securityAlerts) ? cfg.securityAlerts : [];
+      alerts.unshift({ id: crypto.randomUUID(), at:new Date().toISOString(), username:user || '(vazio)', ip, userAgent:String(req.get('user-agent')||'').slice(0,220), attempts:ADMIN_MAX_LOGIN_ATTEMPTS });
+      cfg.securityAlerts = alerts.slice(0,30);
+      await setState('config', cfg);
+    } catch (e) { console.error('[SECURITY ALERT]', e.message); }
+    return res.status(429).json({ error:'3 tentativas incorretas. Este acesso foi bloqueado por 15 minutos e a Emilly será avisada no painel.' });
+  }
+  res.status(401).json({ error:`Credenciais inválidas. Restam ${ADMIN_MAX_LOGIN_ATTEMPTS-nextCount} tentativa(s) antes do bloqueio temporário.` });
 });
 app.post('/api/admin/logout', auth, (req,res) => req.session.destroy(() => res.json({ ok:true })));
 app.get('/api/admin/me', auth, (req,res) => res.json({ ok:true }));

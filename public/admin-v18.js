@@ -41,7 +41,7 @@ clearLegacyCaches();
 $('#loginForm')?.addEventListener('submit',async e=>{e.preventDefault();const btn=e.currentTarget.querySelector('button');setBusy(btn,true,'ENTRANDO...');try{await api('/api/admin/login',{method:'POST',body:JSON.stringify(Object.fromEntries(new FormData(e.currentTarget)))});await showDash();}catch(err){$('#loginMsg').textContent=err.message||'Usuário ou senha incorretos.';}finally{setBusy(btn,false);}});
 $('#logoutBtn')?.addEventListener('click',async()=>{try{await api('/api/admin/logout',{method:'POST'});}finally{location.reload();}});
 async function check(){try{await api('/api/admin/me');await showDash();}catch{}}
-async function showDash(){$('#loginView')?.classList.add('hidden');$('#dashboard')?.classList.remove('hidden');$('#logoutBtn')?.classList.remove('hidden');selectedCalendarDate=todayISO();await refresh();}
+async function showDash(){$('#loginView')?.classList.add('hidden');$('#dashboard')?.classList.remove('hidden');$('#logoutBtn')?.classList.remove('hidden');document.body.classList.add('admin-authenticated');selectedCalendarDate=todayISO();await refresh();}
 async function refresh(){
   const [b,c,s]=await Promise.all([
     api('/api/admin/bookings'),
@@ -53,7 +53,7 @@ async function refresh(){
   adminConfig.weeklyHours=adminConfig.weeklyHours||{};
   adminConfig.dateHours=adminConfig.dateHours||{};
   adminConfig.services=s.services||[];
-  renderStats();renderCalendar();renderDayManager();renderList();renderBlocks();renderSchedule();renderServices();renderGallery();renderPaymentSettings();renderClientSearch();renderFinance();renderPromotion();renderHome();
+  renderStats();renderCalendar();renderDayManager();renderList();renderBlocks();renderSchedule();renderServices();renderGallery();renderPaymentSettings();renderClientSearch();renderFinance();renderPromotion();renderHome();renderSecurityAlerts();
 }
 function renderStats(){const today=todayISO(),month=today.slice(0,7);const done=bookings.filter(b=>b.status==='Concluído'&&String(b.date).startsWith(month));const revenue=done.reduce((s,b)=>s+Number(b.total||0),0);const rows=[['Agendamentos hoje',bookings.filter(b=>b.date===today&&!['Cancelado','Concluído'].includes(b.status)).length],['Concluídos no mês',done.length],['Faturamento do mês',money(revenue)],['Clientes no mês',new Set(bookings.filter(b=>String(b.date).startsWith(month)).map(b=>normalizePhoneValue(b.phone)||normalizeSearchValue(b.name))).size]];$('#stats').innerHTML=rows.map(([l,n],i)=>`<div class="stat stat-v51"><span class="stat-icon">${['▣','✓','◆','♙'][i]}</span><div><span>${l}</span><b>${n}</b></div></div>`).join('');}
 
@@ -291,6 +291,12 @@ document.addEventListener('click',async e=>{
 $('#galleryUploadForm')?.addEventListener('submit',async e=>{e.preventDefault();const file=$('#galleryPhoto')?.files?.[0],categoryId=$('#galleryCategory')?.value;if(!file){toast('Escolha uma foto.','error');return;}if(!categoryId){toast('Escolha a categoria.','error');return;}const btn=e.currentTarget.querySelector('button[type="submit"]');setBusy(btn,true,'ENVIANDO...');try{const fd=new FormData();fd.append('photo',file);fd.append('categoryId',categoryId);fd.append('title',$('#galleryTitle').value||'');fd.append('caption',$('#galleryCaption').value||'');const r=await fetch('/api/admin/gallery',{method:'POST',body:fd,credentials:'same-origin'});let d={};try{d=await r.json();}catch{}if(!r.ok)throw new Error(d.error||`Erro ${r.status}`);e.currentTarget.reset();await refresh();toast('Foto adicionada e otimizada automaticamente.');}catch(err){toast(err.message,'error');}finally{setBusy(btn,false);}});
 
 
+function renderSecurityAlerts(){
+  const card=$('#securityAlertCard'),box=$('#securityAlerts');if(!card||!box)return;
+  const rows=Array.isArray(adminConfig?.securityAlerts)?adminConfig.securityAlerts:[];
+  card.classList.toggle('hidden',rows.length===0);
+  box.innerHTML=rows.slice(0,8).map(a=>{const d=new Date(a.at);return `<div class="security-alert-row"><div><b>3 tentativas incorretas bloqueadas</b><small>${esc(d.toLocaleString('pt-BR'))} • usuário: ${esc(a.username||'')} • IP: ${esc(a.ip||'não identificado')}</small></div><span>Bloqueado 15 min</span></div>`}).join('');
+}
 function renderHome(){
   const next=$('#homeNextBookings'),rev=$('#homeRevenue');if(!next||!rev)return;
   const now=todayISO();const upcoming=bookings.filter(b=>b.date>=now&&!['Cancelado','Concluído'].includes(b.status)).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).slice(0,5);
