@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b080a">
   <title>Painel • Studio RB</title>
   <link rel="stylesheet" href="styles.css?v=23">
-  <link rel="stylesheet" href="admin.css?v=52">
+  <link rel="stylesheet" href="admin.css?v=53">
   <link rel="icon" href="assets/logo-premium-v4.svg?v=23">
 </head>
 <body class="admin-body admin-v15">
@@ -19,18 +19,28 @@
   </header>
 
   <main class="admin-main">
-    <section id="loginView" class="login-wrap">
-      <div class="login-card">
-        <img src="assets/logo-premium-v4.svg?v=23" alt="Studio RB">
-        <span class="eyebrow">ÁREA DA PROPRIETÁRIA</span>
-        <h1>Entrar no painel</h1>
-        <p>Gerencie agenda, procedimentos, fotos e confirmações em um só lugar.</p>
-        <form id="loginForm">
-          <input name="username" autocomplete="username" placeholder="Usuário" required>
-          <input name="password" type="password" autocomplete="current-password" placeholder="Senha" required>
-          <button class="btn btn-pink full" type="submit">ENTRAR</button>
-        </form>
-        <p id="loginMsg" class="muted"></p>
+    <section id="loginView" class="login-wrap login-luxury">
+      <div class="login-showcase">
+        <img class="login-emilly" src="assets/emilly-oficial.jpg" alt="Emilly Ribeiro">
+        <div class="login-showcase-shade"></div>
+        <div class="login-showcase-brand"><img src="assets/logo-premium-v4.svg?v=23" alt="Studio RB"><span>PAINEL ADMINISTRATIVO</span></div>
+        <div class="login-showcase-copy"><span class="eyebrow">LASH STUDIO RB</span><h2>Gerencie seu Studio<br><em>com elegância.</em></h2><p>Agenda, clientes, procedimentos, promoções, avaliações e financeiro em um só lugar.</p><div class="login-features"><span>◷ Agenda completa</span><span>♙ Gestão de clientes</span><span>◇ Promoções</span><span>◫ Financeiro</span></div></div>
+      </div>
+      <div class="login-access">
+        <a class="login-back" href="/">← Voltar para o site</a>
+        <div class="login-card">
+          <img src="assets/logo-premium-v4.svg?v=23" alt="Studio RB">
+          <span class="eyebrow">ÁREA EXCLUSIVA DA PROPRIETÁRIA</span>
+          <h1>Bem-vinda, Emilly.</h1>
+          <p>Entre para cuidar do seu Studio.</p>
+          <form id="loginForm">
+            <label><span>Usuário</span><input name="username" autocomplete="username" placeholder="Seu usuário" required></label>
+            <label><span>Senha</span><input name="password" type="password" autocomplete="current-password" placeholder="Sua senha" required></label>
+            <button class="btn btn-pink full" type="submit">ENTRAR NO PAINEL →</button>
+          </form>
+          <p id="loginMsg" class="muted"></p>
+          <small class="login-signature">Studio RB • Gestão exclusiva da Emilly</small>
+        </div>
       </div>
     </section>
 
@@ -282,6 +292,6 @@
     </form>
   </dialog>
 
-  <script src="admin-v18.js?v=52" defer></script>
+  <script src="admin-v18.js?v=53" defer></script>
 </body>
 </html>

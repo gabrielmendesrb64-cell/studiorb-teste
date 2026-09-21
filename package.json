@@ -1,6 +1,6 @@
 {
   "name": "lsh-studio-rb",
-  "version": "9.0.0",
+  "version": "8.1.0",
   "private": true,
   "description": "Studio RB V52 TESTE - redesign completo, admin separado, área da cliente e avaliações verificadas",
   "main": "server.js",
