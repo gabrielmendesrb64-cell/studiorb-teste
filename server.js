@@ -96,7 +96,9 @@ function sendFile(res, file) {
   try {
     const data = fs.readFileSync(file);
     securityHeaders(res);
-    res.writeHead(200, { 'Content-Type': mime(file), 'Cache-Control': file.endsWith('.html') ? 'no-cache' : 'public, max-age=3600' });
+    const ext = path.extname(file).toLowerCase();
+    const cacheControl = ['.html','.css','.js'].includes(ext) ? 'no-store, max-age=0' : 'public, max-age=86400';
+    res.writeHead(200, { 'Content-Type': mime(file), 'Cache-Control': cacheControl });
     res.end(data);
   } catch { json(res, 404, { error: 'Arquivo não encontrado.' }); }
 }

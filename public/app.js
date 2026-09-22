@@ -28,7 +28,9 @@ async function loadConfig() {
   $('#eventPlace').textContent = c.eventPlace || 'Local a definir';
   $('#eventMessage').textContent = c.message || 'Escolha um presente da nossa lista e leve no dia do chá.';
   $('#invitationMessage').textContent = c.invitationMessage || 'Sua presença vai deixar esse momento ainda mais especial. Confirme abaixo se poderá estar com a gente.';
-  const [one, two] = (c.couple || 'Daniel & Núbia').split('&').map(x => x.trim());
+  const couple = c.couple || 'Daniel e Núbia';
+  const parts = couple.includes('&') ? couple.split('&') : couple.split(/\s+e\s+/i);
+  const [one, two] = parts.map(x => x.trim());
   $('#nameOne').textContent = one || 'Daniel';
   $('#nameTwo').textContent = two || 'Núbia';
 }
