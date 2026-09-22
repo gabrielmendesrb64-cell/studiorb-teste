@@ -1,13 +1,121 @@
-const loginView=document.getElementById('loginView'),dashView=document.getElementById('dashView'),dialog=document.getElementById('giftDialog'),giftForm=document.getElementById('giftForm');let state={gifts:[],reservations:[],messages:[]};
-function esc(s=''){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c]));}
-async function api(url,opt={}){const r=await fetch(url,{...opt,headers:{'Content-Type':'application/json',...(opt.headers||{})}});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Erro');return d;}
-async function check(){try{await api('/api/admin/session');showDash();}catch{loginView.hidden=false;dashView.hidden=true;}}
-async function showDash(){loginView.hidden=true;dashView.hidden=false;await load();}
-document.getElementById('loginForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),fb=document.getElementById('loginFeedback');try{await api('/api/admin/login',{method:'POST',body:JSON.stringify({user:f.get('user'),password:f.get('password')})});fb.textContent='';showDash();}catch(err){fb.textContent=err.message;}};
-document.getElementById('logout').onclick=async()=>{await api('/api/admin/logout',{method:'POST'});location.reload();};
-async function load(){state=await api('/api/admin/dashboard');render();}
-function render(){const total=state.gifts.reduce((n,g)=>n+g.quantity,0),reserved=state.reservations.length,available=Math.max(0,total-reserved);document.getElementById('stats').innerHTML=`<div class=stat><b>${total}</b><span>presentes desejados</span></div><div class=stat><b>${reserved}</b><span>já reservados</span></div><div class=stat><b>${available}</b><span>ainda disponíveis</span></div><div class=stat><b>${state.messages.length}</b><span>mensagens recebidas</span></div>`;document.getElementById('reservas').innerHTML=`<h2>Quem escolheu cada presente</h2>${state.reservations.length?`<table class=table><thead><tr><th>Convidado</th><th>WhatsApp</th><th>Presente</th><th>Data</th><th></th></tr></thead><tbody>${state.reservations.map(r=>`<tr><td><b>${esc(r.guest_name)}</b></td><td>${esc(r.phone)}</td><td>${esc(r.gift_name)}</td><td>${new Date(r.created_at).toLocaleString('pt-BR')}</td><td><button class=danger data-release=${r.id}>Liberar</button></td></tr>`).join('')}</tbody></table>`:'<p>Nenhum presente reservado ainda.</p>'}`;document.querySelectorAll('[data-release]').forEach(b=>b.onclick=async()=>{if(confirm('Liberar este presente novamente?')){await api('/api/admin/reservations/'+b.dataset.release,{method:'DELETE'});load();}});document.getElementById('giftAdminList').innerHTML=state.gifts.map(g=>`<div class=gift-row><div><b>${esc(g.name)}</b><br><small>${esc(g.category)} · ${g.reserved}/${g.quantity} reservados</small></div><small>${esc(g.description)}</small><span>${g.quantity} un.</span><div><button class=ghost data-edit=${g.id}>Editar</button> <button class=danger data-del=${g.id}>Excluir</button></div></div>`).join('');document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openGift(state.gifts.find(g=>g.id==b.dataset.edit)));document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{if(confirm('Excluir este presente e suas reservas?')){await api('/api/admin/gifts/'+b.dataset.del,{method:'DELETE'});load();}});document.getElementById('mensagens').innerHTML=`<h2>Mensagens dos convidados</h2>${state.messages.length?state.messages.map(m=>`<div class=message><b>${esc(m.guest_name)}</b><p>${esc(m.message)}</p><small>${new Date(m.created_at).toLocaleString('pt-BR')}</small></div>`).join(''):'<p>Nenhuma mensagem ainda.</p>'}`;}
-document.querySelectorAll('.tabs button').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.panel').forEach(p=>p.hidden=true);document.getElementById(btn.dataset.tab).hidden=false;});
-function openGift(g){giftForm.reset();document.getElementById('giftFeedback').textContent='';giftForm.id.value=g?.id||'';giftForm.name.value=g?.name||'';giftForm.category.value=g?.category||'Cozinha';giftForm.description.value=g?.description||'';giftForm.quantity.value=g?.quantity||1;giftForm.image.value=g?.image||'presente';document.getElementById('giftDialogTitle').textContent=g?'Editar presente':'Novo presente';dialog.showModal();}
-document.getElementById('newGift').onclick=()=>openGift();document.getElementById('closeDialog').onclick=()=>dialog.close();giftForm.onsubmit=async e=>{e.preventDefault();const f=new FormData(giftForm),id=f.get('id'),payload={name:f.get('name'),category:f.get('category'),description:f.get('description'),quantity:Number(f.get('quantity')),image:f.get('image')};try{await api(id?'/api/admin/gifts/'+id:'/api/admin/gifts',{method:id?'PUT':'POST',body:JSON.stringify(payload)});dialog.close();load();}catch(err){document.getElementById('giftFeedback').textContent=err.message;}};
-check();
+const $ = s => document.querySelector(s);
+const tokenKey = 'nd_admin_token';
+let token = localStorage.getItem(tokenKey) || '';
+let dashboardData = null;
+
+async function api(url, options = {}) {
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers || {})
+    }
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    if (res.status === 401 && url !== '/api/admin/login') logout(false);
+    throw new Error(data.error || 'Não foi possível concluir a ação.');
+  }
+  return data;
+}
+
+function showDashboard() {
+  $('#loginPanel').classList.add('hidden');
+  $('#dashboard').classList.remove('hidden');
+}
+function showLogin() {
+  $('#dashboard').classList.add('hidden');
+  $('#loginPanel').classList.remove('hidden');
+}
+function logout(clear = true) {
+  if (clear) { token=''; localStorage.removeItem(tokenKey); }
+  showLogin();
+}
+
+$('#loginForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  $('#loginError').textContent = '';
+  try {
+    const result = await api('/api/admin/login', { method:'POST', body:JSON.stringify({ password: $('#adminPassword').value }) });
+    token = result.token;
+    localStorage.setItem(tokenKey, token);
+    $('#adminPassword').value='';
+    showDashboard();
+    await loadDashboard();
+  } catch (err) { $('#loginError').textContent = err.message; }
+});
+$('#logoutBtn').addEventListener('click', () => logout(true));
+
+async function loadDashboard() {
+  dashboardData = await api('/api/admin/dashboard');
+  renderStats();
+  renderConfig();
+  renderGiftList();
+}
+function renderStats() {
+  const gifts = dashboardData.gifts || [];
+  $('#statAvailable').textContent = gifts.filter(g=>g.status==='available').length;
+  $('#statReserved').textContent = gifts.filter(g=>g.status==='reserved').length;
+  $('#statReceived').textContent = gifts.filter(g=>g.status==='received').length;
+}
+function renderConfig() {
+  const c = dashboardData.config || {};
+  $('#cfgCouple').value=c.couple||''; $('#cfgTitle').value=c.title||''; $('#cfgSubtitle').value=c.subtitle||'';
+  $('#cfgDate').value=c.eventDate||''; $('#cfgTime').value=c.eventTime||''; $('#cfgPlace').value=c.eventPlace||''; $('#cfgMessage').value=c.message||'';
+}
+function phoneMask(v='') {
+  const d = String(v).replace(/\D/g,'');
+  if (d.length===11) return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
+  if (d.length===10) return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
+  return v;
+}
+function renderGiftList() {
+  const wrap = $('#adminGiftList'); wrap.replaceChildren();
+  if (!dashboardData.gifts.length) { const e=document.createElement('div'); e.className='empty'; e.textContent='Nenhum presente cadastrado.'; wrap.appendChild(e); return; }
+  dashboardData.gifts.forEach(gift => {
+    const item=document.createElement('article'); item.className='admin-item';
+    const info=document.createElement('div');
+    const h=document.createElement('h4'); h.textContent=gift.name;
+    const meta=document.createElement('div'); meta.className='admin-meta';
+    const status = gift.status==='available' ? 'Disponível' : gift.status==='received' ? 'Recebido' : 'Reservado';
+    meta.textContent = `${gift.category || 'Outros'} • ${status}`;
+    info.append(h,meta);
+    if (gift.reservedBy) {
+      const who=document.createElement('div'); who.className='admin-meta'; who.style.marginTop='6px';
+      who.textContent=`Reservado por ${gift.reservedBy.name} • ${phoneMask(gift.reservedBy.phone)}`;
+      info.appendChild(who);
+    }
+    const actions=document.createElement('div'); actions.className='admin-actions';
+    if (gift.status!=='available') actions.appendChild(actionButton('Liberar','btn btn-soft btn-small',()=>mutate(`/api/admin/gifts/${gift.id}/release`,'POST')));
+    if (gift.status==='reserved') actions.appendChild(actionButton('Marcar recebido','btn btn-primary btn-small',()=>mutate(`/api/admin/gifts/${gift.id}/received`,'POST')));
+    actions.appendChild(actionButton('Excluir','btn btn-danger btn-small',async()=>{ if(confirm(`Excluir “${gift.name}”?`)) await mutate(`/api/admin/gifts/${gift.id}`,'DELETE'); }));
+    item.append(info,actions); wrap.appendChild(item);
+  });
+}
+function actionButton(text, cls, handler) { const b=document.createElement('button'); b.className=cls; b.textContent=text; b.addEventListener('click',handler); return b; }
+async function mutate(url, method, body) { await api(url,{method, ...(body?{body:JSON.stringify(body)}:{})}); await loadDashboard(); }
+
+$('#giftForm').addEventListener('submit', async e => {
+  e.preventDefault(); $('#giftError').textContent='';
+  try {
+    await api('/api/admin/gifts',{method:'POST', body:JSON.stringify({ name:$('#giftName').value, category:$('#giftCategory').value, description:$('#giftDescription').value, image:$('#giftImage').value })});
+    e.currentTarget.reset(); await loadDashboard();
+  } catch(err){ $('#giftError').textContent=err.message; }
+});
+
+$('#configForm').addEventListener('submit', async e => {
+  e.preventDefault(); $('#configError').textContent='';
+  try {
+    await api('/api/admin/config',{method:'PUT',body:JSON.stringify({
+      couple:$('#cfgCouple').value,title:$('#cfgTitle').value,subtitle:$('#cfgSubtitle').value,eventDate:$('#cfgDate').value,eventTime:$('#cfgTime').value,eventPlace:$('#cfgPlace').value,message:$('#cfgMessage').value
+    })});
+    await loadDashboard();
+  } catch(err){ $('#configError').textContent=err.message; }
+});
+
+(async function init(){
+  if (!token) return showLogin();
+  try { showDashboard(); await loadDashboard(); }
+  catch { token=''; localStorage.removeItem(tokenKey); showLogin(); }
+})();

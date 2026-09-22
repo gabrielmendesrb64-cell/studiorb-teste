@@ -1,0 +1,73 @@
+{
+  "config": {
+    "couple": "Núbia & Daniel",
+    "title": "Chá dos Noivos",
+    "subtitle": "Nossa casa começa com carinho, risadas e pessoas especiais como você.",
+    "eventDate": "Data a definir",
+    "eventTime": "Horário a definir",
+    "eventPlace": "Local a definir",
+    "message": "Escolha um presente da nossa lista, confirme seus dados e leve o presente no dia do chá. Sua presença já deixa esse momento ainda mais especial!"
+  },
+  "gifts": [
+    {
+      "id": "gift-1",
+      "name": "Jogo de panelas",
+      "category": "Cozinha",
+      "description": "Um conjunto versátil para o dia a dia.",
+      "image": "",
+      "status": "available",
+      "reservedBy": null,
+      "createdAt": "2026-09-22T20:20:00-03:00"
+    },
+    {
+      "id": "gift-2",
+      "name": "Jogo de cama casal",
+      "category": "Quarto",
+      "description": "Preferência por tons neutros ou verde oliva.",
+      "image": "",
+      "status": "available",
+      "reservedBy": null,
+      "createdAt": "2026-09-22T20:20:00-03:00"
+    },
+    {
+      "id": "gift-3",
+      "name": "Kit de toalhas",
+      "category": "Banheiro",
+      "description": "Toalhas de banho e rosto em cores claras.",
+      "image": "",
+      "status": "available",
+      "reservedBy": null,
+      "createdAt": "2026-09-22T20:20:00-03:00"
+    },
+    {
+      "id": "gift-4",
+      "name": "Liquidificador",
+      "category": "Eletroportáteis",
+      "description": "Modelo simples e resistente para uso diário.",
+      "image": "",
+      "status": "available",
+      "reservedBy": null,
+      "createdAt": "2026-09-22T20:20:00-03:00"
+    },
+    {
+      "id": "gift-5",
+      "name": "Aparelho de jantar",
+      "category": "Cozinha",
+      "description": "Pratos para montar nossa mesa nova.",
+      "image": "",
+      "status": "available",
+      "reservedBy": null,
+      "createdAt": "2026-09-22T20:20:00-03:00"
+    },
+    {
+      "id": "gift-6",
+      "name": "Ferro de passar",
+      "category": "Lavanderia",
+      "description": "Pode ser a vapor ou tradicional.",
+      "image": "",
+      "status": "available",
+      "reservedBy": null,
+      "createdAt": "2026-09-22T20:20:00-03:00"
+    }
+  ]
+}

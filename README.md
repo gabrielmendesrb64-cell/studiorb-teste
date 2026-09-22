@@ -1,32 +1,42 @@
-# Daniel & Nubia — Chá de Casa Nova
+# Chá dos Noivos — Núbia & Daniel
 
-Site de lista de presentes com reserva por convidado e painel privado.
+Site completo para lista de presentes do chá dos noivos, com visual verde oliva, área pública e área reservada para os noivos.
+
+## O que já está pronto
+
+- Página inicial responsiva para celular e computador.
+- Lista de presentes por categoria.
+- Convidado escolhe um presente, informa nome e telefone e confirma.
+- Assim que confirmado, o presente fica indisponível para outras pessoas.
+- Aviso claro para levar o presente no dia do chá.
+- Aba “Sugestão de presente”.
+- Área dos noivos em `/admin`.
+- Cadastro e exclusão de presentes.
+- Visualização do nome e telefone de quem reservou.
+- Botão para liberar uma reserva.
+- Botão para marcar presente como recebido.
+- Edição da data, horário, local, título e mensagem do evento.
+- Proteção da área dos noivos com senha.
+- Dados salvos em `data/db.json`.
 
 ## Como rodar
-1. Instale Node.js 18+
-2. Rode `npm install`
-3. Rode `npm start`
-4. Abra `http://localhost:3000`
-5. Painel: `http://localhost:3000/admin`
 
-## Login inicial local
-Usuário: `danielnubia`
-Senha: `troque-esta-senha`
+1. Instale Node.js 18 ou mais recente.
+2. Abra a pasta do projeto no terminal.
+3. Não há dependências externas para instalar. Configure as variáveis de ambiente usando `.env.example` como referência. Em hospedagens como Render, coloque `ADMIN_PASSWORD` e `ADMIN_SECRET` diretamente nas variáveis do serviço.
+4. Inicie:
 
-Em produção, altere ADMIN_USER, ADMIN_PASSWORD e SESSION_SECRET pelas variáveis de ambiente.
+```bash
+npm start
+```
 
-## Banco de dados
-Sem `DATABASE_URL`, o projeto salva tudo em `data.json` (ótimo para testar localmente).
-Em hospedagem como Render, use PostgreSQL e configure `DATABASE_URL`, porque o disco padrão pode ser reiniciado e perder dados locais.
+5. Abra `http://localhost:3000`.
+6. Área dos noivos: `http://localhost:3000/admin`.
 
-## O que já funciona
-- Lista de presentes responsiva
-- Categorias e busca
-- Quantidade por item (ex.: 6 jogos de toalha)
-- Reserva com nome + WhatsApp + confirmação
-- Bloqueio automático quando atingir a quantidade
-- Painel privado
-- Ver convidado, telefone e presente escolhido
-- Liberar reserva
-- Adicionar, editar e excluir presentes
-- Mensagens dos convidados
+## Importante sobre hospedagem
+
+Este projeto usa um arquivo JSON para salvar as reservas. Em hospedagens onde o disco é apagado ao reiniciar ou fazer deploy, use um disco persistente ou migre os dados para um banco como PostgreSQL/Supabase antes de usar com convidados reais.
+
+## Segurança
+
+Troque obrigatoriamente `ADMIN_PASSWORD` e `ADMIN_SECRET` antes de publicar. O `ADMIN_SECRET` deve ser uma chave longa e difícil de adivinhar.

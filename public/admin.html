@@ -1,1 +1,79 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Área do Casal | Daniel & Nubia</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/admin.css"></head><body class="admin"><main><section id="loginView" class="login-shell"><div class="login-card"><div class="lock">⌂</div><p class="eyebrow">ÁREA PRIVADA</p><h1>Daniel & Nubia</h1><p>Entre para gerenciar a lista e ver quem escolheu cada presente.</p><form id="loginForm"><input name="user" placeholder="Usuário" required><input type="password" name="password" placeholder="Senha" required><button>Entrar</button><p id="loginFeedback"></p></form><a href="/">← Voltar ao site</a></div></section><section id="dashView" hidden><header><div><p class="eyebrow">CHÁ DE CASA NOVA</p><h1>Painel do Casal</h1></div><div><a href="/" target="_blank">Ver site</a><button id="logout">Sair</button></div></header><div class="stats" id="stats"></div><div class="tabs"><button class="active" data-tab="reservas">Reservas</button><button data-tab="presentes">Presentes</button><button data-tab="mensagens">Mensagens</button></div><section class="panel" id="reservas"></section><section class="panel" id="presentes" hidden><div class="panel-head"><h2>Gerenciar presentes</h2><button id="newGift">+ Novo presente</button></div><div id="giftAdminList"></div></section><section class="panel" id="mensagens" hidden></section></section></main><dialog id="giftDialog"><form id="giftForm"><input type="hidden" name="id"><div class="dialog-head"><h2 id="giftDialogTitle">Novo presente</h2><button type="button" id="closeDialog">×</button></div><label>Nome<input name="name" required></label><label>Categoria<select name="category"><option>Cozinha</option><option>Sala</option><option>Quarto</option><option>Banheiro</option><option>Limpeza</option><option>Eletrodomésticos</option><option>Outros</option></select></label><label>Descrição<textarea name="description"></textarea></label><div class="two"><label>Quantidade<input type="number" min="1" max="99" name="quantity" value="1"></label><label>Ícone<select name="image"><option value="presente">Presente</option><option value="airfryer">Air Fryer</option><option value="panelas">Panelas</option><option value="toalhas">Toalhas</option><option value="aspirador">Limpeza</option><option value="pratos">Pratos</option><option value="cafeteira">Cafeteira</option><option value="cama">Cama</option><option value="microondas">Micro-ondas</option><option value="faqueiro">Faqueiro</option><option value="copos">Copos</option><option value="edredom">Edredom</option><option value="liquidificador">Liquidificador</option></select></label></div><button class="save" type="submit">Salvar presente</button><p id="giftFeedback"></p></form></dialog><script src="/admin.js"></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#39452f" />
+  <title>Área dos Noivos | Núbia & Daniel</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body class="admin-page">
+  <main class="admin-shell">
+    <section class="panel login-panel" id="loginPanel">
+      <div class="kicker">Área reservada</div>
+      <h1>Área dos noivos</h1>
+      <p class="section-copy">Entre com a senha para gerenciar presentes, reservas e informações do chá.</p>
+      <form class="form-grid" id="loginForm">
+        <label>Senha<input id="adminPassword" type="password" autocomplete="current-password" required placeholder="Digite a senha" /></label>
+        <div class="error" id="loginError"></div>
+        <button class="btn btn-primary" type="submit">Entrar</button>
+        <a class="btn btn-secondary" href="/">Voltar ao site</a>
+      </form>
+    </section>
+
+    <section id="dashboard" class="hidden">
+      <div class="admin-header">
+        <div><div class="kicker">Núbia & Daniel</div><h1>Área dos noivos</h1></div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap"><a class="btn btn-secondary" href="/">Ver site</a><button class="btn btn-soft" id="logoutBtn">Sair</button></div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><small>Disponíveis</small><strong id="statAvailable">0</strong></div>
+        <div class="stat"><small>Reservados</small><strong id="statReserved">0</strong></div>
+        <div class="stat"><small>Recebidos</small><strong id="statReceived">0</strong></div>
+      </div>
+
+      <div class="admin-grid">
+        <div style="display:grid; gap:20px">
+          <section class="panel">
+            <div class="kicker">Novo item</div>
+            <h2 style="font-size:32px">Adicionar presente</h2>
+            <form class="admin-form" id="giftForm">
+              <label>Nome do presente<input id="giftName" maxlength="100" required placeholder="Ex.: Air fryer" /></label>
+              <label>Categoria<input id="giftCategory" maxlength="60" placeholder="Ex.: Cozinha" /></label>
+              <label>Descrição<textarea id="giftDescription" maxlength="220" placeholder="Cor, modelo, tamanho ou observação..."></textarea></label>
+              <label>Imagem por link (opcional)<input id="giftImage" type="url" maxlength="500" placeholder="https://..." /></label>
+              <div class="error" id="giftError"></div>
+              <button class="btn btn-primary" type="submit">Adicionar à lista</button>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="kicker">Informações</div>
+            <h2 style="font-size:32px">Dados do chá</h2>
+            <form class="admin-form" id="configForm">
+              <label>Nome dos noivos<input id="cfgCouple" maxlength="70" /></label>
+              <label>Título<input id="cfgTitle" maxlength="70" /></label>
+              <label>Frase principal<textarea id="cfgSubtitle" maxlength="180"></textarea></label>
+              <div class="two-col"><label>Data<input id="cfgDate" maxlength="80" /></label><label>Horário<input id="cfgTime" maxlength="80" /></label></div>
+              <label>Local<input id="cfgPlace" maxlength="150" /></label>
+              <label>Mensagem da lista<textarea id="cfgMessage" maxlength="350"></textarea></label>
+              <div class="error" id="configError"></div>
+              <button class="btn btn-primary" type="submit">Salvar informações</button>
+            </form>
+          </section>
+        </div>
+
+        <section class="panel">
+          <div class="kicker">Controle da lista</div>
+          <h2 style="font-size:32px">Presentes e reservas</h2>
+          <p class="section-copy">Veja quem reservou cada item, libere novamente se alguém desistir ou marque como recebido.</p>
+          <div class="admin-list" id="adminGiftList"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="/admin.js"></script>
+</body>
+</html>

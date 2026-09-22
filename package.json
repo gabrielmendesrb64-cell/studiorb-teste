@@ -1,17 +1,14 @@
 {
-  "name": "daniel-nubia-cha-casa-nova",
+  "name": "cha-nubia-daniel",
   "version": "1.0.0",
   "private": true,
-  "description": "Lista de presentes do Chá de Casa Nova de Daniel & Nubia",
+  "description": "Site do Chá dos Noivos de Núbia & Daniel",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
   "engines": {
     "node": ">=18"
-  },
-  "dependencies": {
-    "express": "^4.21.2",
-    "pg": "^8.13.1"
   }
 }
