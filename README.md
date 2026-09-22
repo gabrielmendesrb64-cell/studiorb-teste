@@ -1,42 +1,47 @@
-# Chá dos Noivos — Núbia & Daniel
+# Chá dos Noivos — Daniel & Núbia
 
-Site completo para lista de presentes do chá dos noivos, com visual verde oliva, área pública e área reservada para os noivos.
+Site responsivo em verde oliva e creme com:
 
-## O que já está pronto
+- convite com **data, horário e local** editáveis;
+- **confirmação de presença** com nome, telefone, resposta e recado;
+- lista de presentes com categorias;
+- cadastro, na Área dos Noivos, do **link exato de onde comprar**;
+- tentativa automática de capturar a **foto do produto** a partir do link da loja (Open Graph/Twitter Card), com campo de imagem manual como alternativa;
+- botão **Onde comprar** para o convidado abrir a loja;
+- reserva do presente por nome e telefone;
+- item reservado fica indisponível para outras pessoas;
+- Área dos Noivos com presentes separados em **Disponíveis**, **Reservados para entregar no chá** e **Já presenteados / Entregues**;
+- lista separada das confirmações de presença;
+- ilustração de Daniel e Núbia na capa.
 
-- Página inicial responsiva para celular e computador.
-- Lista de presentes por categoria.
-- Convidado escolhe um presente, informa nome e telefone e confirma.
-- Assim que confirmado, o presente fica indisponível para outras pessoas.
-- Aviso claro para levar o presente no dia do chá.
-- Aba “Sugestão de presente”.
-- Área dos noivos em `/admin`.
-- Cadastro e exclusão de presentes.
-- Visualização do nome e telefone de quem reservou.
-- Botão para liberar uma reserva.
-- Botão para marcar presente como recebido.
-- Edição da data, horário, local, título e mensagem do evento.
-- Proteção da área dos noivos com senha.
-- Dados salvos em `data/db.json`.
+## Rodar
 
-## Como rodar
-
-1. Instale Node.js 18 ou mais recente.
-2. Abra a pasta do projeto no terminal.
-3. Não há dependências externas para instalar. Configure as variáveis de ambiente usando `.env.example` como referência. Em hospedagens como Render, coloque `ADMIN_PASSWORD` e `ADMIN_SECRET` diretamente nas variáveis do serviço.
-4. Inicie:
+Requer Node.js 18 ou superior.
 
 ```bash
 npm start
 ```
 
-5. Abra `http://localhost:3000`.
-6. Área dos noivos: `http://localhost:3000/admin`.
+Acesse `http://localhost:3000`.
 
-## Importante sobre hospedagem
+Área dos Noivos: `http://localhost:3000/admin`
 
-Este projeto usa um arquivo JSON para salvar as reservas. Em hospedagens onde o disco é apagado ao reiniciar ou fazer deploy, use um disco persistente ou migre os dados para um banco como PostgreSQL/Supabase antes de usar com convidados reais.
+## Senha da Área dos Noivos
 
-## Segurança
+Antes de publicar, configure as variáveis de ambiente:
 
-Troque obrigatoriamente `ADMIN_PASSWORD` e `ADMIN_SECRET` antes de publicar. O `ADMIN_SECRET` deve ser uma chave longa e difícil de adivinhar.
+```env
+PORT=3000
+ADMIN_PASSWORD=coloque-uma-senha-forte
+ADMIN_SECRET=coloque-uma-chave-longa-e-aleatoria
+```
+
+O arquivo `.env.example` serve apenas como referência. Este projeto não carrega `.env` automaticamente; em Render/Railway/etc., cadastre as variáveis pelo painel da hospedagem.
+
+## Foto automática do produto
+
+Ao colar o link de uma loja, o servidor tenta ler a imagem informada nos metadados públicos da página (`og:image` ou `twitter:image`). Algumas lojas bloqueiam esse tipo de leitura. Quando isso acontecer, cole no campo opcional o link direto da foto do produto.
+
+## Dados do evento
+
+Entre na Área dos Noivos e preencha data, horário e local reais do chá. O site já exibe esses dados no convite e recebe confirmações dos convidados.

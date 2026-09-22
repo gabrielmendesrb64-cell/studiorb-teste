@@ -1,12 +1,13 @@
 {
   "config": {
-    "couple": "Núbia & Daniel",
+    "couple": "Daniel & Núbia",
     "title": "Chá dos Noivos",
-    "subtitle": "Nossa casa começa com carinho, risadas e pessoas especiais como você.",
+    "subtitle": "Estamos muito felizes em compartilhar esse momento especial com vocês! Aqui vocês encontram nosso convite, a lista de presentes e outras informações importantes.",
     "eventDate": "Data a definir",
     "eventTime": "Horário a definir",
     "eventPlace": "Local a definir",
-    "message": "Escolha um presente da nossa lista, confirme seus dados e leve o presente no dia do chá. Sua presença já deixa esse momento ainda mais especial!"
+    "message": "Escolha um presente da nossa lista, veja o link indicado pelos noivos, confirme seus dados e leve o presente no dia do chá.",
+    "invitationMessage": "Sua presença vai deixar esse momento ainda mais especial. Confira a data, o horário e o local e confirme abaixo se poderá estar com a gente."
   },
   "gifts": [
     {
@@ -15,6 +16,7 @@
       "category": "Cozinha",
       "description": "Um conjunto versátil para o dia a dia.",
       "image": "",
+      "purchaseUrl": "",
       "status": "available",
       "reservedBy": null,
       "createdAt": "2026-09-22T20:20:00-03:00"
@@ -22,9 +24,10 @@
     {
       "id": "gift-2",
       "name": "Jogo de cama casal",
-      "category": "Quarto",
+      "category": "Cama, mesa e banho",
       "description": "Preferência por tons neutros ou verde oliva.",
       "image": "",
+      "purchaseUrl": "",
       "status": "available",
       "reservedBy": null,
       "createdAt": "2026-09-22T20:20:00-03:00"
@@ -32,9 +35,10 @@
     {
       "id": "gift-3",
       "name": "Kit de toalhas",
-      "category": "Banheiro",
+      "category": "Cama, mesa e banho",
       "description": "Toalhas de banho e rosto em cores claras.",
       "image": "",
+      "purchaseUrl": "",
       "status": "available",
       "reservedBy": null,
       "createdAt": "2026-09-22T20:20:00-03:00"
@@ -42,9 +46,10 @@
     {
       "id": "gift-4",
       "name": "Liquidificador",
-      "category": "Eletroportáteis",
+      "category": "Eletrodomésticos",
       "description": "Modelo simples e resistente para uso diário.",
       "image": "",
+      "purchaseUrl": "",
       "status": "available",
       "reservedBy": null,
       "createdAt": "2026-09-22T20:20:00-03:00"
@@ -55,6 +60,7 @@
       "category": "Cozinha",
       "description": "Pratos para montar nossa mesa nova.",
       "image": "",
+      "purchaseUrl": "",
       "status": "available",
       "reservedBy": null,
       "createdAt": "2026-09-22T20:20:00-03:00"
@@ -62,12 +68,14 @@
     {
       "id": "gift-6",
       "name": "Ferro de passar",
-      "category": "Lavanderia",
+      "category": "Casa",
       "description": "Pode ser a vapor ou tradicional.",
       "image": "",
+      "purchaseUrl": "",
       "status": "available",
       "reservedBy": null,
       "createdAt": "2026-09-22T20:20:00-03:00"
     }
-  ]
+  ],
+  "rsvps": []
 }

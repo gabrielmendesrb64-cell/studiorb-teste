@@ -3,19 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#39452f" />
-  <meta name="description" content="Chá dos Noivos de Núbia e Daniel — lista de presentes e sugestões." />
-  <title>Chá dos Noivos | Núbia & Daniel</title>
+  <meta name="theme-color" content="#46552f" />
+  <meta name="description" content="Chá dos Noivos de Daniel e Núbia — convite, confirmação de presença e lista de presentes." />
+  <title>Chá dos Noivos | Daniel & Núbia</title>
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
   <header class="topbar">
     <nav class="nav">
-      <a class="brand" href="#inicio"><span class="brand-mark">N&D</span><span>Chá dos Noivos</span></a>
+      <a class="brand" href="#inicio"><span class="brand-script">Chá dos Noivos</span><small>Daniel & Núbia</small></a>
       <div class="nav-links">
         <a class="nav-link active" href="#inicio">Início</a>
-        <a class="nav-link" href="#presentes">Presentes</a>
-        <a class="nav-link" href="#sugestoes">Sugestões</a>
+        <a class="nav-link" href="#convite">Convite</a>
+        <a class="nav-link" href="#presentes">Lista de presentes</a>
+        <a class="nav-link" href="#sugestoes">Sugestão de presente</a>
         <a class="nav-link admin-link" href="/admin">Área dos noivos</a>
       </div>
     </nav>
@@ -24,61 +25,96 @@
   <main>
     <section class="hero" id="inicio">
       <div class="hero-inner">
-        <span class="eyebrow" id="heroTitle">Chá dos Noivos</span>
-        <h1><span id="nameOne">Núbia</span> <span class="amp">&</span> <span id="nameTwo">Daniel</span></h1>
-        <p class="hero-subtitle" id="heroSubtitle">Nossa casa começa com carinho, risadas e pessoas especiais como você.</p>
-        <div class="hero-actions">
-          <a href="#presentes" class="btn btn-primary">Escolher um presente</a>
-          <a href="#sugestoes" class="btn btn-secondary">Ver sugestões</a>
+        <div class="hero-photo-wrap"><img src="/casal-nubia-daniel.jpg" alt="Ilustração de Daniel e Núbia" class="hero-photo" /></div>
+        <div class="hero-copy">
+          <span class="eyebrow">Sejam bem-vindos ao nosso</span>
+          <h1><span id="heroTitle">Chá dos Noivos</span><small><span id="nameOne">Daniel</span> <span class="amp">&</span> <span id="nameTwo">Núbia</span></small></h1>
+          <div class="ornament">♡</div>
+          <p class="hero-subtitle" id="heroSubtitle">Estamos muito felizes em compartilhar esse momento especial com vocês.</p>
+          <div class="hero-actions">
+            <a href="#presentes" class="btn btn-primary">🎁 Ver presentes</a>
+            <a href="#convite" class="btn btn-secondary">✉ Confirmar presença</a>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="event-strip" aria-label="Informações do evento">
-      <div class="info-card"><span>Data</span><strong id="eventDate">Data a definir</strong></div>
-      <div class="info-card"><span>Horário</span><strong id="eventTime">Horário a definir</strong></div>
-      <div class="info-card"><span>Local</span><strong id="eventPlace">Local a definir</strong></div>
+    <section class="invite-section" id="convite">
+      <div class="invite-card">
+        <div class="invite-heading">
+          <span class="eyebrow">Você é nosso convidado</span>
+          <h2>Nosso convite</h2>
+          <p id="invitationMessage">Sua presença vai deixar esse momento ainda mais especial. Confirme abaixo se poderá estar com a gente.</p>
+        </div>
+        <div class="event-strip" aria-label="Informações do evento">
+          <div class="info-card"><span>📅 Data</span><strong id="eventDate">Data a definir</strong></div>
+          <div class="info-card"><span>🕒 Horário</span><strong id="eventTime">Horário a definir</strong></div>
+          <div class="info-card"><span>📍 Local</span><strong id="eventPlace">Local a definir</strong></div>
+        </div>
+        <div class="rsvp-box">
+          <div>
+            <div class="kicker">Confirmação de presença</div>
+            <h3>Você poderá participar?</h3>
+            <p>Preencha seus dados para Daniel e Núbia saberem quem estará presente.</p>
+          </div>
+          <form class="rsvp-form" id="rsvpForm">
+            <label>Nome completo<input id="rsvpName" autocomplete="name" minlength="3" maxlength="80" required placeholder="Seu nome completo" /></label>
+            <label>Telefone / WhatsApp<input id="rsvpPhone" autocomplete="tel" inputmode="tel" required placeholder="(12) 99999-9999" /></label>
+            <label>Confirmação
+              <select id="rsvpAttending" required>
+                <option value="">Selecione</option>
+                <option value="yes">Sim, estarei presente 💚</option>
+                <option value="no">Não poderei comparecer</option>
+              </select>
+            </label>
+            <label>Recado (opcional)<textarea id="rsvpNote" maxlength="220" placeholder="Deixe um recadinho para os noivos..."></textarea></label>
+            <div class="error" id="rsvpError"></div>
+            <button class="btn btn-primary" type="submit" id="rsvpSubmit">Confirmar resposta</button>
+            <div class="success-inline hidden" id="rsvpSuccess"></div>
+          </form>
+        </div>
+      </div>
     </section>
 
     <section class="section" id="presentes">
       <div class="section-head">
-        <div><div class="kicker">Nossa lista</div><h2>Escolha com carinho</h2></div>
+        <div><div class="kicker">🎁 Lista de presentes</div><h2>Escolha com carinho</h2></div>
         <p class="section-copy" id="eventMessage">Escolha um presente da nossa lista, confirme seus dados e leve o presente no dia do chá.</p>
       </div>
       <div class="gift-toolbar" id="giftFilters"></div>
       <div class="gifts-grid" id="giftsGrid"><div class="empty">Carregando presentes...</div></div>
     </section>
 
-    <section class="section">
+    <section class="section compact-section">
       <div class="instructions">
         <div>
-          <div class="kicker" style="color:#cdd6c4">Como funciona</div>
-          <h3>O presente será entregue no dia do chá 💚</h3>
-          <p>Ao confirmar sua escolha, o item fica reservado e indisponível para outras pessoas. Você não precisa comprar pelo site — basta levar o presente pessoalmente no dia do chá.</p>
+          <div class="kicker light-kicker">Como funciona</div>
+          <h3>Reserve, compre e leve no dia do chá 💚</h3>
+          <p>Os noivos podem cadastrar o link exato da loja onde gostariam que o presente fosse comprado. Clique em “Onde comprar”, abra a loja e, depois, confirme que você dará o presente. Assim ele fica indisponível para outras pessoas.</p>
         </div>
         <div class="steps">
-          <div class="step"><span class="step-num">1</span><span>Escolha um item disponível.</span></div>
-          <div class="step"><span class="step-num">2</span><span>Informe seu nome e telefone.</span></div>
-          <div class="step"><span class="step-num">3</span><span>Confirme e leve o presente no evento.</span></div>
+          <div class="step"><span class="step-num">1</span><span>Escolha um presente disponível.</span></div>
+          <div class="step"><span class="step-num">2</span><span>Abra o link indicado para comprar.</span></div>
+          <div class="step"><span class="step-num">3</span><span>Reserve em seu nome e leve no evento.</span></div>
         </div>
       </div>
     </section>
 
     <section class="section" id="sugestoes">
       <div class="section-head">
-        <div><div class="kicker">Sugestão de presente</div><h2>Quer escolher algo diferente?</h2></div>
-        <p class="section-copy">Caso prefira presentear fora da lista, estas categorias combinam com a casa nova dos noivos.</p>
+        <div><div class="kicker">💡 Sugestão de presente</div><h2>Quer escolher algo diferente?</h2></div>
+        <p class="section-copy">Se preferir presentear fora da lista, estas ideias também vão ajudar muito na casa nova.</p>
       </div>
       <div class="suggestions">
-        <article class="suggestion-card"><div class="suggestion-icon">🍽️</div><h3>Cozinha</h3><p>Utensílios, travessas, assadeiras, potes herméticos, copos e itens para servir.</p></article>
-        <article class="suggestion-card"><div class="suggestion-icon">🛏️</div><h3>Quarto</h3><p>Jogo de cama, manta, travesseiros, cabides, organizadores e peças em tons neutros.</p></article>
-        <article class="suggestion-card"><div class="suggestion-icon">🛁</div><h3>Banheiro</h3><p>Toalhas, tapetes, organizadores, dispenser, cestos e acessórios de bancada.</p></article>
-        <article class="suggestion-card"><div class="suggestion-icon">🏡</div><h3>Casa</h3><p>Itens decorativos, aromatizadores, quadros, vasos, almofadas e objetos funcionais.</p></article>
+        <article class="suggestion-card"><div class="suggestion-icon">🏠</div><h3>Vale-presente de lojas</h3><p>Uma opção prática para os noivos escolherem algo que esteja faltando.</p></article>
+        <article class="suggestion-card"><div class="suggestion-icon">🍽️</div><h3>Cozinha</h3><p>Utensílios, travessas, assadeiras, potes, copos e itens para servir.</p></article>
+        <article class="suggestion-card"><div class="suggestion-icon">🛏️</div><h3>Cama, mesa e banho</h3><p>Jogo de cama, manta, toalhas, tapetes e peças em tons neutros.</p></article>
+        <article class="suggestion-card"><div class="suggestion-icon">💌</div><h3>Outras ideias</h3><p>Itens decorativos ou personalizados que deixem o novo lar ainda mais especial.</p></article>
       </div>
     </section>
   </main>
 
-  <footer class="footer">Feito com carinho para <strong>Núbia & Daniel</strong> • Chá dos Noivos</footer>
+  <footer class="footer">Obrigado por fazer parte desse momento especial de <strong>Daniel & Núbia</strong> ♡</footer>
 
   <div class="modal-backdrop" id="reserveModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal">
@@ -87,7 +123,9 @@
         <button class="icon-btn" id="closeModal" aria-label="Fechar">×</button>
       </div>
       <div id="reserveFormWrap">
+        <div class="chosen-gift" id="chosenGiftCard"></div>
         <p class="notice" id="chosenGiftText"></p>
+        <a class="btn btn-secondary store-modal-link hidden" id="modalStoreLink" target="_blank" rel="noopener noreferrer nofollow">🛍️ Abrir loja para comprar</a>
         <form class="form-grid" id="reserveForm">
           <label>Nome completo<input id="guestName" name="name" autocomplete="name" minlength="3" maxlength="80" required placeholder="Seu nome completo" /></label>
           <label>Telefone / WhatsApp<input id="guestPhone" name="phone" autocomplete="tel" inputmode="tel" required placeholder="(12) 99999-9999" /></label>
@@ -99,7 +137,8 @@
       <div class="success-panel hidden" id="successPanel">
         <div class="success-mark">✓</div>
         <h3>Presente reservado!</h3>
-        <p id="successText" class="section-copy" style="margin:10px auto 18px"></p>
+        <p id="successText" class="section-copy success-copy"></p>
+        <a class="btn btn-secondary hidden" id="successStoreLink" target="_blank" rel="noopener noreferrer nofollow">🛍️ Ir para a loja</a>
         <button class="btn btn-primary" id="finishModal">Fechar</button>
       </div>
     </div>
