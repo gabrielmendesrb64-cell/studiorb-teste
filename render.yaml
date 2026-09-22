@@ -1,18 +1,15 @@
 services:
   - type: web
-    name: controle-dividas
+    name: daniel-nubia-cha-casa-nova
     runtime: node
-    plan: free
     buildCommand: npm install
     startCommand: npm start
     envVars:
-      - key: NODE_VERSION
-        value: 22.16.0
       - key: NODE_ENV
         value: production
       - key: ADMIN_USER
-        value: admin
+        value: danielnubia
       - key: ADMIN_PASSWORD
-        sync: false
+        generateValue: true
       - key: SESSION_SECRET
         generateValue: true

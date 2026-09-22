@@ -1,26 +1,17 @@
 {
-  "name": "lsh-studio-rb",
-  "version": "7.8.0",
+  "name": "daniel-nubia-cha-casa-nova",
+  "version": "1.0.0",
   "private": true,
-  "description": "Studio RB V52 TESTE - redesign completo, admin separado, área da cliente e avaliações verificadas",
+  "description": "Lista de presentes do Chá de Casa Nova de Daniel & Nubia",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js",
-    "check": "node --check server.js && node --check public/studio-rb-v18.js && node --check public/admin-v18.js"
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "dependencies": {
-    "compression": "^1.7.4",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "express-rate-limit": "^7.4.0",
-    "express-session": "^1.18.0",
-    "helmet": "^7.1.0",
-    "memorystore": "^1.6.7",
-    "nodemailer": "^6.9.15",
-    "pg": "^8.13.1",
-    "express-async-errors": "^3.1.1",
-    "multer": "^2.0.2",
-    "sharp": "^0.34.3"
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
   }
 }

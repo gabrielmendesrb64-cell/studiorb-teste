@@ -1,41 +1,32 @@
-# Studio RB — V18 Catálogo + PIX
+# Daniel & Nubia — Chá de Casa Nova
 
-Versão redesenhada com base no catálogo enviado pela cliente.
+Site de lista de presentes com reserva por convidado e painel privado.
 
-## Principais mudanças
-- Visual preto, rosa/pink e branco, inspirado no PDF da Studio RB.
-- Catálogo de procedimentos com os valores do material de referência.
-- Fluxo de reserva com sinal PIX (padrão R$ 20,00).
-- Cliente pode enviar comprovante pelo próprio site ou seguir para o WhatsApp.
-- Agendamento fica como **Comprovante enviado** até aprovação da Emilly.
-- Painel admin possui **Aprovar / Confirmar**, **Recusar PIX** e **Ver comprovante**.
-- Chave PIX, valor do sinal, recebedor, cidade e instruções são configuráveis no painel.
-- Uploads de fotos do celular agora usam multipart e otimização no servidor com Sharp. O servidor aceita imagem de até 20 MB e reduz automaticamente para WebP.
-- Fotos de portfólio também são otimizadas automaticamente no servidor.
-- PostgreSQL/Supabase continua sendo a fonte persistente dos dados.
+## Como rodar
+1. Instale Node.js 18+
+2. Rode `npm install`
+3. Rode `npm start`
+4. Abra `http://localhost:3000`
+5. Painel: `http://localhost:3000/admin`
 
-## Banco
-Ao iniciar, `database.sql` cria/atualiza as tabelas. A V18 adiciona:
-- campos de status PIX no agendamento;
-- tabela `lsh_payment_proofs` para os comprovantes.
+## Login inicial local
+Usuário: `danielnubia`
+Senha: `troque-esta-senha`
 
-## Render
-Build command: `npm install`
-Start command: `npm start`
+Em produção, altere ADMIN_USER, ADMIN_PASSWORD e SESSION_SECRET pelas variáveis de ambiente.
 
-Variável obrigatória:
-`DATABASE_URL=<Session Pooler do Supabase>`
+## Banco de dados
+Sem `DATABASE_URL`, o projeto salva tudo em `data.json` (ótimo para testar localmente).
+Em hospedagem como Render, use PostgreSQL e configure `DATABASE_URL`, porque o disco padrão pode ser reiniciado e perder dados locais.
 
-Mantenha também as variáveis de admin, e-mail e WhatsApp já configuradas.
-
-## Primeiro acesso após deploy
-1. Abra o painel `/admin.html`.
-2. Vá em **PIX & Sinal**.
-3. Coloque a chave PIX correta e confirme o valor do sinal.
-4. Confira os procedimentos/valores.
-5. Libere os horários.
-6. Faça um agendamento de teste e envie um comprovante de teste.
-7. No painel, abra o comprovante e aprove.
-
-## Segurança
-Nunca envie `DATABASE_URL`, `SMTP_PASS`, senha de admin ou outras credenciais ao GitHub público.
+## O que já funciona
+- Lista de presentes responsiva
+- Categorias e busca
+- Quantidade por item (ex.: 6 jogos de toalha)
+- Reserva com nome + WhatsApp + confirmação
+- Bloqueio automático quando atingir a quantidade
+- Painel privado
+- Ver convidado, telefone e presente escolhido
+- Liberar reserva
+- Adicionar, editar e excluir presentes
+- Mensagens dos convidados

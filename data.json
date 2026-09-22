@@ -1,0 +1,105 @@
+{
+  "gifts": [
+    {
+      "id": 1,
+      "name": "Air Fryer 5L",
+      "category": "Eletrodomésticos",
+      "description": "Para deixar as refeições mais práticas no nosso novo lar.",
+      "quantity": 1,
+      "image": "airfryer"
+    },
+    {
+      "id": 2,
+      "name": "Jogo de Panelas",
+      "category": "Cozinha",
+      "description": "Um conjunto completo para nossas primeiras receitas.",
+      "quantity": 1,
+      "image": "panelas"
+    },
+    {
+      "id": 3,
+      "name": "Jogo de Toalhas",
+      "category": "Banheiro",
+      "description": "Toalhas macias para deixar a casa ainda mais aconchegante.",
+      "quantity": 6,
+      "image": "toalhas"
+    },
+    {
+      "id": 4,
+      "name": "Aspirador de Pó",
+      "category": "Limpeza",
+      "description": "Praticidade para cuidar da nossa casa no dia a dia.",
+      "quantity": 1,
+      "image": "aspirador"
+    },
+    {
+      "id": 5,
+      "name": "Jogo de Pratos",
+      "category": "Cozinha",
+      "description": "Conjunto para receber família e amigos à mesa.",
+      "quantity": 2,
+      "image": "pratos"
+    },
+    {
+      "id": 6,
+      "name": "Cafeteira",
+      "category": "Eletrodomésticos",
+      "description": "Para começar nossas manhãs com café fresquinho.",
+      "quantity": 1,
+      "image": "cafeteira"
+    },
+    {
+      "id": 7,
+      "name": "Jogo de Cama",
+      "category": "Quarto",
+      "description": "Conforto e carinho para o nosso cantinho.",
+      "quantity": 2,
+      "image": "cama"
+    },
+    {
+      "id": 8,
+      "name": "Micro-ondas",
+      "category": "Eletrodomésticos",
+      "description": "Mais praticidade para a rotina da casa.",
+      "quantity": 1,
+      "image": "microondas"
+    },
+    {
+      "id": 9,
+      "name": "Faqueiro",
+      "category": "Cozinha",
+      "description": "Um faqueiro bonito para completar nossa mesa.",
+      "quantity": 1,
+      "image": "faqueiro"
+    },
+    {
+      "id": 10,
+      "name": "Jogo de Copos",
+      "category": "Cozinha",
+      "description": "Copos para o dia a dia e para receber visitas.",
+      "quantity": 2,
+      "image": "copos"
+    },
+    {
+      "id": 11,
+      "name": "Edredom Casal",
+      "category": "Quarto",
+      "description": "Um toque de conforto para nosso novo quarto.",
+      "quantity": 1,
+      "image": "edredom"
+    },
+    {
+      "id": 12,
+      "name": "Liquidificador",
+      "category": "Eletrodomésticos",
+      "description": "Um companheiro para sucos, receitas e sobremesas.",
+      "quantity": 1,
+      "image": "liquidificador"
+    }
+  ],
+  "reservations": [],
+  "messages": [],
+  "nextGiftId": 13,
+  "nextReservationId": 1,
+  "nextMessageId": 1
+}

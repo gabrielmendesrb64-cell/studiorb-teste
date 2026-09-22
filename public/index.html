@@ -1,53 +1,92 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#08050a">
-  <title>Lash Studio RB • Emilly Ribeiro</title>
-  <meta name="description" content="Studio RB — cílios, sobrancelhas e micropigmentação com atendimento da Emilly Ribeiro.">
-  <link rel="icon" href="assets/logo-premium-v4.svg?v=23">
-  <link rel="stylesheet" href="studio-rb-v18.css?v=54">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#f6f0e7" />
+  <title>Daniel & Nubia | Chá de Casa Nova</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Parisienne&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
   <header class="topbar">
-    <a href="#inicio" class="brand"><span class="brand-mark">RB</span><span><b>Studio RB</b><small>Emilly Ribeiro</small></span></a>
-    <nav><a href="/admin" class="nav-cta">Área da Emilly</a></nav>
+    <a class="brand" href="#inicio">D <span>&</span> N</a>
+    <nav><a href="#inicio">Início</a><a href="#presentes">Presentes</a><a href="#mensagem">Mensagem</a></nav>
+    <a class="admin-link" href="/admin">Área do casal</a>
   </header>
 
   <main>
-    <section id="inicio" class="hero section-dark">
-      <div class="neon-orbit orbit-a"></div><div class="neon-orbit orbit-b"></div>
+    <section id="inicio" class="hero">
+      <div class="hero-art" aria-hidden="true"><div class="leaf leaf-a"></div><div class="leaf leaf-b"></div><div class="house">⌂</div></div>
       <div class="hero-copy">
-        <span class="kicker">REALCE O QUE TE FAZ ÚNICA</span>
-        <h1>Beleza real, <em>em cada detalhe.</em></h1>
-        <p>Conheça os procedimentos e valores do Studio RB. Os horários são agendados diretamente pela Emilly.</p>
-        <div class="hero-actions"><a class="btn btn-hot" href="#catalogo">Ver catálogo</a></div>
+        <p class="eyebrow">NOSSO NOVO COMEÇO</p>
+        <h1>Daniel <span>&</span> Nubia</h1>
+        <h2>Chá de Casa Nova</h2>
+        <p class="lead">Estamos começando uma nova fase e queremos dividir esse momento especial com vocês. Escolha um presente da nossa lista e leve-o no dia do chá. 🤍</p>
+        <div class="event-grid">
+          <div><b>📅 Data</b><span>Em breve</span></div>
+          <div><b>🕒 Horário</b><span>Em breve</span></div>
+          <div><b>📍 Local</b><span>Em breve</span></div>
+        </div>
+        <a class="primary" href="#presentes">Ver lista de presentes</a>
       </div>
-      <div class="hero-photo-wrap"><div class="blob-frame"><img src="assets/emilly-oficial.jpg" alt="Emilly Ribeiro, Studio RB"></div><span class="spark s1">✦</span><span class="spark s2">✦</span></div>
-    </section>
-
-    <section class="about section-dark">
-      <div class="about-photo"><img src="assets/emilly-oficial.jpg" alt="Emilly Ribeiro"></div>
-      <div class="about-copy"><span class="kicker">PRAZER, ME CHAMO</span><h2>Emilly Ribeiro <span>✦</span></h2><p>Sou lash designer apaixonada por realçar a beleza e a autoestima através do olhar. Trabalho com dedicação, cuidado e técnicas que valorizam cada cliente de forma única.</p><div class="mini-tags"><span>Cílios</span><span>Sobrancelhas</span><span>Micropigmentação</span></div></div>
-    </section>
-
-    <section id="catalogo" class="catalog section-dark">
-      <div class="section-head"><span class="kicker">CATÁLOGO STUDIO RB</span><h2>Procedimentos & valores</h2><p>Consulte os procedimentos disponíveis. O agendamento é realizado exclusivamente pela Emilly.</p></div>
-      <div id="servicesGrid" class="services-grid"><div class="loading-card">Carregando serviços...</div></div>
-    </section>
-
-    <section class="owner-access section-dark">
-      <div class="owner-access-card">
-        <span class="kicker">ACESSO EXCLUSIVO</span>
-        <h2>Agenda da Emilly</h2>
-        <p>Área reservada para gerenciamento de agenda, clientes, procedimentos e financeiro.</p>
-        <span class="owner-note">Acesso reservado à proprietária pelo botão no topo.</span>
+      <div class="hero-card">
+        <div class="photo-placeholder"><span>Daniel</span><i>&</i><span>Nubia</span><small>coloque aqui a foto do casal</small></div>
+        <blockquote>“Lar é onde o amor se faz presente.”</blockquote>
       </div>
     </section>
-</main>
-<footer><div><b>Studio RB</b><span>Emilly Ribeiro</span></div><div id="footerContact"></div></footer>
-  <div id="toast" class="toast"></div>
-  <script src="studio-rb-v18.js?v=54" defer></script>
+
+    <section class="intro-strip">
+      <div><span>♡</span><b>Pessoas especiais</b><small>Tornam tudo mais bonito</small></div>
+      <div><span>⌂</span><b>Novos começos</b><small>Uma casa cheia de sonhos</small></div>
+      <div><span>♧</span><b>Boas memórias</b><small>Momentos para guardar</small></div>
+    </section>
+
+    <section id="presentes" class="gifts-section">
+      <div class="section-head">
+        <p class="eyebrow">COM CARINHO</p>
+        <h2>Lista de Presentes</h2>
+        <p>Escolha um presente para levar no dia do nosso Chá de Casa Nova. Assim evitamos presentes repetidos e conseguimos organizar tudo com muito carinho.</p>
+      </div>
+      <div class="filters" id="filters"></div>
+      <div class="search-row"><label>⌕ <input id="search" placeholder="Buscar presente..." /></label><span id="summary"></span></div>
+      <div class="gift-grid" id="giftGrid"><div class="loading">Carregando presentes...</div></div>
+    </section>
+
+    <section class="note-section">
+      <div class="note-card"><span class="gift-icon">🎁</span><div><p class="eyebrow">IMPORTANTE</p><h3>O presente é entregue no dia do chá</h3><p>O site serve apenas para reservar o item em seu nome. Você compra onde preferir e leva pessoalmente no dia do nosso Chá de Casa Nova.</p></div></div>
+    </section>
+
+    <section id="mensagem" class="message-section">
+      <div><p class="eyebrow">UM RECADINHO PARA NÓS</p><h2>Deixe uma mensagem</h2><p>Vamos adorar guardar uma lembrança sua desta fase tão especial.</p></div>
+      <form id="messageForm" class="message-form"><input name="name" placeholder="Seu nome" required maxlength="100"><textarea name="message" placeholder="Escreva sua mensagem para Daniel & Nubia..." required maxlength="500"></textarea><button class="primary" type="submit">Enviar mensagem</button><p class="form-feedback" id="messageFeedback"></p></form>
+    </section>
+  </main>
+
+  <footer><div class="script">Daniel & Nubia</div><p>Obrigado por fazer parte do nosso novo começo. ♡</p><small>Chá de Casa Nova</small></footer>
+
+  <div class="modal-backdrop" id="reserveModal" hidden>
+    <div class="modal">
+      <button class="modal-x" data-close aria-label="Fechar">×</button>
+      <div class="modal-title"><span>🎁</span><div><small>Você escolheu</small><h3 id="modalGiftName"></h3></div></div>
+      <div id="modalGiftArt" class="modal-product product-art"></div>
+      <p>Preencha seus dados para reservar este presente. Ele ficará indisponível para outros convidados quando a quantidade desejada for atingida.</p>
+      <form id="reserveForm">
+        <input type="hidden" name="giftId">
+        <label>Nome completo <b>*</b><input name="name" autocomplete="name" required minlength="3" maxlength="100" placeholder="Seu nome completo"></label>
+        <label>Telefone / WhatsApp <b>*</b><input name="phone" inputmode="tel" autocomplete="tel" required placeholder="(00) 00000-0000"></label>
+        <label class="check"><input type="checkbox" name="confirmed" required><span>Confirmo que levarei este presente no dia do Chá de Casa Nova de Daniel & Nubia. 🤍</span></label>
+        <button type="submit" class="primary full">Confirmar reserva</button>
+        <p class="privacy">Seus dados ficam visíveis somente para Daniel & Nubia.</p>
+        <p class="form-feedback" id="reserveFeedback"></p>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="successModal" hidden><div class="modal success"><button class="modal-x" data-close-success>×</button><div class="success-check">✓</div><h3>Presente reservado com sucesso!</h3><p>Obrigado por fazer parte desse momento tão especial. Seu presente já ficou reservado para o nosso Chá de Casa Nova. 🤍</p><button class="primary" data-close-success>Voltar para a lista</button></div></div>
+
+  <script src="/app.js"></script>
 </body>
 </html>
