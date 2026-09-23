@@ -7,8 +7,8 @@ const net = require('net');
 const { URL } = require('url');
 
 const PORT = Number(process.env.PORT || 3000);
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'troque-esta-senha';
-const ADMIN_SECRET = process.env.ADMIN_SECRET || 'troque-por-uma-chave-longa-e-aleatoria';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'DanielNubia@2026';
+const ADMIN_SECRET = process.env.ADMIN_SECRET || crypto.createHash('sha256').update(`cha-noivos:${ADMIN_PASSWORD}`).digest('hex');
 const ROOT = __dirname;
 const PUBLIC = path.join(ROOT, 'public');
 const DB_PATH = path.join(ROOT, 'data', 'db.json');
@@ -23,9 +23,62 @@ function rateLimited(key, max, windowMs) {
   return fresh.length > max;
 }
 
+function normalizeGift(gift) {
+  const quantityRaw = Number.parseInt(gift.quantity, 10);
+  const quantity = Number.isFinite(quantityRaw) ? Math.max(1, Math.min(100, quantityRaw)) : 1;
+  let reservations = Array.isArray(gift.reservations) ? gift.reservations : [];
+
+  // Migração automática das versões antigas, que aceitavam somente 1 reserva por presente.
+  if (!reservations.length && gift.reservedBy) {
+    reservations = [{
+      id: `reservation-legacy-${gift.id}`,
+      name: cleanText(gift.reservedBy.name, 80),
+      phone: cleanPhone(gift.reservedBy.phone),
+      status: gift.status === 'received' ? 'received' : 'reserved',
+      reservedAt: gift.reservedBy.reservedAt || gift.createdAt || new Date().toISOString(),
+      receivedAt: gift.receivedAt || null
+    }];
+  }
+
+  reservations = reservations.slice(0, 100).map((r, index) => ({
+    id: cleanText(r.id, 120) || `reservation-${gift.id}-${index}`,
+    name: cleanText(r.name, 80) || 'Convidado',
+    phone: cleanPhone(r.phone),
+    status: r.status === 'received' ? 'received' : 'reserved',
+    reservedAt: r.reservedAt || new Date().toISOString(),
+    receivedAt: r.status === 'received' ? (r.receivedAt || null) : null
+  }));
+
+  return {
+    ...gift,
+    quantity: Math.max(quantity, reservations.length),
+    reservations,
+    reservedBy: undefined,
+    receivedAt: undefined,
+    status: undefined
+  };
+}
+function giftCounts(gift) {
+  const reservations = Array.isArray(gift.reservations) ? gift.reservations : [];
+  const reserved = reservations.filter(r => r.status === 'reserved').length;
+  const received = reservations.filter(r => r.status === 'received').length;
+  const occupied = reserved + received;
+  return { reserved, received, occupied, available: Math.max(0, Number(gift.quantity || 1) - occupied) };
+}
+function publicGift(gift) {
+  const counts = giftCounts(gift);
+  const status = counts.available > 0 ? 'available' : (counts.received >= gift.quantity ? 'received' : 'reserved');
+  return {
+    id:gift.id, name:gift.name, category:gift.category, description:gift.description,
+    image:gift.image, purchaseUrl:gift.purchaseUrl || '', quantity:gift.quantity,
+    availableQuantity:counts.available, reservedQuantity:counts.reserved,
+    receivedQuantity:counts.received, status
+  };
+}
 function readDb() {
   const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
   if (!Array.isArray(db.gifts)) db.gifts = [];
+  db.gifts = db.gifts.map(normalizeGift);
   if (!Array.isArray(db.rsvps)) db.rsvps = [];
   if (!db.config) db.config = {};
   return db;
@@ -58,7 +111,7 @@ function cleanHttpUrl(value, max = 1200) {
   return u.toString();
 }
 function makeToken() {
-  const payload = Buffer.from(JSON.stringify({ exp: Date.now() + 12 * 60 * 60 * 1000 })).toString('base64url');
+  const payload = Buffer.from(JSON.stringify({ exp: Date.now() + 4 * 60 * 60 * 1000 })).toString('base64url');
   const sig = crypto.createHmac('sha256', ADMIN_SECRET).update(payload).digest('base64url');
   return `${payload}.${sig}`;
 }
@@ -191,8 +244,7 @@ async function api(req, res, pathname, urlObj) {
   try {
     if (req.method === 'GET' && pathname === '/api/config') return json(res, 200, readDb().config);
     if (req.method === 'GET' && pathname === '/api/gifts') {
-      const gifts = readDb().gifts.map(g => ({ id:g.id, name:g.name, category:g.category, description:g.description, image:g.image, purchaseUrl:g.purchaseUrl || '', status:g.status }));
-      return json(res, 200, gifts);
+      return json(res, 200, readDb().gifts.map(publicGift));
     }
 
     let match = pathname.match(/^\/api\/gifts\/([^/]+)\/reserve$/);
@@ -205,11 +257,19 @@ async function api(req, res, pathname, urlObj) {
       const db = readDb();
       const gift = db.gifts.find(g => g.id === decodeURIComponent(match[1]));
       if (!gift) return json(res, 404, { error:'Presente não encontrado.' });
-      if (gift.status !== 'available') return json(res, 409, { error:'Esse presente acabou de ser escolhido por outra pessoa.' });
-      gift.status = 'reserved';
-      gift.reservedBy = { name, phone, reservedAt:new Date().toISOString() };
+      const counts = giftCounts(gift);
+      if (counts.available <= 0) return json(res, 409, { error:'Todas as unidades desse presente já foram escolhidas.' });
+      gift.reservations.push({
+        id:`reservation-${crypto.randomBytes(6).toString('hex')}`,
+        name, phone, status:'reserved', reservedAt:new Date().toISOString(), receivedAt:null
+      });
       writeDb(db);
-      return json(res, 200, { ok:true, message:`Tudo certo, ${name.split(' ')[0]}! O presente ficou reservado em seu nome. Se quiser, use o botão da loja para comprar e lembre-se de levá-lo no dia do chá.` });
+      const remaining = giftCounts(gift).available;
+      return json(res, 200, {
+        ok:true,
+        remaining,
+        message:`Tudo certo, ${name.split(' ')[0]}! 1 unidade de “${gift.name}” ficou reservada em seu nome.${remaining > 0 ? ` Ainda faltam ${remaining}.` : ' Agora todas as unidades desse presente já foram escolhidas.'} Use o botão da loja para comprar e leve o presente no dia do chá.`
+      });
     }
 
     if (req.method === 'POST' && pathname === '/api/rsvp') {
@@ -272,17 +332,40 @@ async function api(req, res, pathname, urlObj) {
         try { const meta = await fetchProductMetadata(purchaseUrl); purchaseUrl=meta.url; image=meta.image || ''; }
         catch (err) { warning = 'O presente foi salvo, mas a loja não liberou a foto automática. Você pode adicionar uma imagem manualmente.'; }
       }
+      const quantity = Math.max(1, Math.min(100, Number.parseInt(body.quantity, 10) || 1));
       const db=readDb();
-      const gift={id:`gift-${crypto.randomBytes(6).toString('hex')}`,name,category:cleanText(body.category,60)||'Outros',description:cleanText(body.description,220),image,purchaseUrl,status:'available',reservedBy:null,createdAt:new Date().toISOString()};
+      const gift={
+        id:`gift-${crypto.randomBytes(6).toString('hex')}`,name,
+        category:cleanText(body.category,60)||'Outros',description:cleanText(body.description,220),
+        image,purchaseUrl,quantity,reservations:[],createdAt:new Date().toISOString()
+      };
       db.gifts.unshift(gift); writeDb(db); return json(res,201,{ok:true,gift,warning});
     }
 
-    match = pathname.match(/^\/api\/admin\/gifts\/([^/]+)\/(release|received)$/);
+    match = pathname.match(/^\/api\/admin\/gifts\/([^/]+)\/quantity$/);
+    if (req.method === 'PUT' && match) {
+      const body = await readJson(req), db=readDb(), gift=db.gifts.find(g=>g.id===decodeURIComponent(match[1]));
+      if (!gift) return json(res,404,{error:'Presente não encontrado.'});
+      const quantity = Number.parseInt(body.quantity, 10);
+      if (!Number.isFinite(quantity) || quantity < 1 || quantity > 100) return json(res,400,{error:'A quantidade deve ficar entre 1 e 100.'});
+      const counts = giftCounts(gift);
+      if (quantity < counts.occupied) return json(res,409,{error:`Esse presente já tem ${counts.occupied} unidade(s) reservada(s)/entregue(s). A quantidade não pode ficar abaixo disso.`});
+      gift.quantity = quantity;
+      writeDb(db); return json(res,200,{ok:true,gift});
+    }
+
+    match = pathname.match(/^\/api\/admin\/gifts\/([^/]+)\/reservations\/([^/]+)\/(release|received)$/);
     if (req.method === 'POST' && match) {
       const db=readDb(), gift=db.gifts.find(g=>g.id===decodeURIComponent(match[1]));
       if (!gift) return json(res,404,{error:'Presente não encontrado.'});
-      if (match[2]==='release') { gift.status='available'; gift.reservedBy=null; gift.receivedAt=null; }
-      else { gift.status='received'; gift.receivedAt=new Date().toISOString(); }
+      const reservationId = decodeURIComponent(match[2]);
+      const index = gift.reservations.findIndex(r => r.id === reservationId);
+      if (index < 0) return json(res,404,{error:'Reserva não encontrada.'});
+      if (match[3] === 'release') gift.reservations.splice(index, 1);
+      else {
+        gift.reservations[index].status = 'received';
+        gift.reservations[index].receivedAt = new Date().toISOString();
+      }
       writeDb(db); return json(res,200,{ok:true});
     }
 

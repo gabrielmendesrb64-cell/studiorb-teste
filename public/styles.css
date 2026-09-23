@@ -34,3 +34,60 @@
 .couple-access a:hover{background:#fffdf8;color:var(--olive-800)}
 @media(max-width:850px){.pix-feature{grid-template-columns:auto 1fr}.pix-feature-button{grid-column:1/-1;width:100%}}
 @media(max-width:600px){.pix-feature{grid-template-columns:1fr;text-align:center;padding:20px 16px}.pix-feature-icon{margin:auto}.pix-feature-copy p{font-size:11px}.couple-access{flex-direction:column;gap:7px}.couple-access a{padding:7px 12px}}
+
+/* ===== Topo aprovado: reprodução fiel da referência enviada ===== */
+.reference-start{position:relative;width:100%;background:#f5eedb;overflow:hidden;border-bottom:1px solid rgba(72,84,49,.12)}
+.reference-start-image{display:block;width:100%;height:auto;user-select:none;-webkit-user-drag:none}
+.start-hotspot{position:absolute;z-index:5;display:block;border-radius:9px;background:transparent}
+.start-hotspot:focus-visible{outline:3px solid rgba(77,93,49,.8);outline-offset:2px;background:rgba(255,255,255,.14)}
+.start-brand{left:8.8%;top:0;width:19.5%;height:17%}
+.start-nav-home{left:33.0%;top:2.1%;width:7.0%;height:10.5%}
+.start-nav-gifts{left:40.6%;top:1.5%;width:11.9%;height:11%}
+.start-nav-pix{left:52.8%;top:1.5%;width:12.0%;height:11%}
+.start-nav-admin{left:66.8%;top:1.5%;width:11.0%;height:11%}
+.start-gifts-button{left:51.5%;top:87.0%;width:18.0%;height:11.5%;border-radius:999px}
+
+.event-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 13px}
+.event-summary>div{background:#fffdf8;border:1px solid #dcd7c8;border-radius:11px;padding:12px 14px;text-align:center}
+.event-summary span{display:block;text-transform:uppercase;letter-spacing:.1em;color:var(--olive-700);font:800 9px/1.2 ui-sans-serif,system-ui;margin-bottom:5px}
+.event-summary strong{display:block;color:var(--olive-950);font-size:14px;line-height:1.3}
+.gift-quantity-note{display:grid;gap:2px;background:#f1f3e8;border:1px solid #d8ddc8;border-radius:8px;padding:7px 8px;margin:0 0 9px;color:#4a5931}
+.gift-quantity-note strong{font:800 10px/1.2 ui-sans-serif,system-ui}
+.gift-quantity-note span{font:500 9px/1.3 ui-sans-serif,system-ui;color:#6d735b}
+
+/* ===== Área dos Noivos v3 ===== */
+.login-panel{position:relative;overflow:hidden;padding:30px 30px 26px;background:linear-gradient(145deg,#fffdf8,#f3efdf)}
+.login-panel:before{content:"";position:absolute;right:-70px;top:-70px;width:190px;height:190px;border-radius:50%;background:rgba(104,121,70,.10)}
+.login-lock{position:relative;z-index:1;width:58px;height:58px;border-radius:18px;display:grid;place-items:center;margin-bottom:14px;background:linear-gradient(145deg,#586b39,#394828);color:#fff;font-size:26px;box-shadow:0 10px 24px rgba(58,72,38,.18)}
+.admin-header{padding:18px 20px;background:linear-gradient(135deg,#344221,#58693a);border-radius:16px;color:#fff;box-shadow:0 12px 32px rgba(47,58,31,.16)}
+.admin-header .kicker{color:#dfe6d1}.admin-header h1{color:#fff;margin-bottom:0}.admin-header .btn-secondary{background:#fff;color:#344221;border-color:#fff}.admin-header .btn-soft{background:rgba(255,255,255,.13);color:#fff;border:1px solid rgba(255,255,255,.24)}
+.stat{min-height:88px;display:flex;flex-direction:column;justify-content:center}
+.admin-gift-card{align-items:flex-start;padding:14px 12px}
+.admin-gift-info{min-width:0;width:100%}
+.admin-gift-title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.admin-gift-title-row h4{flex:1;min-width:140px}
+.unit-badge{font:800 9px/1 ui-sans-serif,system-ui;color:#506236;background:#e9eddc;border:1px solid #d5dbc3;padding:5px 7px;border-radius:999px;white-space:nowrap}
+.quantity-editor{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:9px;padding:8px;background:#f5f2e8;border:1px solid #e2decf;border-radius:9px}
+.quantity-editor span{font:800 9px/1.2 ui-sans-serif,system-ui;color:#646954}.quantity-editor input{width:72px;padding:6px 8px;border-radius:7px}
+.btn-tiny{padding:6px 8px;font-size:9px;border-radius:7px}
+.reservation-stack{display:grid;gap:6px;margin-top:10px}
+.reservation-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px 9px;border:1px solid #e3dfd1;background:#fff;border-radius:9px}
+.reservation-row strong{display:block;font:800 10px/1.3 ui-sans-serif,system-ui;color:#373c28}.reservation-row span{display:block;margin-top:2px;font:500 9px/1.35 ui-sans-serif,system-ui;color:#777565}
+.reservation-actions{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.status-section{box-shadow:0 5px 16px rgba(47,57,30,.04)}
+.status-section-head{padding:12px 13px}.status-section-head h3{font-size:16px}.status-section-head b{font-size:11px;min-width:28px;text-align:center}
+
+@media(max-width:850px){
+  .reference-start{overflow:hidden}.reference-start-image{width:100%}
+  .event-summary{grid-template-columns:1fr}
+  .admin-header{align-items:flex-start;flex-direction:column}.header-actions{width:100%}.header-actions .btn{flex:1}
+  .reservation-row{grid-template-columns:1fr}.reservation-actions{justify-content:flex-start}
+}
+@media(max-width:600px){
+  .site-shell{width:100%;margin:0}
+  .reference-start-image{min-height:245px;object-fit:cover;object-position:center top}
+  .start-brand,.start-nav-home,.start-nav-gifts,.start-nav-pix,.start-nav-admin{display:none}
+  .start-gifts-button{left:50%;top:84%;width:30%;height:13%}
+  .event-summary>div{padding:10px 12px}
+  .admin-shell{padding:12px}.login-panel{margin:26px auto;padding:24px 18px}.admin-login-title{font-size:34px}
+  .quantity-editor{align-items:stretch}.quantity-editor span{width:100%}.quantity-editor input{width:90px}
+}

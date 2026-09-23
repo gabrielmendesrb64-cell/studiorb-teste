@@ -21,19 +21,15 @@ async function api(url, options = {}) {
 async function loadConfig() {
   const c = await api('/api/config');
   state.config = c;
-  $('#heroTitle').textContent = (c.title || 'Chá dos Noivos').replace(/\s+Noivos$/i, '') || 'Chá dos';
-  $('#heroSubtitle').textContent = c.subtitle || 'Estamos muito felizes em compartilhar esse momento especial com vocês!';
-  $('#eventDate').textContent = c.eventDate || 'Data a definir';
-  $('#eventTime').textContent = c.eventTime || 'Horário a definir';
-  $('#eventPlace').textContent = c.eventPlace || 'Local a definir';
-  $('#eventMessage').textContent = c.message || 'Escolha um presente da nossa lista, veja o link desejado pelos noivos e leve no dia do chá.';
-  $('#invitationMessage').textContent = c.invitationMessage || 'Coloque o nome completo de cada pessoa que irá ao chá.';
+  const setText = (selector, value) => { const el = $(selector); if (el) el.textContent = value; };
+  setText('#eventDate', c.eventDate || 'Data a definir');
+  setText('#eventTime', c.eventTime || 'Horário a definir');
+  setText('#eventPlace', c.eventPlace || 'Local a definir');
+  setText('#eventMessage', c.message || 'Escolha um presente da nossa lista, veja o link desejado pelos noivos e leve no dia do chá.');
+  setText('#invitationMessage', c.invitationMessage || 'Coloque o nome completo de cada pessoa que irá ao chá.');
   const couple = c.couple || 'Daniel e Núbia';
-  const parts = couple.split(/\s+(?:e|&)\s+/i);
-  $('#nameOne').textContent = (parts[0] || 'Daniel').trim();
-  $('#nameTwo').textContent = (parts[1] || 'Núbia').trim();
-  $('#pixKeyText').textContent = c.pixKey || 'Chave a definir';
-  $('#pixReceiverText').textContent = c.pixReceiver || couple;
+  setText('#pixKeyText', c.pixKey || 'Chave a definir');
+  setText('#pixReceiverText', c.pixReceiver || couple);
   $('#copyPixBtn').disabled = !c.pixKey;
   $('#copyPixBtn').textContent = c.pixKey ? 'Copiar chave PIX' : 'PIX ainda não configurado';
 }
@@ -95,15 +91,20 @@ function renderGifts() {
   }
 
   gifts.forEach(gift => {
+    const available = Number(gift.availableQuantity ?? (gift.status === 'available' ? 1 : 0));
+    const total = Math.max(1, Number(gift.quantity || 1));
+    const unavailable = available <= 0;
     const card = document.createElement('article');
-    card.className = `gift-card ${gift.status !== 'available' ? 'unavailable' : ''}`;
+    card.className = `gift-card ${unavailable ? 'unavailable' : ''}`;
     card.appendChild(buildGiftImage(gift));
 
     const body = document.createElement('div');
     body.className = 'gift-body';
     const status = document.createElement('span');
-    status.className = `status-pill ${gift.status}`;
-    status.textContent = gift.status === 'available' ? 'Disponível' : gift.status === 'received' ? 'Já presenteado ✓' : 'Reservado';
+    status.className = `status-pill ${unavailable ? (gift.status || 'reserved') : 'available'}`;
+    if (!unavailable) status.textContent = total > 1 ? `${available} de ${total} disponíveis` : 'Disponível';
+    else status.textContent = gift.status === 'received' ? 'Todos presenteados ✓' : 'Todas as unidades reservadas';
+
     const cat = document.createElement('span');
     cat.className = 'gift-category';
     cat.textContent = gift.category || 'Outros';
@@ -113,6 +114,16 @@ function renderGifts() {
     const desc = document.createElement('p');
     desc.className = 'gift-desc';
     desc.textContent = gift.description || 'Um presente especial para a casa nova.';
+
+    if (total > 1) {
+      const quantity = document.createElement('div');
+      quantity.className = 'gift-quantity-note';
+      quantity.innerHTML = `<strong>${total} unidades desejadas</strong><span>Cada convidado reserva 1 unidade.</span>`;
+      body.append(status, cat, title, desc, quantity);
+    } else {
+      body.append(status, cat, title, desc);
+    }
+
     const actions = document.createElement('div');
     actions.className = 'gift-actions';
 
@@ -134,14 +145,14 @@ function renderGifts() {
     }
 
     const btn = document.createElement('button');
-    btn.className = gift.status === 'available' ? 'btn btn-primary btn-card' : 'btn btn-soft btn-card';
+    btn.className = !unavailable ? 'btn btn-primary btn-card' : 'btn btn-soft btn-card';
     btn.type = 'button';
-    btn.textContent = gift.status === 'available' ? '🎁 Quero presentear' : 'Indisponível';
-    btn.disabled = gift.status !== 'available';
-    if (gift.status === 'available') btn.addEventListener('click', () => openReserve(gift));
+    btn.textContent = !unavailable ? '🎁 Quero presentear' : 'Indisponível';
+    btn.disabled = unavailable;
+    if (!unavailable) btn.addEventListener('click', () => openReserve(gift));
     actions.appendChild(btn);
 
-    body.append(status, cat, title, desc, actions);
+    body.appendChild(actions);
     card.appendChild(body);
     grid.appendChild(card);
   });
@@ -149,7 +160,11 @@ function renderGifts() {
 
 function openReserve(gift) {
   state.selectedGift = gift;
-  $('#chosenGiftText').textContent = `Você escolheu ${gift.name}. Confirme seus dados para este item ficar reservado em seu nome.`;
+  const available = Number(gift.availableQuantity || 1);
+  const total = Math.max(1, Number(gift.quantity || 1));
+  $('#chosenGiftText').textContent = total > 1
+    ? `Você escolheu ${gift.name}. Esta confirmação reserva 1 unidade. Ainda há ${available} de ${total} disponíveis.`
+    : `Você escolheu ${gift.name}. Confirme seus dados para este item ficar reservado em seu nome.`;
   $('#reserveError').textContent = '';
   $('#reserveForm').reset();
   $('#reserveFormWrap').classList.remove('hidden');

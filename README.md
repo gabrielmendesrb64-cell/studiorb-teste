@@ -1,35 +1,37 @@
 # Chá dos Noivos — Daniel e Núbia
 
-Site completo em Node.js para convite, confirmação de presença e lista de presentes do chá dos noivos.
+Site completo em Node.js para convite, confirmação de presença, PIX e lista de presentes.
 
-## O que está incluído
+## Principais funções
 
-- Visual creme + verde oliva inspirado na referência aprovada.
-- Ilustração de Daniel e Núbia integrada ao topo sem ficar gigante.
-- Data, horário e local configuráveis pela Área dos Noivos.
-- Lista de presentes com foto, categoria, descrição e link exato do produto.
-- Dois botões em cada presente: **Ver presente desejado** e **Quero presentear**.
-- Ao reservar, o presente fica indisponível para outras pessoas.
-- Área dos Noivos separa presentes em Disponíveis, Reservados e Já presenteados/Entregues.
-- Confirmação de presença sem telefone: cada família pode adicionar vários nomes completos na mesma confirmação.
-- PIX fixo configurável: permanece sempre disponível e cada pessoa escolhe o valor que quiser enviar.
-- Área dos Noivos mostra o total de pessoas confirmadas e os nomes enviados por cada família/grupo.
+- Topo do site usando exatamente a arte/referência aprovada por Daniel e Núbia.
+- Lista de presentes com foto, categoria, descrição e link exato para compra.
+- Botões **Ver presente desejado** e **Quero presentear**.
+- Cada presente aceita uma **quantidade desejada** de 1 a 100 unidades.
+  - Exemplo: ao cadastrar “Kit de toalhas” com quantidade 5, até 5 pessoas diferentes podem reservar 1 unidade cada.
+  - O site mostra quantas unidades ainda estão disponíveis.
+- Confirmação de presença apenas com nomes completos.
+  - Uma família pode adicionar vários nomes na mesma confirmação.
+- PIX fixo, sempre disponível e sem limite de contribuições pelo site.
+- Data, horário e local configuráveis.
+- Área dos Noivos protegida por senha.
+- Painel administrativo separado por unidades disponíveis, reservadas e entregues.
+- No painel é possível ver quem reservou cada unidade, liberar uma reserva e marcar uma unidade como entregue.
 - Layout responsivo para celular e computador.
 
-## Rodar localmente
+## Área dos Noivos
 
-1. Instale Node.js 18 ou mais recente.
-2. Entre na pasta do projeto.
-3. Defina uma senha segura para a área dos noivos.
-4. Execute:
+Acesse:
 
-```bash
-npm start
-```
+`/admin`
 
-O site usa a porta definida por `PORT` ou, por padrão, `3000`.
+### Senha inicial desta versão
 
-## Variáveis de ambiente recomendadas no Render
+`DanielNubia@2026`
+
+Antes de colocar o site em uso definitivo, é recomendado trocar a senha no Render usando a variável `ADMIN_PASSWORD`.
+
+## Variáveis de ambiente no Render
 
 ```env
 ADMIN_PASSWORD=coloque-uma-senha-forte
@@ -37,25 +39,26 @@ ADMIN_SECRET=coloque-uma-chave-longa-e-aleatoria
 NODE_ENV=production
 ```
 
-O Render define `PORT` automaticamente.
+O Render fornece a variável `PORT` automaticamente.
 
-## Área dos Noivos
+## Rodar localmente
 
-Acesse `/admin`.
+Requer Node.js 18 ou superior.
 
-Nela é possível:
+```bash
+npm start
+```
 
-- cadastrar presentes;
-- informar o link do produto;
-- buscar a imagem automaticamente quando a loja permite;
-- acompanhar quem reservou;
-- liberar uma reserva;
-- marcar como entregue;
-- excluir presentes;
-- alterar data, horário, local e textos;
-- configurar a chave PIX fixa e o nome do recebedor;
-- visualizar e excluir confirmações de presença.
+Por padrão o servidor abre na porta 3000.
 
-## Persistência
+## Quantidade dos presentes
 
-Os dados ficam em `data/db.json`. Em hospedagens com disco efêmero, como configurações padrão de alguns serviços, use um disco persistente ou banco de dados antes de colocar o site em uso definitivo, para evitar perda de dados após redeploy/restart.
+Na Área dos Noivos, ao cadastrar um presente existe o campo **Quantidade desejada**.
+
+Também é possível alterar essa quantidade depois. A quantidade nunca pode ser reduzida para menos do que o número de unidades que já estão reservadas ou entregues.
+
+## Persistência dos dados
+
+Os dados ficam em `data/db.json`.
+
+Em hospedagens com armazenamento efêmero, um novo deploy ou reinício pode apagar alterações feitas durante o uso. Para uso definitivo, utilize armazenamento persistente ou banco de dados.

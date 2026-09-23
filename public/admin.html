@@ -5,14 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#4f5d31" />
   <title>Área dos Noivos | Daniel e Núbia</title>
-  <link rel="stylesheet" href="/styles.css?v=20260922-6" />
+  <link rel="stylesheet" href="/styles.css?v=20260922-9" />
 </head>
 <body class="admin-page">
   <main class="admin-shell">
     <section class="panel login-panel" id="loginPanel">
-      <div class="kicker">Área reservada</div>
+      <div class="login-lock" aria-hidden="true">🔒</div>
+      <div class="kicker">Área protegida</div>
       <h1 class="admin-login-title">Área dos Noivos</h1>
-      <p>Entre com a senha para gerenciar presentes, PIX, confirmações e informações do chá.</p>
+      <p>Este painel é privado. Digite a senha para gerenciar presentes, quantidades, PIX, convidados e informações do chá.</p>
       <form class="form-grid" id="loginForm">
         <label>Senha<input id="adminPassword" type="password" autocomplete="current-password" required placeholder="Digite a senha" /></label>
         <div class="error" id="loginError"></div>
@@ -45,7 +46,11 @@
               <div class="helper">Esse link aparece para o convidado no botão “Ver presente desejado”. Ao colar, tentaremos buscar a foto automaticamente.</div>
               <div class="product-preview hidden" id="productPreview"><img id="productPreviewImage" alt="Prévia do presente" /><div><strong id="productPreviewTitle">Foto encontrada</strong><span id="productPreviewStatus"></span></div></div>
               <label>Link direto da imagem <span class="optional">(opcional, caso a loja bloqueie a foto automática)</span><input id="giftImage" type="url" maxlength="1600" placeholder="https://.../foto.jpg" /></label>
-              <label>Categoria<input id="giftCategory" maxlength="60" placeholder="Ex.: Cozinha" /></label>
+              <div class="two-col">
+                <label>Categoria<input id="giftCategory" maxlength="60" placeholder="Ex.: Cozinha" /></label>
+                <label>Quantidade desejada<input id="giftQuantity" type="number" min="1" max="100" value="1" required /></label>
+              </div>
+              <div class="helper">Exemplo: se vocês querem 5 kits de toalhas, coloque <strong>5</strong>. Cinco pessoas diferentes poderão reservar uma unidade cada.</div>
               <label>Descrição<textarea id="giftDescription" maxlength="220" placeholder="Cor, modelo, tamanho ou observação..."></textarea></label>
               <div class="error" id="giftError"></div>
               <div class="success-inline hidden" id="giftSuccess"></div>
@@ -79,7 +84,7 @@
           <section class="panel">
             <div class="kicker">Controle da lista</div>
             <h2 class="admin-panel-title">Presentes separados por status</h2>
-            <p>Os itens ficam separados em disponíveis, reservados para levar no chá e já presenteados/entregues.</p>
+            <p>Cada presente pode ter várias unidades. O painel mostra quantas ainda faltam, quem reservou cada unidade e quais já foram entregues.</p>
             <div class="status-board">
               <div class="status-section"><div class="status-section-head"><span class="dot available-dot"></span><h3>Disponíveis</h3><b id="countAvailable">0</b></div><div class="admin-list" id="availableGiftList"></div></div>
               <div class="status-section"><div class="status-section-head"><span class="dot reserved-dot"></span><h3>Reservados para entregar no chá</h3><b id="countReserved">0</b></div><div class="admin-list" id="reservedGiftList"></div></div>
@@ -99,6 +104,6 @@
       </div>
     </section>
   </main>
-  <script src="/admin.js?v=20260922-6"></script>
+  <script src="/admin.js?v=20260922-9"></script>
 </body>
 </html>
