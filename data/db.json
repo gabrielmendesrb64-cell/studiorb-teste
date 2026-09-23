@@ -2,12 +2,14 @@
   "config": {
     "couple": "Daniel e Núbia",
     "title": "Chá dos Noivos",
-    "subtitle": "Estamos muito felizes em compartilhar esse momento especial com vocês! Aqui vocês encontram nosso convite, a lista de presentes e outras informações importantes.",
+    "subtitle": "Estamos muito felizes em compartilhar esse momento especial com vocês! Aqui vocês encontram nossa lista de presentes e as informações do nosso chá.",
     "eventDate": "Data a definir",
     "eventTime": "Horário a definir",
     "eventPlace": "Local a definir",
-    "message": "Escolha um presente da nossa lista, veja o link indicado pelos noivos, confirme seus dados e leve o presente no dia do chá.",
-    "invitationMessage": "Sua presença vai deixar esse momento ainda mais especial. Confira a data, o horário e o local e confirme abaixo se poderá estar com a gente."
+    "message": "Escolha um presente da nossa lista, veja o presente desejado no link indicado pelos noivos e leve no dia do chá.",
+    "invitationMessage": "Coloque abaixo o nome completo de cada pessoa da sua família que irá ao chá. Você pode adicionar quantos nomes precisar.",
+    "pixKey": "",
+    "pixReceiver": "Daniel e Núbia"
   },
   "gifts": [
     {

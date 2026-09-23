@@ -3,16 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#46552f" />
+  <meta name="theme-color" content="#4f5d31" />
   <title>Área dos Noivos | Daniel e Núbia</title>
-  <link rel="stylesheet" href="/styles.css?v=20260922-4" />
+  <link rel="stylesheet" href="/styles.css?v=20260922-6" />
 </head>
 <body class="admin-page">
   <main class="admin-shell">
     <section class="panel login-panel" id="loginPanel">
       <div class="kicker">Área reservada</div>
-      <h1 class="admin-login-title">Área dos noivos</h1>
-      <p class="section-copy">Entre com a senha para gerenciar presentes, links de compra, confirmações e informações do chá.</p>
+      <h1 class="admin-login-title">Área dos Noivos</h1>
+      <p>Entre com a senha para gerenciar presentes, PIX, confirmações e informações do chá.</p>
       <form class="form-grid" id="loginForm">
         <label>Senha<input id="adminPassword" type="password" autocomplete="current-password" required placeholder="Digite a senha" /></label>
         <div class="error" id="loginError"></div>
@@ -23,7 +23,7 @@
 
     <section id="dashboard" class="hidden">
       <div class="admin-header">
-        <div><div class="kicker">Daniel e Núbia</div><h1>Área dos noivos</h1></div>
+        <div><div class="kicker">Daniel e Núbia</div><h1>Área dos Noivos</h1></div>
         <div class="header-actions"><a class="btn btn-secondary" href="/">Ver site</a><button class="btn btn-soft" id="logoutBtn">Sair</button></div>
       </div>
 
@@ -31,7 +31,7 @@
         <div class="stat"><small>Presentes disponíveis</small><strong id="statAvailable">0</strong></div>
         <div class="stat"><small>Reservados</small><strong id="statReserved">0</strong></div>
         <div class="stat"><small>Já presenteados</small><strong id="statReceived">0</strong></div>
-        <div class="stat"><small>Presenças confirmadas</small><strong id="statRsvpYes">0</strong></div>
+        <div class="stat"><small>Pessoas confirmadas</small><strong id="statRsvpYes">0</strong></div>
       </div>
 
       <div class="admin-grid">
@@ -41,10 +41,10 @@
             <h2 class="admin-panel-title">Adicionar presente</h2>
             <form class="admin-form" id="giftForm">
               <label>Nome do presente<input id="giftName" maxlength="100" required placeholder="Ex.: Air Fryer" /></label>
-              <label>Link de onde comprar<input id="giftProductUrl" type="url" maxlength="1200" placeholder="https://loja.com/produto..." /></label>
-              <div class="helper">Ao colar o link, tentaremos buscar a foto do produto automaticamente.</div>
+              <label>Link do presente desejado<input id="giftProductUrl" type="url" maxlength="1200" placeholder="https://loja.com/produto..." /></label>
+              <div class="helper">Esse link aparece para o convidado no botão “Ver presente desejado”. Ao colar, tentaremos buscar a foto automaticamente.</div>
               <div class="product-preview hidden" id="productPreview"><img id="productPreviewImage" alt="Prévia do presente" /><div><strong id="productPreviewTitle">Foto encontrada</strong><span id="productPreviewStatus"></span></div></div>
-              <label>Link direto da imagem <span class="optional">(opcional / caso a loja bloqueie a foto automática)</span><input id="giftImage" type="url" maxlength="1600" placeholder="https://.../foto.jpg" /></label>
+              <label>Link direto da imagem <span class="optional">(opcional, caso a loja bloqueie a foto automática)</span><input id="giftImage" type="url" maxlength="1600" placeholder="https://.../foto.jpg" /></label>
               <label>Categoria<input id="giftCategory" maxlength="60" placeholder="Ex.: Cozinha" /></label>
               <label>Descrição<textarea id="giftDescription" maxlength="220" placeholder="Cor, modelo, tamanho ou observação..."></textarea></label>
               <div class="error" id="giftError"></div>
@@ -54,16 +54,20 @@
           </section>
 
           <section class="panel">
-            <div class="kicker">Convite</div>
-            <h2 class="admin-panel-title">Data, horário e local</h2>
+            <div class="kicker">Convite e PIX</div>
+            <h2 class="admin-panel-title">Informações do chá</h2>
             <form class="admin-form" id="configForm">
               <label>Nome dos noivos<input id="cfgCouple" maxlength="70" /></label>
               <label>Título<input id="cfgTitle" maxlength="70" /></label>
-              <label>Frase principal<textarea id="cfgSubtitle" maxlength="180"></textarea></label>
+              <label>Frase principal<textarea id="cfgSubtitle" maxlength="220"></textarea></label>
               <div class="two-col"><label>Data<input id="cfgDate" maxlength="80" placeholder="Ex.: 15 de novembro de 2026" /></label><label>Horário<input id="cfgTime" maxlength="80" placeholder="Ex.: 16h00" /></label></div>
               <label>Local<input id="cfgPlace" maxlength="150" placeholder="Nome do espaço + endereço" /></label>
-              <label>Texto do convite<textarea id="cfgInvitationMessage" maxlength="420"></textarea></label>
-              <label>Mensagem da lista<textarea id="cfgMessage" maxlength="350"></textarea></label>
+              <label>Texto da confirmação de presença<textarea id="cfgInvitationMessage" maxlength="420"></textarea></label>
+              <label>Mensagem da lista de presentes<textarea id="cfgMessage" maxlength="350"></textarea></label>
+              <hr style="border:0;border-top:1px solid #e5e0d1;width:100%;margin:3px 0" />
+              <label>Chave PIX fixa<input id="cfgPixKey" maxlength="180" placeholder="E-mail, telefone, CPF/CNPJ ou chave aleatória" /></label>
+              <label>Nome do recebedor do PIX<input id="cfgPixReceiver" maxlength="100" placeholder="Ex.: Daniel e Núbia" /></label>
+              <div class="helper">A opção de PIX nunca fica indisponível. Cada convidado escolhe o valor que quiser enviar diretamente no próprio banco.</div>
               <div class="error" id="configError"></div>
               <div class="success-inline hidden" id="configSuccess"></div>
               <button class="btn btn-primary" type="submit">Salvar informações</button>
@@ -75,7 +79,7 @@
           <section class="panel">
             <div class="kicker">Controle da lista</div>
             <h2 class="admin-panel-title">Presentes separados por status</h2>
-            <p class="section-copy">Os itens ficam separados em disponíveis, reservados para levar no chá e já presenteados/entregues.</p>
+            <p>Os itens ficam separados em disponíveis, reservados para levar no chá e já presenteados/entregues.</p>
             <div class="status-board">
               <div class="status-section"><div class="status-section-head"><span class="dot available-dot"></span><h3>Disponíveis</h3><b id="countAvailable">0</b></div><div class="admin-list" id="availableGiftList"></div></div>
               <div class="status-section"><div class="status-section-head"><span class="dot reserved-dot"></span><h3>Reservados para entregar no chá</h3><b id="countReserved">0</b></div><div class="admin-list" id="reservedGiftList"></div></div>
@@ -86,16 +90,15 @@
           <section class="panel">
             <div class="kicker">Lista de convidados</div>
             <h2 class="admin-panel-title">Confirmações de presença</h2>
+            <p>Uma família pode confirmar vários nomes de uma vez. Aqui aparece cada grupo enviado e todos os nomes confirmados.</p>
             <div class="rsvp-admin-grid">
-              <div><h3 class="subhead">💚 Confirmaram presença</h3><div class="admin-list" id="rsvpYesList"></div></div>
-              <div><h3 class="subhead">Não poderão comparecer</h3><div class="admin-list" id="rsvpNoList"></div></div>
+              <div><h3 class="subhead">💚 Pessoas que vão ao chá</h3><div class="admin-list" id="rsvpYesList"></div></div>
             </div>
           </section>
         </div>
       </div>
     </section>
   </main>
-
-  <script src="/admin.js?v=20260922-4"></script>
+  <script src="/admin.js?v=20260922-6"></script>
 </body>
 </html>

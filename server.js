@@ -38,6 +38,18 @@ function writeDb(db) {
 function cleanText(value, max = 120) { return String(value || '').trim().replace(/\s+/g, ' ').slice(0, max); }
 function cleanMultiline(value, max = 500) { return String(value || '').trim().slice(0, max); }
 function cleanPhone(value) { return String(value || '').replace(/\D/g, '').slice(0, 11); }
+function cleanNames(value) {
+  const raw = Array.isArray(value) ? value : [];
+  const seen = new Set();
+  const names = [];
+  for (const item of raw.slice(0, 12)) {
+    const name = cleanText(item, 80);
+    if (name.length < 3) continue;
+    const key = name.toLocaleLowerCase('pt-BR');
+    if (!seen.has(key)) { seen.add(key); names.push(name); }
+  }
+  return names;
+}
 function cleanHttpUrl(value, max = 1200) {
   const raw = String(value || '').trim().slice(0, max);
   if (!raw) return '';
@@ -203,18 +215,14 @@ async function api(req, res, pathname, urlObj) {
     if (req.method === 'POST' && pathname === '/api/rsvp') {
       if (rateLimited(`rsvp:${clientIp(req)}`, 10, 10 * 60 * 1000)) return json(res, 429, { error:'Muitas tentativas. Tente novamente em alguns minutos.' });
       const body = await readJson(req);
-      const name = cleanText(body.name, 80), phone = cleanPhone(body.phone);
-      const attending = body.attending === true || body.attending === 'yes' ? 'yes' : body.attending === false || body.attending === 'no' ? 'no' : '';
-      const note = cleanText(body.note, 220);
-      if (name.length < 3) return json(res, 400, { error:'Informe seu nome completo.' });
-      if (phone.length < 10) return json(res, 400, { error:'Informe um telefone válido com DDD.' });
-      if (!attending) return json(res, 400, { error:'Informe se você poderá comparecer.' });
+      const names = cleanNames(body.names);
+      if (!names.length) return json(res, 400, { error:'Informe pelo menos um nome completo.' });
       const db = readDb();
-      const existing = db.rsvps.find(r => r.phone === phone);
-      const record = { id: existing?.id || `rsvp-${crypto.randomBytes(6).toString('hex')}`, name, phone, attending, note, confirmedAt:new Date().toISOString() };
-      if (existing) Object.assign(existing, record); else db.rsvps.unshift(record);
+      const record = { id:`rsvp-${crypto.randomBytes(6).toString('hex')}`, names, confirmedAt:new Date().toISOString() };
+      db.rsvps.unshift(record);
       writeDb(db);
-      return json(res, 200, { ok:true, message: attending === 'yes' ? `Presença confirmada, ${name.split(' ')[0]}! Vai ser muito especial ter você com a gente. 💚` : `Confirmação registrada, ${name.split(' ')[0]}. Obrigado por nos avisar!` });
+      const people = names.length === 1 ? '1 presença confirmada' : `${names.length} presenças confirmadas`;
+      return json(res, 200, { ok:true, message:`Tudo certo! ${people}. Vai ser muito especial ter vocês com a gente. 💚` });
     }
 
     if (req.method === 'POST' && pathname === '/api/admin/login') {
@@ -239,14 +247,16 @@ async function api(req, res, pathname, urlObj) {
     if (req.method === 'PUT' && pathname === '/api/admin/config') {
       const body = await readJson(req), db = readDb();
       db.config = {
-        couple:cleanText(body.couple,70)||db.config.couple||'Daniel & Núbia',
+        couple:cleanText(body.couple,70)||db.config.couple||'Daniel e Núbia',
         title:cleanText(body.title,70)||db.config.title||'Chá dos Noivos',
-        subtitle:cleanText(body.subtitle,180),
+        subtitle:cleanText(body.subtitle,220),
         eventDate:cleanText(body.eventDate,80),
         eventTime:cleanText(body.eventTime,80),
         eventPlace:cleanText(body.eventPlace,150),
         message:cleanMultiline(body.message,350),
-        invitationMessage:cleanMultiline(body.invitationMessage,420)
+        invitationMessage:cleanMultiline(body.invitationMessage,420),
+        pixKey:cleanText(body.pixKey,180),
+        pixReceiver:cleanText(body.pixReceiver,100)
       };
       writeDb(db); return json(res,200,{ok:true,config:db.config});
     }
