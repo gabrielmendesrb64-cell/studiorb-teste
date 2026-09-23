@@ -62,3 +62,9 @@ Também é possível alterar essa quantidade depois. A quantidade nunca pode ser
 Os dados ficam em `data/db.json`.
 
 Em hospedagens com armazenamento efêmero, um novo deploy ou reinício pode apagar alterações feitas durante o uso. Para uso definitivo, utilize armazenamento persistente ou banco de dados.
+
+
+## Alteração v4
+- O topo não usa mais a imagem de referência como banner. Ele foi reconstruído em HTML/CSS usando apenas a ilustração dos noivos.
+- O menu superior foi removido.
+- No topo ficam apenas os botões **Ver presentes** e **Confirmar presença**, que levam diretamente às respectivas seções.
