@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#4f5d31" />
   <meta name="description" content="Chá dos Noivos de Daniel e Núbia — convite, confirmação de presença e lista de presentes." />
   <title>Chá dos Noivos | Daniel e Núbia</title>
-  <link rel="stylesheet" href="/styles.css?v=20260922-6" />
+  <link rel="stylesheet" href="/styles.css?v=20260922-7" />
 </head>
 <body>
   <div class="site-shell">
@@ -20,9 +20,8 @@
         <div class="nav-links">
           <a class="nav-link active" href="#inicio">Início</a>
           <a class="nav-link" href="#presentes">Lista de Presentes</a>
-          <a class="nav-link" href="#sugestoes">Sugestão de Presente</a>
+          <a class="nav-link" href="#pix">PIX</a>
           <a class="nav-link" href="#presenca">Confirmar Presença</a>
-          <a class="nav-link admin-link" href="/admin">Área dos Noivos</a>
         </div>
         <div class="nav-motto" aria-hidden="true"><span>♡</span><em>Juntos<br>para sempre</em></div>
       </nav>
@@ -34,7 +33,7 @@
         <img class="hero-flower hero-flower-right" src="/floral-bottom-right.jpg?v=1" alt="" aria-hidden="true" />
         <div class="hero-grid">
           <div class="hero-couple">
-            <img src="/casal-nubia-daniel.jpg?v=20260922-6" alt="Ilustração de Daniel e Núbia" />
+            <img src="/casal-nubia-daniel.jpg?v=20260922-7" alt="Ilustração de Daniel e Núbia" />
           </div>
           <div class="hero-copy">
             <span class="eyebrow">Sejam bem-vindos ao nosso</span>
@@ -87,30 +86,21 @@
         </div>
       </section>
 
-      <section class="section suggestions-section" id="sugestoes">
-        <div class="section-head suggestion-head">
-          <div class="title-with-icon"><div class="big-icon bulb">💡</div><div><h2>Sugestão de Presente</h2><p>Prefere nos presentear de outra forma? Aqui vão algumas ideias que também vão nos ajudar muito!</p></div></div>
-        </div>
-        <div class="suggestions">
-          <article class="suggestion-card"><div class="suggestion-icon">⌂</div><h3>Vale-presente de lojas</h3><p>Uma opção prática para escolhermos algum item que esteja faltando.</p></article>
-          <article class="suggestion-card pix-card" id="pixCard" tabindex="0" role="button" aria-label="Abrir opção de presente por PIX"><div class="suggestion-icon">$</div><h3>Contribuição em PIX</h3><p>PIX fixo dos noivos. Você escolhe o valor que quiser enviar e essa opção nunca fica indisponível.</p><button class="text-button" type="button">Ver PIX →</button></article>
-          <article class="suggestion-card"><div class="suggestion-icon">♡</div><h3>Itens personalizados</h3><p>Itens decorativos, quadros e tudo que deixe o nosso lar mais especial.</p></article>
-          <article class="suggestion-card"><div class="suggestion-icon">✉</div><h3>Outras ideias</h3><p>Se tiver outra ideia de presente, também será um prazer receber!</p></article>
+      <section class="section pix-section" id="pix">
+        <div class="pix-feature" id="pixCard" tabindex="0" role="button" aria-label="Abrir opção de presente por PIX">
+          <div class="pix-feature-icon">PIX</div>
+          <div class="pix-feature-copy">
+            <div class="kicker">Uma forma livre de presentear</div>
+            <h2>Presenteie por PIX</h2>
+            <p>Se preferir, você pode contribuir com o valor que quiser. A chave é fixa e pode receber quantas contribuições forem enviadas.</p>
+          </div>
+          <button class="btn btn-primary pix-feature-button" type="button">Ver chave PIX →</button>
         </div>
       </section>
 
-      <section class="admin-preview" id="area-noivos">
-        <img class="preview-flower preview-flower-left" src="/floral-left-bouquet.jpg?v=1" alt="" aria-hidden="true" />
-        <img class="preview-flower preview-flower-right" src="/floral-bottom-right.jpg?v=1" alt="" aria-hidden="true" />
-        <div class="admin-preview-head">
-          <div class="title-with-icon"><div class="gear-icon">⚙</div><div><h2>Área dos Noivos</h2><p>Acompanhem a organização dos presentes em tempo real.</p></div></div>
-          <a class="btn btn-outline" href="/admin">🔒 Acessar como noivos</a>
-        </div>
-        <div class="preview-board">
-          <div class="preview-column"><div class="preview-title"><span class="dot dot-green"></span>Disponíveis <b id="publicAvailableCount">0</b></div><div id="publicAvailableList" class="preview-list"></div></div>
-          <div class="preview-column"><div class="preview-title"><span class="dot dot-gold"></span>Reservados para o chá <b id="publicReservedCount">0</b></div><div id="publicReservedList" class="preview-list"></div></div>
-          <div class="preview-column"><div class="preview-title"><span class="dot dot-olive"></span>Já presenteados / Entregues <b id="publicReceivedCount">0</b></div><div id="publicReceivedList" class="preview-list"></div></div>
-        </div>
+      <section class="couple-access" id="area-noivos">
+        <span>Área reservada aos noivos</span>
+        <a href="/admin">🔒 Acessar</a>
       </section>
     </main>
 
@@ -150,6 +140,6 @@
     </div>
   </div>
 
-  <script src="/app.js?v=20260922-6"></script>
+  <script src="/app.js?v=20260922-7"></script>
 </body>
 </html>

@@ -42,7 +42,6 @@ async function loadGifts() {
   state.gifts = await api('/api/gifts');
   renderFilters();
   renderGifts();
-  renderPublicBoard();
 }
 
 function renderFilters() {
@@ -145,43 +144,6 @@ function renderGifts() {
     body.append(status, cat, title, desc, actions);
     card.appendChild(body);
     grid.appendChild(card);
-  });
-}
-
-function renderPublicBoard() {
-  const groups = {
-    available: state.gifts.filter(g => g.status === 'available'),
-    reserved: state.gifts.filter(g => g.status === 'reserved'),
-    received: state.gifts.filter(g => g.status === 'received')
-  };
-  const map = [
-    ['available', '#publicAvailableCount', '#publicAvailableList'],
-    ['reserved', '#publicReservedCount', '#publicReservedList'],
-    ['received', '#publicReceivedCount', '#publicReceivedList']
-  ];
-  map.forEach(([key, countSel, listSel]) => {
-    $(countSel).textContent = groups[key].length;
-    const list = $(listSel);
-    list.replaceChildren();
-    const visible = groups[key].slice(0, 5);
-    if (!visible.length) {
-      const empty = document.createElement('div');
-      empty.className = 'mini-empty';
-      empty.textContent = 'Nenhum item aqui por enquanto.';
-      list.appendChild(empty);
-      return;
-    }
-    visible.forEach(gift => {
-      const item = document.createElement('div');
-      item.className = 'preview-item';
-      const icon = document.createElement('span');
-      icon.className = 'mini-icon';
-      icon.textContent = categoryEmoji(gift.category);
-      const name = document.createElement('span');
-      name.textContent = gift.name;
-      item.append(icon, name);
-      list.appendChild(item);
-    });
   });
 }
 

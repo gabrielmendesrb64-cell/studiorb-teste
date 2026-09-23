@@ -18,3 +18,19 @@
 @media(max-width:850px){.site-shell{width:100%;margin:0}.topbar{position:relative}.nav{height:auto;grid-template-columns:1fr;padding:12px 16px}.brand{margin-bottom:6px}.nav-links{justify-content:center}.hero{height:auto}.hero-grid{grid-template-columns:1fr;padding:20px 18px 26px}.hero-couple{height:330px}.hero-copy{padding-top:14px}.hero-flower-right{display:none}.gifts-grid{grid-template-columns:repeat(3,1fr)}.section{padding-left:18px;padding-right:18px}.section-head{align-items:flex-start;flex-direction:column}.gift-toolbar{justify-content:flex-start}.suggestions{grid-template-columns:repeat(2,1fr)}.preview-board{grid-template-columns:1fr}.admin-preview-head{align-items:flex-start;flex-direction:column}.preview-flower{display:none}.stats{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){.nav-links{display:grid;grid-template-columns:repeat(2,1fr);width:100%}.nav-link{text-align:center;padding:10px 7px}.admin-link{grid-column:1/-1}.hero-couple{height:285px}.hero-script{font-size:48px}.hero h1 strong{font-size:56px}.couple-name{font-size:36px}.event-mini{display:grid;grid-template-columns:1fr;width:100%}.event-mini span{text-align:center}.hero-actions{display:grid;grid-template-columns:1fr}.gifts-grid{grid-template-columns:repeat(2,1fr)}.gift-actions{grid-template-columns:1fr}.title-with-icon h2{font-size:28px}.rsvp-card{padding:14px}.suggestions{grid-template-columns:1fr}.preview-board{grid-template-columns:1fr}.admin-preview{padding-left:18px;padding-right:18px}.stats{grid-template-columns:1fr 1fr}.two-col{grid-template-columns:1fr}.admin-shell{margin:0;padding:14px}.admin-item{grid-template-columns:auto 1fr}.admin-actions{grid-column:1/-1;justify-content:flex-start}.rsvp-item{grid-template-columns:1fr}}
 @media(max-width:390px){.gifts-grid{grid-template-columns:1fr}.hero-couple{height:260px}.brand-script{font-size:27px}.brand small{font-size:16px}}
+
+
+/* Ajustes finais: PIX em destaque e acesso dos noivos discreto */
+.pix-section{background:#f8f2e4;padding-top:25px;padding-bottom:25px}
+.pix-feature{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:20px;background:linear-gradient(135deg,#fffdf8 0%,#f5f0df 100%);border:1px solid rgba(75,88,49,.22);border-radius:16px;padding:22px 25px;box-shadow:0 8px 24px rgba(62,72,42,.06);cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}
+.pix-feature:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(62,72,42,.10)}
+.pix-feature-icon{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;background:var(--olive-800);color:#fffdf8;font:800 18px/1 ui-sans-serif,system-ui;letter-spacing:.04em;box-shadow:0 7px 18px rgba(60,70,39,.16)}
+.pix-feature-copy .kicker{margin-bottom:4px}
+.pix-feature-copy h2{font-size:30px;line-height:1.05;margin:0 0 7px;color:#303521}
+.pix-feature-copy p{margin:0;max-width:720px;color:var(--muted);font:400 12px/1.55 ui-sans-serif,system-ui}
+.pix-feature-button{white-space:nowrap}
+.couple-access{display:flex;align-items:center;justify-content:center;gap:12px;padding:11px 18px;background:#f8f2e3;border-top:1px solid rgba(75,88,49,.09);color:#8a8878;font:500 10px/1.2 ui-sans-serif,system-ui}
+.couple-access a{color:#6d7354;text-decoration:none;border:1px solid rgba(75,88,49,.24);border-radius:999px;padding:6px 10px;font-weight:700;background:rgba(255,255,255,.38)}
+.couple-access a:hover{background:#fffdf8;color:var(--olive-800)}
+@media(max-width:850px){.pix-feature{grid-template-columns:auto 1fr}.pix-feature-button{grid-column:1/-1;width:100%}}
+@media(max-width:600px){.pix-feature{grid-template-columns:1fr;text-align:center;padding:20px 16px}.pix-feature-icon{margin:auto}.pix-feature-copy p{font-size:11px}.couple-access{flex-direction:column;gap:7px}.couple-access a{padding:7px 12px}}
