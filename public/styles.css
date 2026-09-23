@@ -163,3 +163,104 @@
   .hero-main-btn{width:100%}
   .hero-clean-leaf{font-size:90px}
 }
+
+/* ===== Topo v5: fiel à referência, mas reconstruído em HTML/CSS ===== */
+.hero-reference{
+  height:420px;
+  position:relative;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 58% 42%,rgba(255,255,255,.72),transparent 31%),
+    linear-gradient(100deg,#f3ead5 0%,#f8f1df 52%,#f2e8d2 100%);
+  border-bottom:1px solid rgba(74,83,45,.14)
+}
+.hero-reference-grid{
+  height:100%;
+  display:grid;
+  grid-template-columns:40% 43% 17%;
+  align-items:center;
+  position:relative;
+  z-index:2;
+  padding:0 26px 0 18px
+}
+.hero-reference-couple{
+  height:405px;
+  align-self:end;
+  display:flex;
+  justify-content:center;
+  align-items:flex-end;
+  overflow:hidden;
+  position:relative
+}
+.hero-reference-couple img{
+  width:100%;height:100%;
+  object-fit:cover;
+  object-position:48% 19%;
+  filter:none;
+  transform:scale(1.05);
+  transform-origin:center bottom
+}
+.hero-reference-copy{text-align:center;padding:0 12px 2px}
+.hero-reference-copy .eyebrow{font-size:10px;letter-spacing:.42em;margin-bottom:4px}
+.hero-reference-copy h1{margin:0;color:var(--olive-950);line-height:.77;font-weight:400}
+.hero-reference-copy .hero-script{font-size:67px;line-height:.78}
+.hero-reference-copy h1 strong{font-size:78px;line-height:.78;letter-spacing:-.045em}
+.hero-reference-copy .couple-name{font-size:45px;margin-top:7px}
+.hero-reference-copy .ornament{margin:7px auto 10px}
+.hero-reference-copy p{max-width:440px;margin:0 auto;font-size:13px;line-height:1.38;color:#4b4d3b}
+.hero-reference-actions{margin-top:15px;display:flex;justify-content:center;gap:9px;flex-wrap:wrap}
+.hero-reference-actions .hero-main-btn{border-radius:999px;min-width:155px;padding:11px 15px}
+.hero-reference-actions .btn-secondary{background:rgba(255,253,246,.82);border-color:rgba(77,93,49,.28)}
+.hero-reference-quote{
+  text-align:center;color:#69664e;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transform:rotate(-3deg);padding:0 2px 0 0
+}
+.hero-reference-quote span{font-family:"Brush Script MT","Segoe Script",cursive;font-size:20px;line-height:1.08;white-space:nowrap}
+.hero-reference-quote b{font-size:27px;font-weight:400;margin-top:8px;color:var(--olive-800)}
+.hero-floral{position:absolute;z-index:1;color:#657047;opacity:.29;pointer-events:none;width:150px;height:150px}
+.hero-floral span,.hero-floral b{position:absolute;font-weight:400;line-height:1}
+.hero-floral span{font-size:76px}.hero-floral b{font-size:43px}
+.hero-floral i{position:absolute;width:100px;height:2px;background:#657047;transform-origin:left center;opacity:.7}
+.hero-floral-left{left:-15px;top:-18px;transform:rotate(-18deg)}
+.hero-floral-left span{left:0;top:0}.hero-floral-left b{left:61px;top:72px}.hero-floral-left i{left:42px;top:74px;transform:rotate(52deg)}
+.hero-floral-right{right:-24px;top:10px;transform:rotate(165deg)}
+.hero-floral-right span{left:0;top:0}.hero-floral-right b{left:61px;top:72px}.hero-floral-right i{left:42px;top:74px;transform:rotate(52deg)}
+
+.event-top{
+  background:#fffaf0;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:0;
+  border-bottom:1px solid rgba(74,83,45,.14);
+  box-shadow:0 8px 22px rgba(49,56,31,.04)
+}
+.event-top-item{padding:15px 20px;text-align:center;position:relative}
+.event-top-item+ .event-top-item:before{content:"";position:absolute;left:0;top:18%;bottom:18%;width:1px;background:#ded8c6}
+.event-top-item span{display:block;color:var(--olive-700);font:800 9px/1.2 ui-sans-serif,system-ui;letter-spacing:.14em;margin-bottom:5px}
+.event-top-item strong{display:block;color:var(--olive-950);font-size:15px;line-height:1.25}
+
+@media(max-width:900px){
+  .hero-reference{height:auto;min-height:650px}
+  .hero-reference-grid{grid-template-columns:1fr;padding:14px 20px 25px;gap:6px}
+  .hero-reference-couple{height:330px;order:1}
+  .hero-reference-couple img{object-fit:contain;object-position:center bottom;transform:none}
+  .hero-reference-copy{order:2;padding:0 8px}
+  .hero-reference-quote{display:none}
+  .event-top{grid-template-columns:1fr 1fr 1fr}
+}
+@media(max-width:600px){
+  .hero-reference{min-height:0}
+  .hero-reference-grid{padding:8px 12px 20px}
+  .hero-reference-couple{height:275px}
+  .hero-reference-copy .eyebrow{font-size:8px;letter-spacing:.26em}
+  .hero-reference-copy .hero-script{font-size:48px}
+  .hero-reference-copy h1 strong{font-size:57px}
+  .hero-reference-copy .couple-name{font-size:34px}
+  .hero-reference-copy p{font-size:12px}
+  .hero-reference-actions{display:grid;grid-template-columns:1fr;max-width:310px;margin:14px auto 0}
+  .hero-reference-actions .hero-main-btn{width:100%}
+  .event-top{grid-template-columns:1fr}
+  .event-top-item{padding:11px 14px}
+  .event-top-item+ .event-top-item:before{left:8%;right:8%;top:0;bottom:auto;width:auto;height:1px}
+  .hero-floral{opacity:.18;transform:scale(.8)}
+}
