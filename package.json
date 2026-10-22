@@ -1,14 +1,6 @@
 {
-  "name": "cha-nubia-daniel",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Site do Chá dos Noivos de Núbia & Daniel",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
-  },
-  "engines": {
-    "node": ">=18"
-  }
+  "name":"lancheflow","version":"1.0.0","private":true,"type":"module",
+  "scripts":{"start":"node server.js","dev":"node --watch server.js","check":"node --check server.js"},
+  "engines":{"node":">=20"},
+  "dependencies":{"express":"^4.21.2","better-sqlite3":"^11.8.1","socket.io":"^4.8.1","bcryptjs":"^2.4.3","jsonwebtoken":"^9.0.2","helmet":"^8.0.0","express-rate-limit":"^7.5.0","dotenv":"^16.4.7"}
 }

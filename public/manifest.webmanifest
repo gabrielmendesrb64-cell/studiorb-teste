@@ -1,17 +1,1 @@
-{
-  "name": "Studio RB Emilly",
-  "short_name": "LSH Emilly",
-  "description": "Agendamento e portfólio do Studio RB",
-  "start_url": "./",
-  "display": "standalone",
-  "background_color": "#090909",
-  "theme_color": "#090909",
-  "icons": [
-    {
-      "src": "assets/logo.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
-  ]
-}
+{"name":"LancheFlow Pedidos e Entregas","short_name":"LancheFlow","start_url":"/","display":"standalone","background_color":"#f7f7f5","theme_color":"#161616","lang":"pt-BR","icons":[{"src":"/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}

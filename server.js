@@ -1,409 +1,131 @@
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
-const dns = require('dns').promises;
-const net = require('net');
-const { URL } = require('url');
+import 'dotenv/config';
+import express from 'express';
+import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import { fileURLToPath } from 'node:url';
+import Database from 'better-sqlite3';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import { Server } from 'socket.io';
 
-const PORT = Number(process.env.PORT || 3000);
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'DanielNubia@2026';
-const ADMIN_SECRET = process.env.ADMIN_SECRET || crypto.createHash('sha256').update(`cha-noivos:${ADMIN_PASSWORD}`).digest('hex');
-const ROOT = __dirname;
-const PUBLIC = path.join(ROOT, 'public');
-const DB_PATH = path.join(ROOT, 'data', 'db.json');
+const root=path.dirname(fileURLToPath(import.meta.url));
+const secret=process.env.JWT_SECRET;
+if(!secret || secret.length<32) throw new Error('Configure JWT_SECRET com pelo menos 32 caracteres no .env');
+const dbPath=path.resolve(root,process.env.DATABASE_PATH||'./data/lanchonete.db');
+fs.mkdirSync(path.dirname(dbPath),{recursive:true});
+const db=new Database(dbPath);db.pragma('journal_mode = WAL');db.pragma('foreign_keys = ON');
+const app=express(),server=http.createServer(app),io=new Server(server,{cors:{origin:false}});
+app.use(helmet({contentSecurityPolicy:false}));app.use(express.json({limit:'100kb'}));app.use('/api',rateLimit({windowMs:60_000,limit:120,standardHeaders:'draft-7',legacyHeaders:false}));
+app.use(express.static(path.join(root,'public')));
 
-const attempts = new Map();
-function rateLimited(key, max, windowMs) {
-  const now = Date.now();
-  const current = attempts.get(key) || [];
-  const fresh = current.filter(ts => now - ts < windowMs);
-  fresh.push(now);
-  attempts.set(key, fresh);
-  return fresh.length > max;
+const now=()=>new Date().toISOString();
+const id=()=>crypto.randomUUID();
+const digits=()=>String(crypto.randomInt(100000,999999));
+const hashCode=(x)=>crypto.createHash('sha256').update(x+secret).digest('hex');
+const money=(v)=>Math.round(Number(v)*100)/100;
+const clean=(x,max=255)=>String(x??'').trim().slice(0,max);
+function config(k,def){const row=db.prepare('SELECT value FROM settings WHERE key=?').get(k);return row?.value??def;}
+const audit=(actor,action,entity,entityId,detail={})=>db.prepare('INSERT INTO audit(id,actor_id,action,entity,entity_id,detail,created_at) VALUES (?,?,?,?,?,?,?)').run(id(),actor||null,action,entity,entityId,JSON.stringify(detail),now());
+
+ db.exec(`
+CREATE TABLE IF NOT EXISTS users(id TEXT PRIMARY KEY,name TEXT NOT NULL,email TEXT UNIQUE NOT NULL,phone TEXT,password_hash TEXT NOT NULL,role TEXT NOT NULL CHECK(role IN ('admin','cashier','kitchen','driver','customer')),active INTEGER DEFAULT 1,online INTEGER DEFAULT 0,created_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY,value TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS categories(id TEXT PRIMARY KEY,name TEXT NOT NULL,sort_order INTEGER DEFAULT 0,active INTEGER DEFAULT 1);
+CREATE TABLE IF NOT EXISTS products(id TEXT PRIMARY KEY,category_id TEXT,name TEXT NOT NULL,description TEXT,price_cents INTEGER NOT NULL,image_url TEXT,active INTEGER DEFAULT 1, FOREIGN KEY(category_id) REFERENCES categories(id));
+CREATE TABLE IF NOT EXISTS addons(id TEXT PRIMARY KEY,name TEXT NOT NULL,price_cents INTEGER NOT NULL,active INTEGER DEFAULT 1);
+CREATE TABLE IF NOT EXISTS orders(id TEXT PRIMARY KEY,number INTEGER UNIQUE,customer_id TEXT NOT NULL,customer_name TEXT,phone TEXT,fulfillment TEXT NOT NULL,address_json TEXT,notes TEXT,payment_method TEXT,payment_status TEXT DEFAULT 'pending',subtotal_cents INTEGER,delivery_cents INTEGER,discount_cents INTEGER DEFAULT 0,total_cents INTEGER,status TEXT DEFAULT 'pending',decline_reason TEXT,created_at TEXT,updated_at TEXT,accepted_by TEXT,prep_by TEXT,ready_by TEXT,driver_id TEXT,ready_at TEXT,delivered_at TEXT,delivery_code_hash TEXT,delivery_code_exp TEXT,delivery_attempts INTEGER DEFAULT 0, FOREIGN KEY(customer_id) REFERENCES users(id));
+CREATE TABLE IF NOT EXISTS order_items(id TEXT PRIMARY KEY,order_id TEXT,product_id TEXT,name TEXT,qty INTEGER,unit_cents INTEGER,notes TEXT,addons_json TEXT,FOREIGN KEY(order_id) REFERENCES orders(id));
+CREATE TABLE IF NOT EXISTS order_history(id TEXT PRIMARY KEY,order_id TEXT,actor_id TEXT,from_status TEXT,to_status TEXT,detail TEXT,created_at TEXT);
+CREATE TABLE IF NOT EXISTS deliveries(id TEXT PRIMARY KEY,order_id TEXT UNIQUE,driver_id TEXT,fee_cents INTEGER DEFAULT 0,status TEXT DEFAULT 'available',pickup_code_hash TEXT,pickup_code_exp TEXT,pickup_attempts INTEGER DEFAULT 0,claimed_at TEXT,picked_at TEXT,completed_at TEXT,paid_at TEXT,FOREIGN KEY(order_id) REFERENCES orders(id));
+CREATE TABLE IF NOT EXISTS cash_sessions(id TEXT PRIMARY KEY,user_id TEXT,initial_cents INTEGER,expected_cents INTEGER DEFAULT 0,counted_cents INTEGER,opened_at TEXT,closed_at TEXT);
+CREATE TABLE IF NOT EXISTS transactions(id TEXT PRIMARY KEY,order_id TEXT,type TEXT,amount_cents INTEGER,method TEXT,created_at TEXT,actor_id TEXT,UNIQUE(order_id,type));
+CREATE TABLE IF NOT EXISTS audit(id TEXT PRIMARY KEY,actor_id TEXT,action TEXT,entity TEXT,entity_id TEXT,detail TEXT,created_at TEXT);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status,created_at);
+CREATE INDEX IF NOT EXISTS idx_deliveries_status ON deliveries(status);
+`);
+const set=db.prepare('INSERT OR IGNORE INTO settings(key,value) VALUES (?,?)');
+[['store_name',process.env.STORE_NAME||'Minha Lanchonete'],['store_address',process.env.STORE_ADDRESS||''],['delivery_fee_cents',String(Math.round(Number(process.env.DELIVERY_FEE||7)*100))],['driver_fee_cents',String(Math.round(Number(process.env.DRIVER_FEE||5)*100))],['open','true']].forEach(p=>set.run(...p));
+if(!db.prepare("SELECT id FROM users WHERE role='admin'").get()){
+ if(!process.env.ADMIN_EMAIL||!process.env.ADMIN_PASSWORD||process.env.ADMIN_PASSWORD.length<12)throw new Error('Configure ADMIN_EMAIL e ADMIN_PASSWORD (mín. 12 caracteres)');
+ db.prepare('INSERT INTO users(id,name,email,password_hash,role,created_at) VALUES(?,?,?,?,?,?)').run(id(),'Administrador',process.env.ADMIN_EMAIL.toLowerCase(),bcrypt.hashSync(process.env.ADMIN_PASSWORD,12),'admin',now());
 }
-
-function normalizeGift(gift) {
-  const quantityRaw = Number.parseInt(gift.quantity, 10);
-  const quantity = Number.isFinite(quantityRaw) ? Math.max(1, Math.min(100, quantityRaw)) : 1;
-  let reservations = Array.isArray(gift.reservations) ? gift.reservations : [];
-
-  // Migração automática das versões antigas, que aceitavam somente 1 reserva por presente.
-  if (!reservations.length && gift.reservedBy) {
-    reservations = [{
-      id: `reservation-legacy-${gift.id}`,
-      name: cleanText(gift.reservedBy.name, 80),
-      phone: cleanPhone(gift.reservedBy.phone),
-      status: gift.status === 'received' ? 'received' : 'reserved',
-      reservedAt: gift.reservedBy.reservedAt || gift.createdAt || new Date().toISOString(),
-      receivedAt: gift.receivedAt || null
-    }];
-  }
-
-  reservations = reservations.slice(0, 100).map((r, index) => ({
-    id: cleanText(r.id, 120) || `reservation-${gift.id}-${index}`,
-    name: cleanText(r.name, 80) || 'Convidado',
-    phone: cleanPhone(r.phone),
-    status: r.status === 'received' ? 'received' : 'reserved',
-    reservedAt: r.reservedAt || new Date().toISOString(),
-    receivedAt: r.status === 'received' ? (r.receivedAt || null) : null
-  }));
-
-  return {
-    ...gift,
-    quantity: Math.max(quantity, reservations.length),
-    reservations,
-    reservedBy: undefined,
-    receivedAt: undefined,
-    status: undefined
-  };
+if(!db.prepare('SELECT id FROM categories LIMIT 1').get()){
+ const c1=id(),c2=id();db.prepare('INSERT INTO categories(id,name) VALUES (?,?)').run(c1,'Hambúrgueres');db.prepare('INSERT INTO categories(id,name) VALUES (?,?)').run(c2,'Bebidas');
+ const ins=db.prepare('INSERT INTO products(id,category_id,name,description,price_cents,image_url) VALUES (?,?,?,?,?,?)');
+ ins.run(id(),c1,'X-Burger','Pão, hambúrguer e queijo',2400,'');ins.run(id(),c1,'X-Bacon','Hambúrguer, queijo e bacon',3200,'');ins.run(id(),c2,'Refrigerante lata','350 ml',700,'');
+ db.prepare('INSERT INTO addons(id,name,price_cents) VALUES(?,?,?)').run(id(),'Bacon extra',600);
 }
-function giftCounts(gift) {
-  const reservations = Array.isArray(gift.reservations) ? gift.reservations : [];
-  const reserved = reservations.filter(r => r.status === 'reserved').length;
-  const received = reservations.filter(r => r.status === 'received').length;
-  const occupied = reserved + received;
-  return { reserved, received, occupied, available: Math.max(0, Number(gift.quantity || 1) - occupied) };
-}
-function publicGift(gift) {
-  const counts = giftCounts(gift);
-  const status = counts.available > 0 ? 'available' : (counts.received >= gift.quantity ? 'received' : 'reserved');
-  return {
-    id:gift.id, name:gift.name, category:gift.category, description:gift.description,
-    image:gift.image, purchaseUrl:gift.purchaseUrl || '', quantity:gift.quantity,
-    availableQuantity:counts.available, reservedQuantity:counts.reserved,
-    receivedQuantity:counts.received, status
-  };
-}
-function readDb() {
-  const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
-  if (!Array.isArray(db.gifts)) db.gifts = [];
-  db.gifts = db.gifts.map(normalizeGift);
-  if (!Array.isArray(db.rsvps)) db.rsvps = [];
-  if (!db.config) db.config = {};
-  return db;
-}
-function writeDb(db) {
-  const temp = `${DB_PATH}.tmp`;
-  fs.writeFileSync(temp, JSON.stringify(db, null, 2), 'utf8');
-  fs.renameSync(temp, DB_PATH);
-}
-function cleanText(value, max = 120) { return String(value || '').trim().replace(/\s+/g, ' ').slice(0, max); }
-function cleanMultiline(value, max = 500) { return String(value || '').trim().slice(0, max); }
-function cleanPhone(value) { return String(value || '').replace(/\D/g, '').slice(0, 11); }
-function cleanNames(value) {
-  const raw = Array.isArray(value) ? value : [];
-  const seen = new Set();
-  const names = [];
-  for (const item of raw.slice(0, 12)) {
-    const name = cleanText(item, 80);
-    if (name.length < 3) continue;
-    const key = name.toLocaleLowerCase('pt-BR');
-    if (!seen.has(key)) { seen.add(key); names.push(name); }
-  }
-  return names;
-}
-function cleanHttpUrl(value, max = 1200) {
-  const raw = String(value || '').trim().slice(0, max);
-  if (!raw) return '';
-  const u = new URL(raw);
-  if (!['http:', 'https:'].includes(u.protocol)) throw new Error('Use um link começando com http:// ou https://.');
-  return u.toString();
-}
-function makeToken() {
-  const payload = Buffer.from(JSON.stringify({ exp: Date.now() + 4 * 60 * 60 * 1000 })).toString('base64url');
-  const sig = crypto.createHmac('sha256', ADMIN_SECRET).update(payload).digest('base64url');
-  return `${payload}.${sig}`;
-}
-function isAdmin(req) {
-  const auth = req.headers.authorization || '';
-  const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
-  const [payload, sig] = token.split('.');
-  if (!payload || !sig) return false;
-  const expected = crypto.createHmac('sha256', ADMIN_SECRET).update(payload).digest('base64url');
-  const a = Buffer.from(sig), b = Buffer.from(expected);
-  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return false;
-  try {
-    const data = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
-    return Number(data.exp) > Date.now();
-  } catch { return false; }
-}
-function securityHeaders(res) {
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  res.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' https: http: data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'");
-}
-function json(res, status, data) {
-  securityHeaders(res);
-  res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
-  res.end(JSON.stringify(data));
-}
-async function readJson(req) {
-  return new Promise((resolve, reject) => {
-    let raw = '';
-    req.on('data', chunk => {
-      raw += chunk;
-      if (raw.length > 150_000) { reject(new Error('Payload muito grande.')); req.destroy(); }
-    });
-    req.on('end', () => {
-      try { resolve(raw ? JSON.parse(raw) : {}); } catch { reject(new Error('JSON inválido.')); }
-    });
-    req.on('error', reject);
-  });
-}
-function mime(file) {
-  const ext = path.extname(file).toLowerCase();
-  return ({ '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'application/javascript; charset=utf-8', '.json':'application/json; charset=utf-8', '.png':'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.svg':'image/svg+xml', '.ico':'image/x-icon' })[ext] || 'application/octet-stream';
-}
-function sendFile(res, file) {
-  try {
-    const data = fs.readFileSync(file);
-    securityHeaders(res);
-    const ext = path.extname(file).toLowerCase();
-    const cacheControl = ['.html','.css','.js'].includes(ext) ? 'no-store, max-age=0' : 'public, max-age=86400';
-    res.writeHead(200, { 'Content-Type': mime(file), 'Cache-Control': cacheControl });
-    res.end(data);
-  } catch { json(res, 404, { error: 'Arquivo não encontrado.' }); }
-}
-function clientIp(req) { return req.socket.remoteAddress || 'unknown'; }
-function adminGuard(req, res) { if (!isAdmin(req)) { json(res, 401, { error:'Acesso não autorizado.' }); return false; } return true; }
+function fail(res,code,message){return res.status(code).json({error:message});}
+function wrap(fn){return (req,res)=>{try{const result=fn(req,res);if(result instanceof Promise) result.catch(e=>handle(e,res));}catch(e){handle(e,res);}};}
+function handle(e,res){console.error(e);return !res.headersSent?fail(res,e.status||500,e.status?e.message:'Ocorreu um erro interno'):undefined;}
+function need(cond,message,code=400){if(!cond){const e=new Error(message);e.status=code;throw e;}}
+function jwtFor(u){return jwt.sign({sub:u.id,role:u.role},secret,{expiresIn:'14d'});}
+function publicUser(u){return {id:u.id,name:u.name,email:u.email,role:u.role,online:!!u.online,active:!!u.active};}
+function auth(req,res,next){try{const bearer=req.headers.authorization?.replace(/^Bearer /,'');need(bearer,'Acesso não autorizado',401);const d=jwt.verify(bearer,secret);const u=db.prepare('SELECT * FROM users WHERE id=? AND active=1').get(d.sub);need(u,'Usuário sem acesso',401);req.user=u;next();}catch(e){return fail(res,401,'Sessão inválida ou expirada');}}
+function roles(...valid){return (req,res,next)=>valid.includes(req.user.role)?next():fail(res,403,'Sem permissão');}
+function emit(){io.emit('changed',{at:now()});}
+function newHistory(o,actor,prev,status,detail=''){db.prepare('INSERT INTO order_history VALUES(?,?,?,?,?,?,?)').run(id(),o,actor||null,prev,status,detail,now());}
+const num=r=>r?Number(r):0;
+function orderDetails(o){return {...o,address:o.address_json?JSON.parse(o.address_json):null,items:db.prepare('SELECT * FROM order_items WHERE order_id=?').all(o.id).map(i=>({...i,addons:JSON.parse(i.addons_json||'[]')})),history:db.prepare('SELECT * FROM order_history WHERE order_id=? ORDER BY created_at').all(o.id)};}
+function maySee(u,o){return ['admin','cashier','kitchen'].includes(u.role)||(u.role==='customer'&&o.customer_id===u.id)||(u.role==='driver'&&o.driver_id===u.id);}
+function viewOrder(u,o){const v=orderDetails(o);if(u.role==='driver') {delete v.delivery_code_hash;delete v.delivery_code_exp;}else if(u.role==='customer'){delete v.delivery_code_hash;delete v.delivery_code_exp;}else {delete v.delivery_code_hash;delete v.delivery_code_exp;}return v;}
+function notifyResult(res,obj){emit();res.json(obj);}
 
-function isPrivateAddress(ip) {
-  if (!ip) return true;
-  if (net.isIPv4(ip)) {
-    const p = ip.split('.').map(Number);
-    return p[0] === 10 || p[0] === 127 || p[0] === 0 ||
-      (p[0] === 169 && p[1] === 254) ||
-      (p[0] === 172 && p[1] >= 16 && p[1] <= 31) ||
-      (p[0] === 192 && p[1] === 168);
-  }
-  const v = ip.toLowerCase();
-  return v === '::1' || v === '::' || v.startsWith('fc') || v.startsWith('fd') || v.startsWith('fe8') || v.startsWith('fe9') || v.startsWith('fea') || v.startsWith('feb');
-}
-async function validateExternalUrl(raw) {
-  const clean = cleanHttpUrl(raw);
-  const u = new URL(clean);
-  const host = u.hostname.toLowerCase();
-  if (host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local')) throw new Error('Esse endereço não pode ser usado.');
-  if (net.isIP(host) && isPrivateAddress(host)) throw new Error('Esse endereço não pode ser usado.');
-  const addresses = await dns.lookup(host, { all:true }).catch(() => []);
-  if (!addresses.length) throw new Error('Não foi possível localizar esse site.');
-  if (addresses.some(x => isPrivateAddress(x.address))) throw new Error('Esse endereço não pode ser usado.');
-  return u;
-}
-function decodeEntities(str='') {
-  return str.replace(/&amp;/gi,'&').replace(/&quot;/gi,'"').replace(/&#39;/gi,"'").replace(/&lt;/gi,'<').replace(/&gt;/gi,'>').replace(/&#x2F;/gi,'/').replace(/&#x27;/gi,"'").replace(/&#(\d+);/g,(_,n)=>String.fromCharCode(Number(n)));
-}
-function metaContent(html, key) {
-  const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const patterns = [
-    new RegExp(`<meta[^>]+(?:property|name)=["']${escaped}["'][^>]+content=["']([^"']+)["'][^>]*>`, 'i'),
-    new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["']${escaped}["'][^>]*>`, 'i')
-  ];
-  for (const p of patterns) { const m = html.match(p); if (m) return decodeEntities(m[1].trim()); }
-  return '';
-}
-async function fetchProductMetadata(rawUrl) {
-  let current = await validateExternalUrl(rawUrl);
-  for (let i = 0; i < 4; i++) {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 7000);
-    let response;
-    try {
-      response = await fetch(current, {
-        method:'GET', redirect:'manual', signal:controller.signal,
-        headers:{ 'User-Agent':'Mozilla/5.0 (compatible; ChaDosNoivos/1.0)', 'Accept':'text/html,application/xhtml+xml' }
-      });
-    } finally { clearTimeout(timer); }
-
-    if ([301,302,303,307,308].includes(response.status)) {
-      const location = response.headers.get('location');
-      if (!location) throw new Error('A loja redirecionou para um endereço inválido.');
-      current = await validateExternalUrl(new URL(location, current).toString());
-      continue;
-    }
-    if (!response.ok) throw new Error('A loja não permitiu buscar os dados do produto.');
-    const contentType = response.headers.get('content-type') || '';
-    if (!contentType.includes('text/html')) throw new Error('O link informado não parece ser uma página de produto.');
-    const buffer = Buffer.from(await response.arrayBuffer()).subarray(0, 1_500_000);
-    const html = buffer.toString('utf8');
-    const imageRaw = metaContent(html,'og:image') || metaContent(html,'twitter:image') || metaContent(html,'twitter:image:src');
-    const titleRaw = metaContent(html,'og:title') || metaContent(html,'twitter:title') || (html.match(/<title[^>]*>([^<]{1,300})<\/title>/i)?.[1] || '');
-    let image = '';
-    if (imageRaw) {
-      try { image = cleanHttpUrl(new URL(imageRaw, current).toString(), 1600); } catch { image = ''; }
-    }
-    return { url:current.toString(), image, title:cleanText(decodeEntities(titleRaw), 160) };
-  }
-  throw new Error('Muitos redirecionamentos ao buscar o produto.');
-}
-
-async function api(req, res, pathname, urlObj) {
-  try {
-    if (req.method === 'GET' && pathname === '/api/config') return json(res, 200, readDb().config);
-    if (req.method === 'GET' && pathname === '/api/gifts') {
-      return json(res, 200, readDb().gifts.map(publicGift));
-    }
-
-    let match = pathname.match(/^\/api\/gifts\/([^/]+)\/reserve$/);
-    if (req.method === 'POST' && match) {
-      if (rateLimited(`reserve:${clientIp(req)}`, 8, 10 * 60 * 1000)) return json(res, 429, { error:'Muitas tentativas. Tente novamente em alguns minutos.' });
-      const body = await readJson(req);
-      const name = cleanText(body.name, 80), phone = cleanPhone(body.phone);
-      if (name.length < 3) return json(res, 400, { error:'Informe seu nome completo.' });
-      if (phone.length < 10) return json(res, 400, { error:'Informe um telefone válido com DDD.' });
-      const db = readDb();
-      const gift = db.gifts.find(g => g.id === decodeURIComponent(match[1]));
-      if (!gift) return json(res, 404, { error:'Presente não encontrado.' });
-      const counts = giftCounts(gift);
-      if (counts.available <= 0) return json(res, 409, { error:'Todas as unidades desse presente já foram escolhidas.' });
-      gift.reservations.push({
-        id:`reservation-${crypto.randomBytes(6).toString('hex')}`,
-        name, phone, status:'reserved', reservedAt:new Date().toISOString(), receivedAt:null
-      });
-      writeDb(db);
-      const remaining = giftCounts(gift).available;
-      return json(res, 200, {
-        ok:true,
-        remaining,
-        message:`Tudo certo, ${name.split(' ')[0]}! 1 unidade de “${gift.name}” ficou reservada em seu nome.${remaining > 0 ? ` Ainda faltam ${remaining}.` : ' Agora todas as unidades desse presente já foram escolhidas.'} Use o botão da loja para comprar e leve o presente no dia do chá.`
-      });
-    }
-
-    if (req.method === 'POST' && pathname === '/api/rsvp') {
-      if (rateLimited(`rsvp:${clientIp(req)}`, 10, 10 * 60 * 1000)) return json(res, 429, { error:'Muitas tentativas. Tente novamente em alguns minutos.' });
-      const body = await readJson(req);
-      const names = cleanNames(body.names);
-      if (!names.length) return json(res, 400, { error:'Informe pelo menos um nome completo.' });
-      const db = readDb();
-      const record = { id:`rsvp-${crypto.randomBytes(6).toString('hex')}`, names, confirmedAt:new Date().toISOString() };
-      db.rsvps.unshift(record);
-      writeDb(db);
-      const people = names.length === 1 ? '1 presença confirmada' : `${names.length} presenças confirmadas`;
-      return json(res, 200, { ok:true, message:`Tudo certo! ${people}. Vai ser muito especial ter vocês com a gente. 💚` });
-    }
-
-    if (req.method === 'POST' && pathname === '/api/admin/login') {
-      if (rateLimited(`login:${clientIp(req)}`, 10, 15 * 60 * 1000)) return json(res, 429, { error:'Muitas tentativas de acesso. Aguarde alguns minutos.' });
-      const body = await readJson(req);
-      const supplied = Buffer.from(String(body.password || ''));
-      const expected = Buffer.from(ADMIN_PASSWORD);
-      const valid = supplied.length === expected.length && crypto.timingSafeEqual(supplied, expected);
-      return valid ? json(res, 200, { token:makeToken() }) : json(res, 401, { error:'Senha incorreta.' });
-    }
-
-    if (pathname.startsWith('/api/admin/') && !adminGuard(req, res)) return;
-    if (req.method === 'GET' && pathname === '/api/admin/dashboard') return json(res, 200, readDb());
-
-    if (req.method === 'GET' && pathname === '/api/admin/product-preview') {
-      const raw = urlObj.searchParams.get('url') || '';
-      if (!raw) return json(res,400,{error:'Cole o link do produto primeiro.'});
-      const metadata = await fetchProductMetadata(raw);
-      return json(res,200,metadata);
-    }
-
-    if (req.method === 'PUT' && pathname === '/api/admin/config') {
-      const body = await readJson(req), db = readDb();
-      db.config = {
-        couple:cleanText(body.couple,70)||db.config.couple||'Daniel e Núbia',
-        title:cleanText(body.title,70)||db.config.title||'Chá dos Noivos',
-        subtitle:cleanText(body.subtitle,220),
-        eventDate:cleanText(body.eventDate,80),
-        eventTime:cleanText(body.eventTime,80),
-        eventPlace:cleanText(body.eventPlace,150),
-        message:cleanMultiline(body.message,350),
-        invitationMessage:cleanMultiline(body.invitationMessage,420),
-        pixKey:cleanText(body.pixKey,180),
-        pixReceiver:cleanText(body.pixReceiver,100)
-      };
-      writeDb(db); return json(res,200,{ok:true,config:db.config});
-    }
-
-    if (req.method === 'POST' && pathname === '/api/admin/gifts') {
-      const body = await readJson(req), name=cleanText(body.name,100);
-      if (name.length < 2) return json(res,400,{error:'Informe o nome do presente.'});
-      let purchaseUrl = '', image = '';
-      if (body.purchaseUrl) purchaseUrl = cleanHttpUrl(body.purchaseUrl, 1200);
-      if (body.image) image = cleanHttpUrl(body.image, 1600);
-      let warning = '';
-      if (purchaseUrl && !image) {
-        try { const meta = await fetchProductMetadata(purchaseUrl); purchaseUrl=meta.url; image=meta.image || ''; }
-        catch (err) { warning = 'O presente foi salvo, mas a loja não liberou a foto automática. Você pode adicionar uma imagem manualmente.'; }
-      }
-      const quantity = Math.max(1, Math.min(100, Number.parseInt(body.quantity, 10) || 1));
-      const db=readDb();
-      const gift={
-        id:`gift-${crypto.randomBytes(6).toString('hex')}`,name,
-        category:cleanText(body.category,60)||'Outros',description:cleanText(body.description,220),
-        image,purchaseUrl,quantity,reservations:[],createdAt:new Date().toISOString()
-      };
-      db.gifts.unshift(gift); writeDb(db); return json(res,201,{ok:true,gift,warning});
-    }
-
-    match = pathname.match(/^\/api\/admin\/gifts\/([^/]+)\/quantity$/);
-    if (req.method === 'PUT' && match) {
-      const body = await readJson(req), db=readDb(), gift=db.gifts.find(g=>g.id===decodeURIComponent(match[1]));
-      if (!gift) return json(res,404,{error:'Presente não encontrado.'});
-      const quantity = Number.parseInt(body.quantity, 10);
-      if (!Number.isFinite(quantity) || quantity < 1 || quantity > 100) return json(res,400,{error:'A quantidade deve ficar entre 1 e 100.'});
-      const counts = giftCounts(gift);
-      if (quantity < counts.occupied) return json(res,409,{error:`Esse presente já tem ${counts.occupied} unidade(s) reservada(s)/entregue(s). A quantidade não pode ficar abaixo disso.`});
-      gift.quantity = quantity;
-      writeDb(db); return json(res,200,{ok:true,gift});
-    }
-
-    match = pathname.match(/^\/api\/admin\/gifts\/([^/]+)\/reservations\/([^/]+)\/(release|received)$/);
-    if (req.method === 'POST' && match) {
-      const db=readDb(), gift=db.gifts.find(g=>g.id===decodeURIComponent(match[1]));
-      if (!gift) return json(res,404,{error:'Presente não encontrado.'});
-      const reservationId = decodeURIComponent(match[2]);
-      const index = gift.reservations.findIndex(r => r.id === reservationId);
-      if (index < 0) return json(res,404,{error:'Reserva não encontrada.'});
-      if (match[3] === 'release') gift.reservations.splice(index, 1);
-      else {
-        gift.reservations[index].status = 'received';
-        gift.reservations[index].receivedAt = new Date().toISOString();
-      }
-      writeDb(db); return json(res,200,{ok:true});
-    }
-
-    match = pathname.match(/^\/api\/admin\/gifts\/([^/]+)$/);
-    if (req.method === 'DELETE' && match) {
-      const db=readDb(), before=db.gifts.length;
-      db.gifts=db.gifts.filter(g=>g.id!==decodeURIComponent(match[1]));
-      if (db.gifts.length===before) return json(res,404,{error:'Presente não encontrado.'});
-      writeDb(db); return json(res,200,{ok:true});
-    }
-
-    match = pathname.match(/^\/api\/admin\/rsvps\/([^/]+)$/);
-    if (req.method === 'DELETE' && match) {
-      const db=readDb(), before=db.rsvps.length;
-      db.rsvps=db.rsvps.filter(r=>r.id!==decodeURIComponent(match[1]));
-      if (db.rsvps.length===before) return json(res,404,{error:'Confirmação não encontrada.'});
-      writeDb(db); return json(res,200,{ok:true});
-    }
-
-    return json(res,404,{error:'Rota não encontrada.'});
-  } catch (err) {
-    console.error(err);
-    return json(res,400,{error:err.name === 'AbortError' ? 'A loja demorou demais para responder.' : (err.message || 'Erro ao processar a solicitação.')});
-  }
-}
-
-const server = http.createServer(async (req, res) => {
-  const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-  const pathname = decodeURIComponent(url.pathname);
-  if (pathname.startsWith('/api/')) return api(req,res,pathname,url);
-  if (pathname === '/' || pathname === '/index.html') return sendFile(res,path.join(PUBLIC,'index.html'));
-  if (pathname === '/admin' || pathname === '/admin.html') return sendFile(res,path.join(PUBLIC,'admin.html'));
-
-  const relative = pathname.replace(/^\/+/, '');
-  const file = path.normalize(path.join(PUBLIC, relative));
-  if (!file.startsWith(PUBLIC + path.sep)) return json(res,403,{error:'Acesso negado.'});
-  if (fs.existsSync(file) && fs.statSync(file).isFile()) return sendFile(res,file);
-  return sendFile(res,path.join(PUBLIC,'index.html'));
-});
-
-server.listen(PORT, () => console.log(`Chá dos Noivos rodando em http://localhost:${PORT}`));
+app.get('/api/health',(_,res)=>res.json({ok:true,at:now()}));
+app.get('/api/store',wrap((_,res)=>res.json({name:config('store_name','Lanchonete'),address:config('store_address',''),open:config('open','true')==='true',delivery_fee_cents:num(config('delivery_fee_cents','700'))})));
+app.post('/api/auth/register',wrap((req,res)=>{const {name,email,phone,password}=req.body;need(clean(name).length>=2&&/^\S+@\S+\.\S+$/.test(clean(email))&&String(password||'').length>=8,'Confira nome, e-mail e senha (mínimo 8 caracteres)');const u={id:id(),name:clean(name),email:clean(email).toLowerCase(),phone:clean(phone,30)};need(!db.prepare('SELECT id FROM users WHERE email=?').get(u.email),'E-mail já cadastrado',409);db.prepare("INSERT INTO users(id,name,email,phone,password_hash,role,created_at) VALUES(?,?,?,?,?,'customer',?)").run(u.id,u.name,u.email,u.phone,bcrypt.hashSync(password,12),now());res.json({token:jwtFor({...u,role:'customer'}),user:{...u,role:'customer'}});}));
+app.post('/api/auth/login',wrap((req,res)=>{const u=db.prepare('SELECT * FROM users WHERE email=?').get(clean(req.body.email).toLowerCase());need(u&&u.active&&bcrypt.compareSync(String(req.body.password||''),u.password_hash),'E-mail ou senha incorretos',401);res.json({token:jwtFor(u),user:publicUser(u)});}));
+app.get('/api/me',auth,wrap((req,res)=>res.json(publicUser(req.user))));
+app.get('/api/catalog',wrap((_,res)=>res.json({categories:db.prepare('SELECT * FROM categories WHERE active=1 ORDER BY sort_order,name').all(),products:db.prepare('SELECT * FROM products WHERE active=1 ORDER BY name').all(),addons:db.prepare('SELECT * FROM addons WHERE active=1').all()})));
+app.post('/api/orders',auth,roles('customer','admin','cashier'),wrap((req,res)=>{
+ need(config('open','true')==='true'||req.user.role!=='customer','Lanchonete fechada');const b=req.body;need(['delivery','pickup'].includes(b.fulfillment),'Entrega ou retirada inválida');need(['pix','card','cash'].includes(b.payment_method),'Forma de pagamento inválida');need(Array.isArray(b.items)&&b.items.length>0&&b.items.length<=40,'Carrinho inválido');if(b.fulfillment==='delivery')need(clean(b.address?.street)&&clean(b.address?.number)&&clean(b.address?.neighborhood)&&clean(b.address?.city)&&clean(b.address?.zip),'Preencha o endereço de entrega');
+ const rows=b.items.map(i=>{const p=db.prepare('SELECT * FROM products WHERE id=? AND active=1').get(i.product_id);need(p,'Produto indisponível');const q=Number(i.qty);need(Number.isSafeInteger(q)&&q>=1&&q<=30,'Quantidade inválida');const addonIds=[...new Set((i.addon_ids||[]).map(String))];need(addonIds.length<=10,'Adicionais demais');const addons=addonIds.map(a=>{const item=db.prepare('SELECT * FROM addons WHERE id=? AND active=1').get(a);need(item,'Adicional inválido');return {id:item.id,name:item.name,price_cents:item.price_cents};});return {p,q,addons,unit:p.price_cents+addons.reduce((s,a)=>s+a.price_cents,0),notes:clean(i.notes,300)};});
+ const sub=rows.reduce((s,i)=>s+i.unit*i.q,0),delivery=b.fulfillment==='delivery'?num(config('delivery_fee_cents','700')):0,oid=id(),n=(db.prepare('SELECT COALESCE(MAX(number),1000)+1 AS n FROM orders').get().n),t=now(),client=req.user;const name=clean(b.name||client.name),phone=clean(b.phone||client.phone,30);need(name&&phone,'Informe nome e telefone');
+ db.transaction(()=>{db.prepare('INSERT INTO orders(id,number,customer_id,customer_name,phone,fulfillment,address_json,notes,payment_method,subtotal_cents,delivery_cents,total_cents,status,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)').run(oid,n,client.id,name,phone,b.fulfillment,b.fulfillment==='delivery'?JSON.stringify(b.address):null,clean(b.notes,500),b.payment_method,sub,delivery,sub+delivery,'pending',t,t);const stmt=db.prepare('INSERT INTO order_items(id,order_id,product_id,name,qty,unit_cents,notes,addons_json) VALUES(?,?,?,?,?,?,?,?)');rows.forEach(r=>stmt.run(id(),oid,r.p.id,r.p.name,r.q,r.unit,r.notes,JSON.stringify(r.addons)));newHistory(oid,client.id,null,'pending');audit(client.id,'create','order',oid,{total_cents:sub+delivery});})();notifyResult(res,{id:oid,number:n,status:'pending'});
+}));
+app.get('/api/orders',auth,wrap((req,res)=>{let orders;if(req.user.role==='customer')orders=db.prepare('SELECT * FROM orders WHERE customer_id=? ORDER BY created_at DESC LIMIT 100').all(req.user.id);else if(req.user.role==='driver')orders=db.prepare('SELECT * FROM orders WHERE driver_id=? ORDER BY created_at DESC LIMIT 100').all(req.user.id);else orders=db.prepare('SELECT * FROM orders ORDER BY created_at DESC LIMIT 150').all();res.json(orders.map(o=>viewOrder(req.user,o)));}));
+app.get('/api/orders/:id',auth,wrap((req,res)=>{const o=db.prepare('SELECT * FROM orders WHERE id=?').get(req.params.id);need(o&&maySee(req.user,o),'Pedido não encontrado',404);res.json(viewOrder(req.user,o));}));
+app.post('/api/orders/:id/status',auth,roles('admin','cashier','kitchen'),wrap((req,res)=>{const actor=req.user,action=clean(req.body.action),o=db.prepare('SELECT * FROM orders WHERE id=?').get(req.params.id);need(o,'Pedido não encontrado',404);
+ const map={accept:['pending','accepted',['cashier','admin']],reject:['pending','rejected',['cashier','admin']],prepare:['accepted','preparing',['kitchen','admin']],ready:['preparing','ready',['kitchen','admin']],cancel:['accepted','cancelled',['cashier','admin']]};const m=map[action];need(m&&o.status===m[0]&&m[2].includes(actor.role),'Transição não permitida',409);if(action==='reject')need(clean(req.body.reason),'Informe o motivo');
+ db.transaction(()=>{db.prepare('UPDATE orders SET status=?,updated_at=?,accepted_by=CASE WHEN ?="accept" THEN ? ELSE accepted_by END,prep_by=CASE WHEN ?="prepare" THEN ? ELSE prep_by END,ready_by=CASE WHEN ?="ready" THEN ? ELSE ready_by END,ready_at=CASE WHEN ?="ready" THEN ? ELSE ready_at END,decline_reason=CASE WHEN ?="reject" THEN ? ELSE decline_reason END WHERE id=?').run(m[1],now(),action,actor.id,action,actor.id,action,actor.id,action,now(),action,clean(req.body.reason),o.id);
+ newHistory(o.id,actor.id,o.status,m[1],clean(req.body.reason));if(action==='ready'&&o.fulfillment==='delivery')db.prepare('INSERT INTO deliveries(id,order_id,fee_cents,status) VALUES(?,?,?,?)').run(id(),o.id,num(config('driver_fee_cents','500')),'available');audit(actor.id,action,'order',o.id);})();notifyResult(res,{ok:true,status:m[1]});}));
+app.get('/api/driver/delivery/:orderId',auth,roles('driver'),wrap((req,res)=>{const d=db.prepare('SELECT id,status FROM deliveries WHERE order_id=? AND driver_id=?').get(req.params.orderId,req.user.id);need(d,'Entrega não encontrada',404);res.json(d);}));
+app.get('/api/deliveries/available',auth,roles('driver','admin'),wrap((req,res)=>{const rows=db.prepare("SELECT d.id,o.number,o.id as order_id,o.address_json,d.fee_cents,o.created_at FROM deliveries d JOIN orders o ON o.id=d.order_id WHERE d.status='available' ORDER BY o.created_at").all();res.json(rows.map(r=>({...r,neighborhood:JSON.parse(r.address_json||'{}').neighborhood,address_json:undefined})));}));
+app.post('/api/drivers/online',auth,roles('driver'),wrap((req,res)=>{const online=req.body.online===true?1:0;db.prepare('UPDATE users SET online=? WHERE id=?').run(online,req.user.id);audit(req.user.id,online?'go_online':'go_offline','user',req.user.id);notifyResult(res,{online:!!online});}));
+app.post('/api/deliveries/:id/claim',auth,roles('driver','admin'),wrap((req,res)=>{const u=req.user;if(u.role==='driver')need(u.online===1,'Inicie o serviço para aceitar corridas');const driverId=u.role==='admin'?clean(req.body.driver_id):u.id;if(u.role==='admin'){const dr=db.prepare("SELECT * FROM users WHERE id=? AND role='driver' AND active=1").get(driverId);need(dr,'Motoboy inválido');}const code=digits(),exp=new Date(Date.now()+8*60*60_000).toISOString();const result=db.transaction(()=>{const d=db.prepare('SELECT d.*,o.status as os FROM deliveries d JOIN orders o ON o.id=d.order_id WHERE d.id=?').get(req.params.id);need(d&&d.status==='available'&&d.os==='ready','Corrida não está disponível',409);need(!db.prepare("SELECT 1 FROM deliveries WHERE driver_id=? AND status IN ('claimed','picked')").get(driverId),'Motoboy possui entrega em andamento',409);db.prepare("UPDATE deliveries SET driver_id=?,status='claimed',claimed_at=?,pickup_code_hash=?,pickup_code_exp=? WHERE id=? AND status='available'").run(driverId,now(),hashCode(code),exp,d.id);db.prepare("UPDATE orders SET driver_id=?,status='assigned',updated_at=? WHERE id=?").run(driverId,now(),d.order_id);newHistory(d.order_id,u.id,'ready','assigned');audit(u.id,'claim','delivery',d.id,{driver_id:driverId});return {ok:true,order_id:d.order_id,pickup_code:code};})(); // code only returned to admin/cashier? Driver must NEVER receive it
+ if(u.role==='driver')return notifyResult(res,{ok:true,order_id:result.order_id});notifyResult(res,result);
+}));
+app.get('/api/deliveries/:id/pickup-code',auth,roles('admin','cashier','kitchen'),wrap((req,res)=>{const d=db.prepare('SELECT * FROM deliveries WHERE order_id=?').get(req.params.id);need(d&&d.status==='claimed','Retirada ainda não atribuída',404); // code is not stored plaintext; reset and issue a new one when staff requests
+ const code=digits(),exp=new Date(Date.now()+8*60*60_000).toISOString();db.prepare('UPDATE deliveries SET pickup_code_hash=?,pickup_code_exp=?,pickup_attempts=0 WHERE id=?').run(hashCode(code),exp,d.id);audit(req.user.id,'issue_pickup_code','delivery',d.id);res.json({code,expires_at:exp});}));
+app.post('/api/deliveries/:id/pickup',auth,roles('driver'),wrap((req,res)=>{const d=db.prepare('SELECT * FROM deliveries WHERE id=?').get(req.params.id);need(d&&d.driver_id===req.user.id&&d.status==='claimed','Entrega não atribuída',403);need(d.pickup_attempts<5,'Código bloqueado; solicite novo ao caixa',429);const code=clean(req.body.code,15);db.prepare('UPDATE deliveries SET pickup_attempts=pickup_attempts+1 WHERE id=?').run(d.id);need(d.pickup_code_hash===hashCode(code)&&d.pickup_code_exp>now(),'Código de retirada inválido ou expirado',400);db.transaction(()=>{db.prepare("UPDATE deliveries SET status='picked',picked_at=? WHERE id=?").run(now(),d.id);db.prepare("UPDATE orders SET status='out_for_delivery',updated_at=? WHERE id=?").run(now(),d.order_id);newHistory(d.order_id,req.user.id,'assigned','out_for_delivery');audit(req.user.id,'pickup','delivery',d.id);})();notifyResult(res,{ok:true});}));
+app.post('/api/orders/:id/delivery-code',auth,roles('customer','admin'),wrap((req,res)=>{const o=db.prepare('SELECT * FROM orders WHERE id=?').get(req.params.id);need(o&&(req.user.role==='admin'||o.customer_id===req.user.id),'Pedido não encontrado',404);need(['assigned','out_for_delivery'].includes(o.status),'Entrega não disponível para confirmação',409);const code=digits(),exp=new Date(Date.now()+24*60*60_000).toISOString();db.prepare('UPDATE orders SET delivery_code_hash=?,delivery_code_exp=?,delivery_attempts=0 WHERE id=?').run(hashCode(code),exp,o.id);audit(req.user.id,'issue_delivery_code','order',o.id);res.json({code,expires_at:exp});}));
+app.post('/api/deliveries/:id/complete',auth,roles('driver'),wrap((req,res)=>{const d=db.prepare('SELECT * FROM deliveries WHERE id=?').get(req.params.id),o=d&&db.prepare('SELECT * FROM orders WHERE id=?').get(d.order_id);need(d&&o&&d.driver_id===req.user.id&&d.status==='picked'&&o.status==='out_for_delivery','Entrega indisponível',403);need(o.delivery_attempts<5,'Código bloqueado; solicite atendimento',429);db.prepare('UPDATE orders SET delivery_attempts=delivery_attempts+1 WHERE id=?').run(o.id);need(o.delivery_code_hash&&o.delivery_code_exp>now()&&o.delivery_code_hash===hashCode(clean(req.body.code,15)),'Código de entrega inválido',400);
+ finishDelivery(d,o,req.user.id,'customer_code');notifyResult(res,{ok:true});}));
+function finishDelivery(d,o,actor,reason){db.transaction(()=>{db.prepare("UPDATE deliveries SET status='completed',completed_at=? WHERE id=?").run(now(),d.id);db.prepare("UPDATE orders SET status='delivered',delivered_at=?,updated_at=?,delivery_code_hash=NULL WHERE id=?").run(now(),now(),o.id);newHistory(o.id,actor,'out_for_delivery','delivered',reason);audit(actor,'complete','delivery',d.id,{reason,fee_cents:d.fee_cents});})();}
+app.post('/api/deliveries/:id/override',auth,roles('admin'),wrap((req,res)=>{need(clean(req.body.reason).length>=10,'Justificativa com pelo menos 10 caracteres');const d=db.prepare('SELECT * FROM deliveries WHERE id=?').get(req.params.id),o=d&&db.prepare('SELECT * FROM orders WHERE id=?').get(d.order_id);need(d&&d.status==='picked'&&o.status==='out_for_delivery','Entrega inválida',409);finishDelivery(d,o,req.user.id,`OVERRIDE: ${clean(req.body.reason)}`);notifyResult(res,{ok:true});}));
+app.post('/api/orders/:id/mark-paid',auth,roles('admin','cashier'),wrap((req,res)=>{const o=db.prepare('SELECT * FROM orders WHERE id=?').get(req.params.id);need(o&&!['rejected','cancelled'].includes(o.status),'Pedido indisponível',409);need(o.payment_status!=='paid','Pedido já foi pago',409);db.transaction(()=>{db.prepare("UPDATE orders SET payment_status='paid' WHERE id=?").run(o.id);db.prepare('INSERT INTO transactions VALUES(?,?,?,?,?,?,?)').run(id(),o.id,'payment',o.total_cents,o.payment_method,now(),req.user.id);audit(req.user.id,'mark_paid','order',o.id,{amount_cents:o.total_cents});})();notifyResult(res,{ok:true});}));
+app.post('/api/orders/:id/mark-refunded',auth,roles('admin'),wrap((req,res)=>{const o=db.prepare('SELECT * FROM orders WHERE id=?').get(req.params.id);need(o&&['rejected','cancelled'].includes(o.status)&&o.payment_status==='paid','Estorno não elegível',409);db.transaction(()=>{db.prepare("UPDATE orders SET payment_status='refunded' WHERE id=?").run(o.id);db.prepare('INSERT INTO transactions VALUES(?,?,?,?,?,?,?)').run(id(),o.id,'refund',-o.total_cents,o.payment_method,now(),req.user.id);audit(req.user.id,'manual_refund','order',o.id);})();notifyResult(res,{ok:true,warning:'Registro manual de estorno; execute a devolução no provedor do pagamento.'});}));
+app.post('/api/orders/:id/complete-pickup',auth,roles('admin','cashier'),wrap((req,res)=>{const o=db.prepare('SELECT * FROM orders WHERE id=?').get(req.params.id);need(o&&o.status==='ready'&&o.fulfillment==='pickup','Pedido indisponível',409);db.prepare("UPDATE orders SET status='delivered',updated_at=?,delivered_at=? WHERE id=?").run(now(),now(),o.id);newHistory(o.id,req.user.id,'ready','delivered','Retirada no balcão');audit(req.user.id,'pickup_at_counter','order',o.id);notifyResult(res,{ok:true});}));
+app.get('/api/admin/users',auth,roles('admin'),wrap((_,res)=>res.json(db.prepare('SELECT id,name,email,role,active,online,created_at FROM users ORDER BY created_at DESC').all())));
+app.post('/api/admin/users',auth,roles('admin'),wrap((req,res)=>{const {name,email,role,password}=req.body;need(['admin','cashier','kitchen','driver'].includes(role)&&clean(name)&&/^\S+@\S+\.\S+$/.test(clean(email))&&String(password||'').length>=10,'Dados inválidos; senha mínimo 10 caracteres');const uid=id();db.prepare('INSERT INTO users(id,name,email,password_hash,role,created_at) VALUES(?,?,?,?,?,?)').run(uid,clean(name),clean(email).toLowerCase(),bcrypt.hashSync(password,12),role,now());audit(req.user.id,'create_user','user',uid);notifyResult(res,{id:uid});}));
+app.patch('/api/admin/users/:id',auth,roles('admin'),wrap((req,res)=>{need(req.params.id!==req.user.id,'Não é permitido bloquear a si mesmo');const u=db.prepare('SELECT * FROM users WHERE id=?').get(req.params.id);need(u,'Usuário não encontrado',404);db.prepare('UPDATE users SET active=? WHERE id=?').run(req.body.active?1:0,u.id);audit(req.user.id,'set_active','user',u.id,{active:!!req.body.active});notifyResult(res,{ok:true});}));
+app.post('/api/admin/products',auth,roles('admin'),wrap((req,res)=>{const b=req.body;need(clean(b.name)&&Number.isInteger(+b.price_cents)&&+b.price_cents>=0,'Produto inválido');const pid=id();db.prepare('INSERT INTO products(id,category_id,name,description,price_cents,image_url) VALUES(?,?,?,?,?,?)').run(pid,clean(b.category_id)||null,clean(b.name),clean(b.description,500),+b.price_cents,clean(b.image_url,1000));audit(req.user.id,'create','product',pid);notifyResult(res,{id:pid});}));
+app.patch('/api/admin/products/:id',auth,roles('admin'),wrap((req,res)=>{const p=db.prepare('SELECT * FROM products WHERE id=?').get(req.params.id);need(p,'Produto não encontrado',404);const b=req.body;const price=b.price_cents===undefined?p.price_cents:Number(b.price_cents);need(Number.isInteger(price)&&price>=0,'Preço inválido');db.prepare('UPDATE products SET name=?,description=?,price_cents=?,image_url=?,active=? WHERE id=?').run(clean(b.name??p.name),clean(b.description??p.description,500),price,clean(b.image_url??p.image_url,1000),b.active===undefined?p.active:(b.active?1:0),p.id);audit(req.user.id,'update','product',p.id);notifyResult(res,{ok:true});}));
+app.post('/api/admin/categories',auth,roles('admin'),wrap((req,res)=>{need(clean(req.body.name),'Nome obrigatório');const cid=id();db.prepare('INSERT INTO categories(id,name) VALUES(?,?)').run(cid,clean(req.body.name));notifyResult(res,{id:cid});}));
+app.post('/api/admin/addons',auth,roles('admin'),wrap((req,res)=>{need(clean(req.body.name)&&Number.isInteger(+req.body.price_cents),'Dados inválidos');const aid=id();db.prepare('INSERT INTO addons(id,name,price_cents) VALUES(?,?,?)').run(aid,clean(req.body.name),+req.body.price_cents);notifyResult(res,{id:aid});}));
+app.patch('/api/admin/settings',auth,roles('admin'),wrap((req,res)=>{const allow=['store_name','store_address','delivery_fee_cents','driver_fee_cents','open'];for(const [k,v] of Object.entries(req.body)){need(allow.includes(k),'Configuração inválida');if(k.endsWith('_cents'))need(Number.isSafeInteger(Number(v))&&Number(v)>=0,'Valor inválido');db.prepare('INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value').run(k,String(v));}audit(req.user.id,'update','settings','store');notifyResult(res,{ok:true});}));
+app.get('/api/admin/report',auth,roles('admin'),wrap((req,res)=>{const date=clean(req.query.date,10)||now().slice(0,10);need(/^\d{4}-\d{2}-\d{2}$/.test(date),'Data inválida');const stats=db.prepare("SELECT COUNT(*) as orders,COALESCE(SUM(CASE WHEN payment_status='paid' THEN total_cents WHEN payment_status='refunded' THEN 0 ELSE 0 END),0) as revenue_cents,COALESCE(AVG(CASE WHEN status='delivered' THEN total_cents END),0) as ticket_cents FROM orders WHERE substr(created_at,1,10)=?").get(date);const statuses=db.prepare('SELECT status,COUNT(*) qty FROM orders WHERE substr(created_at,1,10)=? GROUP BY status').all(date);const paid=db.prepare("SELECT payment_method,SUM(total_cents) amount_cents FROM orders WHERE substr(created_at,1,10)=? AND payment_status='paid' GROUP BY payment_method").all(date);const drivers=db.prepare("SELECT u.name, COUNT(*) deliveries, SUM(d.fee_cents) total_cents, SUM(CASE WHEN d.paid_at IS NOT NULL THEN d.fee_cents ELSE 0 END) paid_cents FROM deliveries d JOIN users u ON u.id=d.driver_id WHERE d.status='completed' GROUP BY d.driver_id").all();res.json({date,...stats,statuses,paid,drivers});}));
+app.post('/api/admin/deliveries/:id/pay',auth,roles('admin'),wrap((req,res)=>{const d=db.prepare('SELECT * FROM deliveries WHERE id=?').get(req.params.id);need(d&&d.status==='completed'&&!d.paid_at,'Pagamento indisponível',409);db.prepare('UPDATE deliveries SET paid_at=? WHERE id=?').run(now(),d.id);audit(req.user.id,'driver_fee_paid','delivery',d.id,{fee_cents:d.fee_cents});notifyResult(res,{ok:true});}));
+app.get('/api/admin/deliveries',auth,roles('admin'),wrap((_,res)=>res.json(db.prepare('SELECT d.*,o.number,u.name as driver_name FROM deliveries d JOIN orders o ON d.order_id=o.id LEFT JOIN users u ON u.id=d.driver_id ORDER BY o.created_at DESC').all())));
+app.post('/api/cash/open',auth,roles('cashier','admin'),wrap((req,res)=>{need(!db.prepare('SELECT id FROM cash_sessions WHERE user_id=? AND closed_at IS NULL').get(req.user.id),'Caixa já aberto',409);const amount=Math.round(Number(req.body.initial||0)*100);need(Number.isSafeInteger(amount)&&amount>=0,'Valor inválido');const cid=id();db.prepare('INSERT INTO cash_sessions(id,user_id,initial_cents,opened_at) VALUES(?,?,?,?)').run(cid,req.user.id,amount,now());audit(req.user.id,'cash_open','cash',cid);res.json({id:cid});}));
+app.post('/api/cash/close',auth,roles('cashier','admin'),wrap((req,res)=>{const c=db.prepare('SELECT * FROM cash_sessions WHERE user_id=? AND closed_at IS NULL').get(req.user.id);need(c,'Nenhum caixa aberto',404);const amount=Math.round(Number(req.body.counted||0)*100);need(Number.isSafeInteger(amount)&&amount>=0,'Valor inválido');const cashPayments=db.prepare("SELECT COALESCE(SUM(total_cents),0) as n FROM orders WHERE payment_status='paid' AND payment_method='cash' AND created_at>=?").get(c.opened_at).n;const expected=c.initial_cents+cashPayments;db.prepare('UPDATE cash_sessions SET counted_cents=?,expected_cents=?,closed_at=? WHERE id=?').run(amount,expected,now(),c.id);audit(req.user.id,'cash_close','cash',c.id,{difference_cents:amount-expected});res.json({expected_cents:expected,difference_cents:amount-expected});}));
+app.get('/api/cash/sessions',auth,roles('cashier','admin'),wrap((req,res)=>res.json(db.prepare('SELECT * FROM cash_sessions WHERE user_id=? ORDER BY opened_at DESC LIMIT 20').all(req.user.id))));
+app.get('/api/admin/audit',auth,roles('admin'),wrap((_,res)=>res.json(db.prepare('SELECT * FROM audit ORDER BY created_at DESC LIMIT 200').all())));
+io.use((socket,next)=>{try{const token=socket.handshake.auth?.token;const d=jwt.verify(token,secret);const u=db.prepare('SELECT id FROM users WHERE id=? AND active=1').get(d.sub);if(!u)throw Error('not authorized');next();}catch{next(Error('Unauthorized'));}});
+io.on('connection',s=>s.emit('connected',{at:now()}));
+app.get('*',(_,res)=>res.sendFile(path.join(root,'public','index.html')));
+server.listen(Number(process.env.PORT||3000),'0.0.0.0',()=>console.log(`LancheFlow running on ${process.env.PORT||3000}`));

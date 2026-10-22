@@ -1,329 +1,59 @@
-const state = { gifts: [], category: 'Todos', selectedGift: null, config: {} };
-const $ = s => document.querySelector(s);
-
-function categoryEmoji(category = '') {
-  const c = category.toLowerCase();
-  if (c.includes('cozinha')) return '🍳';
-  if (c.includes('cama') || c.includes('quarto')) return '🛏️';
-  if (c.includes('banho')) return '🛁';
-  if (c.includes('eletro')) return '🔌';
-  if (c.includes('casa')) return '🏠';
-  return '🎁';
-}
-
-async function api(url, options = {}) {
-  const res = await fetch(url, { headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }, ...options });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || 'Não foi possível concluir a ação.');
-  return data;
-}
-
-async function loadConfig() {
-  const c = await api('/api/config');
-  state.config = c;
-  const setText = (selector, value) => { const el = $(selector); if (el) el.textContent = value; };
-  setText('#eventDate', c.eventDate || 'Data a definir');
-  setText('#eventTime', c.eventTime || 'Horário a definir');
-  setText('#eventPlace', c.eventPlace || 'Local a definir');
-  setText('#eventMessage', c.message || 'Escolha um presente da nossa lista, veja o link desejado pelos noivos e leve no dia do chá.');
-  setText('#invitationMessage', c.invitationMessage || 'Coloque o nome completo de cada pessoa que irá ao chá.');
-  const couple = c.couple || 'Daniel e Núbia';
-  setText('#pixKeyText', c.pixKey || 'Chave a definir');
-  setText('#pixReceiverText', c.pixReceiver || couple);
-  $('#copyPixBtn').disabled = !c.pixKey;
-  $('#copyPixBtn').textContent = c.pixKey ? 'Copiar chave PIX' : 'PIX ainda não configurado';
-}
-
-async function loadGifts() {
-  state.gifts = await api('/api/gifts');
-  renderFilters();
-  renderGifts();
-}
-
-function renderFilters() {
-  const categories = ['Todos', ...new Set(state.gifts.map(g => g.category).filter(Boolean))];
-  const wrap = $('#giftFilters');
-  wrap.replaceChildren();
-  categories.forEach(cat => {
-    const btn = document.createElement('button');
-    btn.className = `filter-chip ${state.category === cat ? 'active' : ''}`;
-    btn.type = 'button';
-    btn.textContent = cat;
-    btn.addEventListener('click', () => { state.category = cat; renderFilters(); renderGifts(); });
-    wrap.appendChild(btn);
-  });
-}
-
-function makeEmoji(category) {
-  const span = document.createElement('span');
-  span.className = 'gift-icon';
-  span.textContent = categoryEmoji(category);
-  return span;
-}
-
-function buildGiftImage(gift, cls = '') {
-  const visual = document.createElement('div');
-  visual.className = cls || 'gift-visual';
-  if (gift.image && /^https?:\/\//i.test(gift.image)) {
-    const img = document.createElement('img');
-    img.src = gift.image;
-    img.alt = gift.name;
-    img.loading = 'lazy';
-    img.referrerPolicy = 'no-referrer';
-    img.addEventListener('error', () => visual.replaceChildren(makeEmoji(gift.category)));
-    visual.appendChild(img);
-  } else {
-    visual.appendChild(makeEmoji(gift.category));
-  }
-  return visual;
-}
-
-function renderGifts() {
-  const grid = $('#giftsGrid');
-  grid.replaceChildren();
-  const gifts = state.gifts.filter(g => state.category === 'Todos' || g.category === state.category);
-  if (!gifts.length) {
-    const empty = document.createElement('div');
-    empty.className = 'empty';
-    empty.textContent = 'Nenhum presente nesta categoria ainda.';
-    grid.appendChild(empty);
-    return;
-  }
-
-  gifts.forEach(gift => {
-    const available = Number(gift.availableQuantity ?? (gift.status === 'available' ? 1 : 0));
-    const total = Math.max(1, Number(gift.quantity || 1));
-    const unavailable = available <= 0;
-    const card = document.createElement('article');
-    card.className = `gift-card ${unavailable ? 'unavailable' : ''}`;
-    card.appendChild(buildGiftImage(gift));
-
-    const body = document.createElement('div');
-    body.className = 'gift-body';
-    const status = document.createElement('span');
-    status.className = `status-pill ${unavailable ? (gift.status || 'reserved') : 'available'}`;
-    if (!unavailable) status.textContent = total > 1 ? `${available} de ${total} disponíveis` : 'Disponível';
-    else status.textContent = gift.status === 'received' ? 'Todos presenteados ✓' : 'Todas as unidades reservadas';
-
-    const cat = document.createElement('span');
-    cat.className = 'gift-category';
-    cat.textContent = gift.category || 'Outros';
-    const title = document.createElement('h3');
-    title.className = 'gift-title';
-    title.textContent = gift.name;
-    const desc = document.createElement('p');
-    desc.className = 'gift-desc';
-    desc.textContent = gift.description || 'Um presente especial para a casa nova.';
-
-    if (total > 1) {
-      const quantity = document.createElement('div');
-      quantity.className = 'gift-quantity-note';
-      quantity.innerHTML = `<strong>${total} unidades desejadas</strong><span>Cada convidado reserva 1 unidade.</span>`;
-      body.append(status, cat, title, desc, quantity);
-    } else {
-      body.append(status, cat, title, desc);
-    }
-
-    const actions = document.createElement('div');
-    actions.className = 'gift-actions';
-
-    if (gift.purchaseUrl) {
-      const link = document.createElement('a');
-      link.className = 'btn btn-secondary btn-card';
-      link.href = gift.purchaseUrl;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer nofollow';
-      link.textContent = '↗ Ver presente desejado';
-      actions.appendChild(link);
-    } else {
-      const noLink = document.createElement('button');
-      noLink.className = 'btn btn-secondary btn-card';
-      noLink.type = 'button';
-      noLink.disabled = true;
-      noLink.textContent = 'Link em breve';
-      actions.appendChild(noLink);
-    }
-
-    const btn = document.createElement('button');
-    btn.className = !unavailable ? 'btn btn-primary btn-card' : 'btn btn-soft btn-card';
-    btn.type = 'button';
-    btn.textContent = !unavailable ? '🎁 Quero presentear' : 'Indisponível';
-    btn.disabled = unavailable;
-    if (!unavailable) btn.addEventListener('click', () => openReserve(gift));
-    actions.appendChild(btn);
-
-    body.appendChild(actions);
-    card.appendChild(body);
-    grid.appendChild(card);
-  });
-}
-
-function openReserve(gift) {
-  state.selectedGift = gift;
-  const available = Number(gift.availableQuantity || 1);
-  const total = Math.max(1, Number(gift.quantity || 1));
-  $('#chosenGiftText').textContent = total > 1
-    ? `Você escolheu ${gift.name}. Esta confirmação reserva 1 unidade. Ainda há ${available} de ${total} disponíveis.`
-    : `Você escolheu ${gift.name}. Confirme seus dados para este item ficar reservado em seu nome.`;
-  $('#reserveError').textContent = '';
-  $('#reserveForm').reset();
-  $('#reserveFormWrap').classList.remove('hidden');
-  $('#successPanel').classList.add('hidden');
-  const chosen = $('#chosenGiftCard');
-  chosen.replaceChildren(buildGiftImage(gift, 'chosen-gift-image'));
-  const info = document.createElement('div');
-  const strong = document.createElement('strong');
-  strong.textContent = gift.name;
-  const small = document.createElement('span');
-  small.textContent = gift.category || 'Presente';
-  info.append(strong, small);
-  chosen.appendChild(info);
-
-  const link = $('#modalStoreLink');
-  const successLink = $('#successStoreLink');
-  if (gift.purchaseUrl) {
-    link.href = gift.purchaseUrl;
-    successLink.href = gift.purchaseUrl;
-    link.classList.remove('hidden');
-    successLink.classList.remove('hidden');
-  } else {
-    link.classList.add('hidden');
-    successLink.classList.add('hidden');
-  }
-  $('#reserveModal').classList.add('open');
-  setTimeout(() => $('#guestName').focus(), 30);
-}
-
-function closeReserve() { $('#reserveModal').classList.remove('open'); }
-$('#closeModal').addEventListener('click', closeReserve);
-$('#finishModal').addEventListener('click', closeReserve);
-$('#reserveModal').addEventListener('click', e => { if (e.target === $('#reserveModal')) closeReserve(); });
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    closeReserve();
-    closePix();
-  }
-});
-
-function maskPhoneInput(input) {
-  input.addEventListener('input', e => {
-    let v = e.target.value.replace(/\D/g, '').slice(0, 11);
-    if (v.length > 6) v = `(${v.slice(0,2)}) ${v.slice(2, v.length === 10 ? 6 : 7)}-${v.slice(v.length === 10 ? 6 : 7)}`;
-    else if (v.length > 2) v = `(${v.slice(0,2)}) ${v.slice(2)}`;
-    else if (v.length) v = `(${v}`;
-    e.target.value = v;
-  });
-}
-maskPhoneInput($('#guestPhone'));
-
-$('#reserveForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  if (!state.selectedGift) return;
-  const button = $('#confirmReserve');
-  button.disabled = true;
-  button.textContent = 'Confirmando...';
-  $('#reserveError').textContent = '';
-  try {
-    const result = await api(`/api/gifts/${encodeURIComponent(state.selectedGift.id)}/reserve`, {
-      method: 'POST',
-      body: JSON.stringify({ name: $('#guestName').value, phone: $('#guestPhone').value })
-    });
-    $('#reserveFormWrap').classList.add('hidden');
-    $('#successPanel').classList.remove('hidden');
-    $('#successText').textContent = result.message;
-    await loadGifts();
-  } catch (err) {
-    $('#reserveError').textContent = err.message;
-    if (err.message.includes('outra pessoa')) await loadGifts();
-  } finally {
-    button.disabled = false;
-    button.textContent = 'Confirmar que vou dar este presente';
-  }
-});
-
-function addRsvpName(value = '', focus = false) {
-  const row = document.createElement('div');
-  row.className = 'name-row';
-  const input = document.createElement('input');
-  input.type = 'text';
-  input.className = 'rsvp-name-input';
-  input.maxLength = 80;
-  input.required = true;
-  input.placeholder = 'Nome completo de quem vai';
-  input.autocomplete = 'name';
-  input.value = value;
-  const remove = document.createElement('button');
-  remove.type = 'button';
-  remove.className = 'remove-name';
-  remove.textContent = '×';
-  remove.title = 'Remover este nome';
-  remove.addEventListener('click', () => {
-    const rows = $('#rsvpNames').querySelectorAll('.name-row');
-    if (rows.length <= 1) { input.value = ''; input.focus(); return; }
-    row.remove();
-  });
-  row.append(input, remove);
-  $('#rsvpNames').appendChild(row);
-  if (focus) input.focus();
-}
-
-function resetRsvpNames() {
-  $('#rsvpNames').replaceChildren();
-  addRsvpName();
-}
-
-$('#addRsvpName').addEventListener('click', () => addRsvpName('', true));
-$('#rsvpForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const names = [...document.querySelectorAll('.rsvp-name-input')].map(i => i.value.trim()).filter(Boolean);
-  const button = $('#rsvpSubmit');
-  $('#rsvpError').textContent = '';
-  $('#rsvpSuccess').classList.add('hidden');
-  if (!names.length) { $('#rsvpError').textContent = 'Informe pelo menos um nome completo.'; return; }
-  if (names.some(n => n.length < 3)) { $('#rsvpError').textContent = 'Confira os nomes completos informados.'; return; }
-  button.disabled = true;
-  button.textContent = 'Confirmando...';
-  try {
-    const result = await api('/api/rsvp', { method: 'POST', body: JSON.stringify({ names }) });
-    $('#rsvpSuccess').textContent = result.message;
-    $('#rsvpSuccess').classList.remove('hidden');
-    resetRsvpNames();
-  } catch (err) {
-    $('#rsvpError').textContent = err.message;
-  } finally {
-    button.disabled = false;
-    button.textContent = '✓ Confirmar presença';
-  }
-});
-
-function openPix() {
-  $('#pixCopySuccess').classList.add('hidden');
-  $('#pixModal').classList.add('open');
-}
-function closePix() { $('#pixModal').classList.remove('open'); }
-$('#pixCard').addEventListener('click', openPix);
-$('#pixCard').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPix(); } });
-$('#closePixModal').addEventListener('click', closePix);
-$('#pixModal').addEventListener('click', e => { if (e.target === $('#pixModal')) closePix(); });
-$('#copyPixBtn').addEventListener('click', async () => {
-  const key = state.config.pixKey || '';
-  if (!key) return;
-  try {
-    await navigator.clipboard.writeText(key);
-  } catch {
-    const t = document.createElement('textarea');
-    t.value = key;
-    document.body.appendChild(t);
-    t.select();
-    document.execCommand('copy');
-    t.remove();
-  }
-  $('#pixCopySuccess').classList.remove('hidden');
-});
-
-resetRsvpNames();
-Promise.all([loadConfig(), loadGifts()]).catch(err => {
-  console.error(err);
-  $('#giftsGrid').innerHTML = '<div class="empty">Não foi possível carregar a lista agora. Tente atualizar a página.</div>';
-});
+const $=s=>document.querySelector(s),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const brl=c=>(Number(c||0)/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}),date=d=>new Date(d).toLocaleString('pt-BR');
+let token=localStorage.getItem('lf_token')||'',me=null,store=null,catalog=null,orders=[],cart=[],socket=null,screen='home',orderId=null,deliveryCode={},pickupCode={};
+const statusText={pending:'Aguardando confirmação',accepted:'Aceito',rejected:'Recusado',preparing:'Em preparo',ready:'Pronto',assigned:'Motoboy designado',out_for_delivery:'Saiu para entrega',delivered:'Entregue',cancelled:'Cancelado'};
+const pill=s=>`<span class="pill ${s==='delivered'?'ok':(['cancelled','rejected'].includes(s)?'bad':'')}">${esc(statusText[s]||s)}</span>`;
+const toast=m=>{const e=$('#toast');e.textContent=m;e.style.display='block';clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>e.style.display='none',4200)};
+async function api(path,options={}){const r=await fetch('/api'+path,{...options,headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{}),...options.headers}});const raw=await r.json().catch(()=>({}));if(!r.ok)throw Error(raw.error||`Erro ${r.status}`);return raw}
+const post=(url,data={})=>api(url,{method:'POST',body:JSON.stringify(data)}),patch=(url,data)=>api(url,{method:'PATCH',body:JSON.stringify(data)});
+async function init(){store=await api('/store');catalog=await api('/catalog');$('#storeName').textContent=store.name;if(token){try{me=await api('/me');startSocket()}catch{token='';localStorage.removeItem('lf_token')}}render()}
+function startSocket(){if(socket)socket.disconnect();socket=io({auth:{token}});socket.on('changed',async()=>{if(me&&screen!=='login'&&screen!=='register'){try{await loadOrders();if(['orders','dashboard','driver','cashier','kitchen','track'].includes(screen))render()}catch{}}});}
+async function loadOrders(){if(me)orders=await api('/orders')}
+function nav(){const controls=[['home','Início']];if(me){controls.push(['orders','Meus pedidos']);if(['cashier','kitchen','admin'].includes(me.role))controls.push(['dashboard','Operação']);if(me.role==='driver')controls.push(['driver','Entregas']);if(me.role==='admin')controls.push(['admin','Admin']);controls.push(['logout','Sair']);}else controls.push(['login','Entrar'],['register','Criar conta']);$('#nav').innerHTML=controls.map(([s,t])=>`<button data-go="${s}">${t}</button>`).join('')}
+async function go(s,oid){if(s==='logout'){localStorage.removeItem('lf_token');token='';me=null;orders=[];cart=[];socket?.disconnect();screen='home';render();return}screen=s;orderId=oid||orderId;if(['orders','dashboard','driver','track','admin'].includes(s)&&me)await loadOrders();render();window.scrollTo(0,0)}
+function render(){nav();const a=$('#app');if(screen==='login'||screen==='register'){a.innerHTML=authView(screen);return}if(screen==='home'){a.innerHTML=homeView();return}if(!me){screen='login';a.innerHTML=authView('login');return}if(screen==='orders'){a.innerHTML=ordersView();return}if(screen==='track'){a.innerHTML=trackView();return}if(screen==='dashboard'){a.innerHTML=dashboardView();return}if(screen==='driver'){a.innerHTML=driverView();return}if(screen==='admin'){a.innerHTML=adminView();loadAdmin();return}a.innerHTML=homeView()}
+function authView(type){const signup=type==='register';return `<div class="card form"><h1>${signup?'Criar conta':'Entrar no sistema'}</h1><form id="authForm">${signup?'<label>Seu nome</label><input name="name" required minlength="2"><label>Telefone</label><input name="phone" required>':''}<label>E-mail</label><input name="email" type="email" required><label>Senha</label><input name="password" type="password" minlength="${signup?8:1}" required><p><button class="primary wide">${signup?'Cadastrar':'Entrar'}</button></p></form><p class="mini">${signup?'Já possui conta?':'Ainda não tem conta?'} <a href="#" data-go="${signup?'login':'register'}">${signup?'Entrar':'Criar conta'}</a></p></div>`}
+function homeView(){const ps=catalog.products.map(p=>`<div class="card product"><div class="photo">${p.image_url?`<img src="${esc(p.image_url)}" alt="${esc(p.name)}">`:'🍔'}</div><h3>${esc(p.name)}</h3><p class="sub">${esc(p.description)}</p><div class="between"><b class="money">${brl(p.price_cents)}</b><button class="primary" data-add="${p.id}">Adicionar</button></div></div>`).join('');return `<div class="hero"><h1>Seu pedido, do jeito certo 🍔</h1><p>Escolha seus favoritos, acompanhe cada etapa e receba na porta de casa.</p><span class="pill ${store.open?'ok':'bad'}">${store.open?'Aberto para pedidos':'Temporariamente fechado'}</span></div><div class="cols"><section><h2>Cardápio</h2><div class="grid">${ps}</div></section><section><div class="card"><h2>🛒 Carrinho</h2><div id="cart">${cartView()}</div></div></section></div>`}
+function cartView(){if(!cart.length)return '<div class="empty">Seu carrinho está vazio.</div>';let total=cart.reduce((sum,i)=>sum+i.unit*i.qty,0);return `<div class="stack">${cart.map((i,idx)=>`<div class="line"><div><b>${esc(i.name)}</b><p class="mini">${esc(i.addons.map(a=>a.name).join(', '))} ${esc(i.notes)}</p><b>${brl(i.unit*i.qty)}</b></div><div class="qty"><button class="muted" data-qty="${idx}" data-delta="-1">−</button>${i.qty}<button class="muted" data-qty="${idx}" data-delta="1">+</button></div></div>`).join('')}<div class="between"><b>Subtotal</b><b>${brl(total)}</b></div><button class="primary wide" data-go="checkout">Finalizar pedido</button></div>`}
+function addonChoice(p){return `<div class="card form"><h2>${esc(p.name)}</h2><p>${brl(p.price_cents)}</p><form id="addForm" data-product="${p.id}"><label>Adicionais</label>${catalog.addons.map(a=>`<label><input type="checkbox" name="addon" value="${a.id}"> ${esc(a.name)} (+${brl(a.price_cents)})</label>`).join('')}<label>Observações</label><textarea name="notes" placeholder="Ex.: sem cebola" maxlength="300"></textarea><label>Quantidade</label><input type="number" name="qty" value="1" min="1" max="30"><p><button class="primary wide">Adicionar ao carrinho</button></p></form><button class="muted" data-go="home">Voltar</button></div>`}
+function checkoutView(){if(!cart.length)return homeView();return `<div class="card form"><h1>Finalizar pedido</h1><p>Subtotal: <b>${brl(cart.reduce((s,x)=>s+x.unit*x.qty,0))}</b></p><form id="checkout"><label>Seu nome</label><input name="name" value="${esc(me?.name||'')}" required><label>Telefone</label><input name="phone" required><label>Recebimento</label><select name="fulfillment"><option value="delivery">Entrega (+${brl(store.delivery_fee_cents)})</option><option value="pickup">Retirada no balcão</option></select><div id="address"><label>CEP</label><input name="zip"><label>Rua</label><input name="street"><label>Número</label><input name="number"><label>Bairro</label><input name="neighborhood"><label>Cidade</label><input name="city"><label>Complemento/referência</label><input name="complement"></div><label>Pagamento</label><select name="payment_method"><option value="cash">Dinheiro na entrega/balcão</option><option value="card">Cartão na entrega/balcão</option><option value="pix">Pix (combinar com a loja)</option></select><p class="mini">O sistema registra a forma de pagamento. Pix e cartão online não são cobrados automaticamente sem uma integração de pagamentos.</p><label>Observações</label><textarea name="notes"></textarea><p><button class="primary wide">Confirmar pedido</button></p></form></div>`}
+function orderCard(o){return `<div class="card"><div class="between"><h3>Pedido #${o.number}</h3>${pill(o.status)}</div><p class="meta">${date(o.created_at)} · ${esc(o.customer_name||'')} · ${brl(o.total_cents)}</p>${o.items.map(i=>`<p class="mini">${i.qty}× ${esc(i.name)} ${i.notes?`· ${esc(i.notes)}`:''}</p>`).join('')}<p class="mini">${o.fulfillment==='pickup'?'Retirada no balcão':'Entrega: '+esc(o.address?.street||'')+', '+esc(o.address?.number||'')+' — '+esc(o.address?.neighborhood||'')}</p><p class="mini">${esc(o.payment_method)} · pagamento: ${esc(o.payment_status)}</p><div class="actions">${me.role==='customer'?`<button class="gold" data-track="${o.id}">Acompanhar</button>`:''}${operationButtons(o)}</div></div>`}
+function operationButtons(o){if(!['cashier','kitchen','admin'].includes(me.role))return '';let b='';const btn=(name,text,klass='primary')=>`<button class="${klass}" data-action="${name}" data-order="${o.id}">${text}</button>`;if(o.status==='pending'&&['cashier','admin'].includes(me.role))b+=btn('accept','Aceitar')+btn('reject','Recusar','danger');if(o.status==='accepted'&&['kitchen','admin'].includes(me.role))b+=btn('prepare','Iniciar preparo');if(o.status==='preparing'&&['kitchen','admin'].includes(me.role))b+=btn('ready','Marcar pronto','gold');if(o.status==='ready'&&o.fulfillment==='pickup'&&['cashier','admin'].includes(me.role))b+=btn('counter','Entregue no balcão');if(['assigned'].includes(o.status))b+=btn('pickupcode','Código retirada','gold');if(o.payment_status!=='paid'&&!['rejected','cancelled'].includes(o.status)&&['cashier','admin'].includes(me.role))b+=btn('paid','Registrar pagamento','muted');if(o.payment_status==='paid'&&['rejected','cancelled'].includes(o.status)&&me.role==='admin')b+=btn('refunded','Registrar estorno','muted');return b}
+function ordersView(){return `<h1>Meus pedidos</h1><div class="grid">${orders.length?orders.map(orderCard).join(''):'<div class="empty">Nenhum pedido ainda.</div>'}</div>`}
+function trackView(){const o=orders.find(x=>x.id===orderId);if(!o)return '<div class="empty">Pedido não encontrado</div>';const stages=o.fulfillment==='pickup'?['pending','accepted','preparing','ready','delivered']:['pending','accepted','preparing','ready','assigned','out_for_delivery','delivered'];const step=stages.indexOf(o.status);return `<h1>Pedido #${o.number}</h1><div class="cols"><div class="card"><h2>${pill(o.status)}</h2><div class="timeline">${stages.map((s,i)=>`<div style="opacity:${i<=step?1:.4}"><b>${esc(statusText[s])}</b></div>`).join('')}</div>${o.decline_reason?`<p class="bad pill">Motivo: ${esc(o.decline_reason)}</p>`:''}<p class="sub">${o.history.map(h=>`${date(h.created_at)}: ${esc(statusText[h.to_status]||h.to_status)}`).join('<hr>')}</p></div><div class="card"><h2>Detalhes</h2>${o.items.map(i=>`<div class="line"><span>${i.qty}× ${esc(i.name)}</span><b>${brl(i.unit_cents*i.qty)}</b></div>`).join('')}<div class="line"><b>Total</b><b>${brl(o.total_cents)}</b></div>${o.fulfillment==='delivery'&&['assigned','out_for_delivery'].includes(o.status)?`<button class="gold wide" data-issue="${o.id}">Gerar código de confirmação de entrega</button>${deliveryCode[o.id]?`<p class="code">${esc(deliveryCode[o.id])}</p><p class="mini">Só informe este código após receber o pedido.</p>`:''}`:''}</div></div>`}
+function dashboardView(){let list=orders.filter(o=>!['delivered','cancelled','rejected'].includes(o.status));const by=s=>list.filter(o=>o.status===s).map(orderCard).join('')||'<div class="empty">Nenhum pedido nesta etapa.</div>';return `<h1>Painel de operação</h1><div class="toolbar"><button class="muted" data-go="dashboard">Atualizar</button><button class="gold" data-cash="open">Abrir caixa</button><button class="muted" data-cash="close">Fechar caixa</button></div><div class="stack">${['pending','accepted','preparing','ready','assigned','out_for_delivery'].map(s=>`<section><h2>${esc(statusText[s])}</h2><div class="grid">${by(s)}</div></section>`).join('')}</div>`}
+function driverView(){const mine=orders.filter(o=>!['delivered','cancelled','rejected'].includes(o.status));return `<h1>Painel do motoboy</h1><div class="card"><h2>${me.online?'🟢 Disponível':'⚪ Fora de serviço'}</h2><div class="actions"><button class="${me.online?'muted':'gold'}" data-online="${me.online?'false':'true'}">${me.online?'Encerrar serviço':'Iniciar serviço'}</button><button class="muted" data-refresh-deliveries>Atualizar corridas</button></div><p class="sub">Você recebe ofertas quando a cozinha libera pedidos.</p></div><h2 style="margin-top:22px">Minhas entregas</h2><div class="grid">${mine.map(o=>{const address=o.address||{};let route=`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent([address.street,address.number,address.neighborhood,address.city,address.zip].filter(Boolean).join(', '))}`;return `<div class="card"><div class="between"><h3>#${o.number}</h3>${pill(o.status)}</div><p>${esc(address.neighborhood||'')} · ${brl(o.total_cents)}</p>${o.status==='assigned'?`<button class="gold" data-driver-action="pickup" data-order="${o.id}">Retirar pedido</button>`:''}${o.status==='out_for_delivery'?`<a class="btn gold" href="${route}" target="_blank" rel="noopener">🗺️ Abrir rota</a> <button class="primary" data-driver-action="complete" data-order="${o.id}">Confirmar entrega</button>`:''}</div>`}).join('')||'<p class="empty">Nenhuma entrega ativa.</p>'}</div><h2 style="margin-top:22px">Corridas disponíveis</h2><div id="available" class="grid">Carregando...</div>`}
+function adminView(){return `<h1>Administração</h1><div id="adminStats" class="grid"></div><div class="cols" style="margin-top:18px"><div class="stack"><div class="card"><h2>Novo produto</h2><form id="productForm"><label>Nome</label><input name="name" required><label>Descrição</label><input name="description"><label>Preço (R$)</label><input name="price" type="number" min="0" step=".01" required><label>Categoria</label><select name="category_id">${catalog.categories.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select><label>URL da foto</label><input name="image_url"><p><button class="primary">Cadastrar produto</button></p></form></div><div class="card"><h2>Produtos</h2><div id="productList">${catalog.products.map(p=>`<div class="line"><span>${esc(p.name)} — ${brl(p.price_cents)}</span><button class="muted" data-edit-product="${p.id}">Editar</button></div>`).join('')}</div></div><div class="card"><h2>Criar funcionário</h2><form id="userForm"><label>Nome</label><input name="name" required><label>E-mail</label><input name="email" type="email" required><label>Senha temporária (mínimo 10)</label><input name="password" required minlength="10"><label>Perfil</label><select name="role"><option value="cashier">Caixa</option><option value="kitchen">Cozinha</option><option value="driver">Motoboy</option><option value="admin">Administrador</option></select><p><button class="gold">Criar acesso</button></p></form><div id="userList"></div></div></div><div class="stack"><div class="card"><h2>Configurações</h2><form id="settingsForm"><label>Nome da loja</label><input name="store_name" value="${esc(store.name)}"><label>Endereço da loja</label><input name="store_address" value="${esc(store.address)}"><label>Taxa de entrega (R$)</label><input name="delivery_fee_cents" type="number" step=".01" value="${store.delivery_fee_cents/100}"><label>Aberto</label><select name="open"><option value="true" ${store.open?'selected':''}>Sim</option><option value="false" ${!store.open?'selected':''}>Não</option></select><p><button>Salvar</button></p></form></div><div class="card"><h2>Relatório do dia</h2><div id="report"></div><button class="muted" data-export>Exportar pedidos CSV</button></div><div class="card"><h2>Entregas e repasses</h2><div id="deliveryAdmin"></div></div></div></div>`}
+async function loadAdmin(){try{const [report,users,deliveries]=await Promise.all([api('/admin/report'),api('/admin/users'),api('/admin/deliveries')]);if(screen!=='admin')return;$('#adminStats').innerHTML=`<div class="card"><p class="sub">Pedidos hoje</p><div class="stat">${report.orders}</div></div><div class="card"><p class="sub">Recebido hoje</p><div class="stat">${brl(report.revenue_cents)}</div></div><div class="card"><p class="sub">Ticket médio (concluídos)</p><div class="stat">${brl(report.ticket_cents)}</div></div>`;$('#report').innerHTML=report.statuses.map(s=>`<p>${esc(statusText[s.status]||s.status)}: <b>${s.qty}</b></p>`).join('')+'<h3>Meios de pagamento</h3>'+report.paid.map(p=>`<p>${esc(p.payment_method)}: ${brl(p.amount_cents)}</p>`).join('');$('#userList').innerHTML=users.map(u=>`<div class="line"><span>${esc(u.name)} <small>${esc(u.role)}</small></span>${u.id===me.id?'':`<button class="muted" data-user="${u.id}" data-active="${u.active?0:1}">${u.active?'Bloquear':'Ativar'}</button>`}</div>`).join('');$('#deliveryAdmin').innerHTML=deliveries.slice(0,50).map(d=>`<div class="line"><span>#${d.number} ${esc(d.driver_name||'Sem motoboy')} ${brl(d.fee_cents)} — ${esc(d.status)}</span>${d.status==='completed'&&!d.paid_at?`<button class="gold" data-pay-driver="${d.id}">Registrar repasse</button>`:d.paid_at?'Pago':''}${d.status==='picked'?`<button class="danger" data-override="${d.id}">Resolver exceção</button>`:''}</div>`).join('')}catch(e){toast(e.message)}}
+async function available(){try{const rs=await api('/deliveries/available');if(screen==='driver')$('#available').innerHTML=rs.map(r=>`<div class="card"><h3>Pedido #${r.number}</h3><p>${esc(r.neighborhood||'Bairro não informado')}</p><b>${brl(r.fee_cents)} por corrida</b><div class="actions"><button class="primary" data-claim="${r.id}">Aceitar entrega</button></div></div>`).join('')||'<p class="empty">Não há novas corridas.</p>'}catch(e){toast(e.message)}}
+async function refresh(){await loadOrders();render();if(screen==='driver')await available()}
+function formData(form){return Object.fromEntries(new FormData(form).entries())}
+document.addEventListener('click',async e=>{const t=e.target.closest('[data-go],[data-add],[data-qty],[data-track],[data-action],[data-issue],[data-online],[data-driver-action],[data-claim],[data-refresh-deliveries],[data-cash],[data-user],[data-edit-product],[data-pay-driver],[data-override],[data-export]');if(!t)return;e.preventDefault();try{
+ if(t.dataset.go){if(t.dataset.go==='checkout'){screen='checkout';$('#app').innerHTML=me?checkoutView():authView('login');if(!me)screen='login';nav();return}await go(t.dataset.go);if(screen==='driver')available();return}
+ if(t.dataset.add){const p=catalog.products.find(p=>p.id===t.dataset.add);$('#app').innerHTML=addonChoice(p);return}
+ if(t.dataset.qty){const idx=+t.dataset.qty,delta=+t.dataset.delta;cart[idx].qty+=delta;if(cart[idx].qty<=0)cart.splice(idx,1);$('#cart').innerHTML=cartView();return}
+ if(t.dataset.track){await go('track',t.dataset.track);return}
+ if(t.dataset.action){const o=t.dataset.order,act=t.dataset.action;if(act==='pickupcode'){const r=await api('/deliveries/'+o+'/pickup-code');alert('Código de retirada para informar ao motoboy: '+r.code);return}if(act==='paid')await post(`/orders/${o}/mark-paid`);else if(act==='refunded'){if(confirm('Você já realizou o estorno fora do sistema?'))await post(`/orders/${o}/mark-refunded`)}else if(act==='counter')await post(`/orders/${o}/complete-pickup`);else {const reason=act==='reject'?prompt('Motivo da recusa:'):'';if(act==='reject'&&!reason)return;await post(`/orders/${o}/status`,{action:act,reason})}await refresh();return}
+ if(t.dataset.issue){const r=await post('/orders/'+t.dataset.issue+'/delivery-code');deliveryCode[t.dataset.issue]=r.code;render();return}
+ if(t.dataset.online){await post('/drivers/online',{online:t.dataset.online==='true'});me=await api('/me');await refresh();return}
+ if('refreshDeliveries' in t.dataset){await available();return}
+ if(t.dataset.claim){await post('/deliveries/'+t.dataset.claim+'/claim');toast('Corrida aceita!');await refresh();return}
+ if(t.dataset.driverAction){const o=orders.find(x=>x.id===t.dataset.order),d=await driverDeliveryId(o.id);const code=prompt(t.dataset.driverAction==='pickup'?'Digite o código de retirada informado pela loja:':'Digite o código que o cliente informou:');if(!code)return;await post(`/deliveries/${d}/${t.dataset.driverAction==='pickup'?'pickup':'complete'}`,{code});toast('Etapa confirmada');await refresh();return}
+ if(t.dataset.cash){const str=prompt(t.dataset.cash==='open'?'Valor inicial do caixa (R$):':'Dinheiro contado no fechamento (R$):','0');if(str===null)return;const r=await post(`/cash/${t.dataset.cash}`,t.dataset.cash==='open'?{initial:Number(str.replace(',','.'))}:{counted:Number(str.replace(',','.'))});alert(r.difference_cents!==undefined?`Diferença: ${brl(r.difference_cents)}`:'Caixa aberto');return}
+ if(t.dataset.user){await patch('/admin/users/'+t.dataset.user,{active:t.dataset.active==='1'});await loadAdmin();return}
+ if(t.dataset.editProduct){const p=catalog.products.find(x=>x.id===t.dataset.editProduct);const name=prompt('Nome',p.name);if(name===null)return;const price=prompt('Preço em R$',String(p.price_cents/100));if(price===null)return;await patch('/admin/products/'+p.id,{name,price_cents:Math.round(Number(price.replace(',','.'))*100)});catalog=await api('/catalog');render();return}
+ if(t.dataset.payDriver){if(confirm('Confirma que pagou este repasse fora do sistema?')){await post('/admin/deliveries/'+t.dataset.payDriver+'/pay');await loadAdmin()}return}
+ if(t.dataset.override){const reason=prompt('Justificativa administrativa obrigatória (mín. 10 caracteres):');if(reason){await post('/deliveries/'+t.dataset.override+'/override',{reason});await refresh()}return}
+ if('export' in t.dataset){let rows=[['numero','data','cliente','status','pagamento','total_centavos'],...orders.map(o=>[o.number,o.created_at,o.customer_name,o.status,o.payment_method,o.total_cents])];const blob=new Blob([rows.map(r=>r.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(';')).join('\n')],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='pedidos.csv';a.click();URL.revokeObjectURL(a.href);return}
+ }catch(err){toast(err.message)}});
+async function driverDeliveryId(oid){const d=await api('/driver/delivery/'+oid);return d.id}
+document.addEventListener('change',e=>{if(e.target.name==='fulfillment'){const area=$('#address');if(area)area.classList.toggle('hidden',e.target.value==='pickup')}});
+document.addEventListener('submit',async e=>{const f=e.target;if(!['authForm','addForm','checkout','productForm','userForm','settingsForm'].includes(f.id))return;e.preventDefault();try{const d=formData(f);
+ if(f.id==='authForm'){const r=await post('/auth/'+(screen==='register'?'register':'login'),d);token=r.token;localStorage.setItem('lf_token',token);me=r.user;startSocket();toast('Acesso autorizado');await go('home');return}
+ if(f.id==='addForm'){const p=catalog.products.find(p=>p.id===f.dataset.product),addons=[...f.querySelectorAll('[name=addon]:checked')].map(x=>catalog.addons.find(a=>a.id===x.value)),qty=Number(d.qty);cart.push({product_id:p.id,name:p.name,unit:p.price_cents+addons.reduce((s,a)=>s+a.price_cents,0),addon_ids:addons.map(a=>a.id),addons,qty,notes:d.notes});await go('home');return}
+ if(f.id==='checkout'){const address={zip:d.zip,street:d.street,number:d.number,neighborhood:d.neighborhood,city:d.city,complement:d.complement};const r=await post('/orders',{items:cart.map(i=>({product_id:i.product_id,qty:i.qty,notes:i.notes,addon_ids:i.addon_ids})),name:d.name,phone:d.phone,fulfillment:d.fulfillment,address,payment_method:d.payment_method,notes:d.notes});cart=[];toast('Pedido criado com sucesso!');await loadOrders();await go('track',r.id);return}
+ if(f.id==='productForm'){await post('/admin/products',{...d,price_cents:Math.round(Number(d.price)*100)});catalog=await api('/catalog');render();toast('Produto cadastrado');return}
+ if(f.id==='userForm'){await post('/admin/users',d);f.reset();loadAdmin();toast('Funcionário criado');return}
+ if(f.id==='settingsForm'){await patch('/admin/settings',{...d,delivery_fee_cents:Math.round(Number(d.delivery_fee_cents)*100)});store=await api('/store');render();toast('Configurações atualizadas');return}
+ }catch(err){toast(err.message)}});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});init().catch(e=>{$('#app').textContent='Erro ao conectar ao servidor: '+e.message});
