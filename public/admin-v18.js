@@ -123,7 +123,7 @@ function renderServices(){
     const maintenance=findMaintenanceAdmin(s,all);
     return `<div class="service-edit-row service-edit-v23" data-i="${i}" data-id="${esc(s.id)}" data-maint-id="${esc(maintenance?.id||'')}">
       <div class="service-image-admin">
-        <img src="${esc(s.image||'assets/service-placeholder.svg')}" alt="${esc(s.name||'Procedimento')}">
+        ${s.image?`<img src="${esc(s.image)}" alt="${esc(s.name||'Procedimento')}">`:`<span class="admin-service-logo-fallback">RB</span>`}
         <label class="mini-btn service-image-pick"><span>Trocar imagem</span><input class="service-image-file" type="file" accept="image/*,.heic,.heif"></label>
         ${s.image?'<button type="button" class="mini-btn danger js-remove-service-image">Remover imagem</button>':''}
         <small class="service-image-help">Foto da galeria ou câmera do celular • até 40 MB</small>

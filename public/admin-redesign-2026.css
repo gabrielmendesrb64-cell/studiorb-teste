@@ -1,0 +1,20 @@
+/* STUDIO RB 3 — painel de gestão com navegação lateral */
+.admin-body{background:radial-gradient(circle at 70% 0,#44192e55,transparent 33%),#0a080b;color:#fff7fa}
+.admin-top{height:72px;background:#110b10f0;border-bottom:1px solid #ffffff18}.admin-brand img{width:70px}
+.admin-main{max-width:none;margin:0;padding:34px 35px 75px 286px}
+.admin-section-menu{position:fixed!important;top:72px;left:0;bottom:0;width:250px!important;z-index:30;background:#110c12!important;border:0!important;border-right:1px solid #ffffff16!important;border-radius:0!important;padding:28px 15px!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;gap:7px!important;overflow-y:auto;box-shadow:10px 0 50px #0003}
+.admin-section-menu .sidebrand{display:flex;align-items:center;gap:12px;margin:0 4px 22px;padding:0 4px 19px;border-bottom:1px solid #ffffff1c}
+.sidebrand>span{width:45px;height:45px;display:grid;place-items:center;background:#fa70a4;border-radius:14px;color:#260a18;font:italic 25px Georgia,serif}
+.sidebrand b{font-size:13px;letter-spacing:.12em}.sidebrand small{display:block;font-size:9px;color:#bda3b0;letter-spacing:.13em;margin-top:4px}
+.admin-section-menu .admin-menu-label{font-size:10px;letter-spacing:.2em;color:#8e7483;padding:0 13px 9px;margin:0}
+.admin-section-menu button{width:100%!important;text-align:left!important;flex:none!important;min-height:46px!important;border-radius:11px!important;border:1px solid transparent!important;padding:11px 14px!important;background:transparent!important;color:#d9c5d0!important;font-size:14px!important;font-weight:600!important;white-space:normal!important}
+.admin-section-menu button:hover{background:#ffffff0b!important}.admin-section-menu button.active{background:linear-gradient(100deg,#f278a8,#e6538e)!important;color:#240816!important;box-shadow:0 8px 24px #ed4b8e23!important}
+.admin-main .dash-head{padding:8px 0 14px;align-items:center}.dash-head h1{font-size:clamp(36px,3.7vw,54px);letter-spacing:-.05em}.dash-head .wave{color:#ff88b3}.dash-sub{color:#bca4b1}
+.admin-main .stats{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.stat{border:1px solid #ffffff16;border-radius:17px;background:#171018;box-shadow:none;padding:21px}.stat b{font-family:Inter,system-ui,sans-serif;color:#fff;font-size:30px;font-weight:800}.stat span{color:#bc9eaf;letter-spacing:0;font-size:12px}
+.panel-card,.login-card{background:#171018;border:1px solid #ffffff13;border-radius:17px;box-shadow:none}.panel-head h2{font-size:25px}.admin-main .calendar-card{margin-top:12px}.admin-main input,.admin-main select,.admin-main textarea{border-radius:11px}
+.admin-main .btn-pink{background:linear-gradient(105deg,#ff9abe,#f4689d);border-radius:10px;color:#260915}.admin-main .btn-ghost{border-radius:10px}
+.admin-main .admin-layout{grid-template-columns:minmax(0,1fr) minmax(300px,.5fr)}
+.admin-main .admin-settings-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.admin-main .login-wrap{min-height:calc(100vh - 180px)}
+@media(max-width:1150px){.admin-main{padding-left:235px;padding-right:18px}.admin-section-menu{width:215px!important}.admin-main .stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.admin-main{padding:20px 13px 100px}.admin-section-menu{position:sticky!important;top:72px;left:auto;bottom:auto;width:auto!important;z-index:29;margin:0 0 16px;padding:8px!important;display:flex!important;flex-direction:row!important;overflow-x:auto;overflow-y:hidden;border:1px solid #ffffff16!important;border-radius:12px!important;gap:6px!important}.admin-section-menu .sidebrand,.admin-section-menu .admin-menu-label{display:none!important}.admin-section-menu button{width:auto!important;min-width:max-content;min-height:38px!important;font-size:12px!important;padding:8px 11px!important}.admin-main .dash-head{flex-direction:column;align-items:stretch}.admin-main .stats{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-main .admin-layout{grid-template-columns:1fr}.admin-main .admin-settings-grid{grid-template-columns:1fr}}
