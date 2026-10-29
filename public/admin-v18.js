@@ -1,10 +1,3 @@
-
-async function renderAdminReviews(){
- const box=document.querySelector('#adminReviewsList');if(!box)return;
- try{const d=await api('/api/admin/reviews');const rows=d.reviews||[];box.innerHTML=rows.length?rows.map(r=>`<article class="admin-review-card"><div><div class="stars">${'★'.repeat(Number(r.rating||5))}</div><h3>${esc(r.client_name)}</h3><small>${esc(r.service_name)}</small><p>“${esc(r.comment)}”</p></div><div class="review-admin-actions"><span class="${r.approved?'approved':'pending'}">${r.approved?'Publicado':'Aguardando'}</span><button data-review-approve="${r.id}" data-value="${r.approved?'0':'1'}" class="btn ${r.approved?'btn-ghost':'btn-pink'}" type="button">${r.approved?'Ocultar':'Publicar'}</button><button data-review-delete="${r.id}" class="btn btn-ghost" type="button">Excluir</button></div></article>`).join(''):'<div class="empty-state">Nenhuma avaliação recebida ainda.</div>'}catch(e){box.innerHTML=`<div class="empty-state">${esc(e.message)}</div>`}
-}
-document.querySelector('#adminReviewsList')?.addEventListener('click',async e=>{const approve=e.target.closest('[data-review-approve]'),del=e.target.closest('[data-review-delete]');try{if(approve)await api('/api/admin/reviews/'+approve.dataset.reviewApprove,{method:'PATCH',body:JSON.stringify({approved:approve.dataset.value==='1'})});if(del){if(!confirm('Excluir esta avaliação?'))return;await api('/api/admin/reviews/'+del.dataset.reviewDelete,{method:'DELETE'});}if(approve||del){await renderAdminReviews();toast('Avaliações atualizadas.')}}catch(err){toast(err.message)}});
-
 'use strict';
 let bookings=[], adminConfig=null, currentFilter='all', calendarCursor=new Date(), selectedCalendarDate='', financePeriod='month', selectedClientKey='';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -41,7 +34,7 @@ clearLegacyCaches();
 $('#loginForm')?.addEventListener('submit',async e=>{e.preventDefault();const btn=e.currentTarget.querySelector('button');setBusy(btn,true,'ENTRANDO...');try{await api('/api/admin/login',{method:'POST',body:JSON.stringify(Object.fromEntries(new FormData(e.currentTarget)))});await showDash();}catch(err){$('#loginMsg').textContent=err.message||'Usuário ou senha incorretos.';}finally{setBusy(btn,false);}});
 $('#logoutBtn')?.addEventListener('click',async()=>{try{await api('/api/admin/logout',{method:'POST'});}finally{location.reload();}});
 async function check(){try{await api('/api/admin/me');await showDash();}catch{}}
-async function showDash(){$('#loginView')?.classList.add('hidden');$('#dashboard')?.classList.remove('hidden');$('#logoutBtn')?.classList.remove('hidden');document.body.classList.add('admin-authenticated');selectedCalendarDate=todayISO();await refresh();}
+async function showDash(){$('#loginView')?.classList.add('hidden');$('#dashboard')?.classList.remove('hidden');$('#logoutBtn')?.classList.remove('hidden');selectedCalendarDate=todayISO();await refresh();}
 async function refresh(){
   const [b,c,s]=await Promise.all([
     api('/api/admin/bookings'),
@@ -53,9 +46,9 @@ async function refresh(){
   adminConfig.weeklyHours=adminConfig.weeklyHours||{};
   adminConfig.dateHours=adminConfig.dateHours||{};
   adminConfig.services=s.services||[];
-  renderStats();renderCalendar();renderDayManager();renderList();renderBlocks();renderSchedule();renderServices();renderGallery();renderPaymentSettings();renderClientSearch();renderFinance();renderPromotion();renderHome();renderSecurityAlerts();
+  renderStats();renderCalendar();renderDayManager();renderList();renderBlocks();renderSchedule();renderServices();renderGallery();renderPaymentSettings();renderClientSearch();renderFinance();
 }
-function renderStats(){const today=todayISO(),month=today.slice(0,7);const done=bookings.filter(b=>b.status==='Concluído'&&String(b.date).startsWith(month));const revenue=done.reduce((s,b)=>s+Number(b.total||0),0);const rows=[['Agendamentos hoje',bookings.filter(b=>b.date===today&&!['Cancelado','Concluído'].includes(b.status)).length],['Concluídos no mês',done.length],['Faturamento do mês',money(revenue)],['Clientes no mês',new Set(bookings.filter(b=>String(b.date).startsWith(month)).map(b=>normalizePhoneValue(b.phone)||normalizeSearchValue(b.name))).size]];$('#stats').innerHTML=rows.map(([l,n],i)=>`<div class="stat stat-v51"><span class="stat-icon">${['▣','✓','◆','♙'][i]}</span><div><span>${l}</span><b>${n}</b></div></div>`).join('');}
+function renderStats(){const rows=[['Pendentes',bookings.filter(b=>b.status==='Pendente').length],['Confirmados',bookings.filter(b=>b.status==='Confirmado').length],['Hoje',bookings.filter(b=>b.date===todayISO()&&b.status!=='Cancelado').length],['Total',bookings.length]];$('#stats').innerHTML=rows.map(([l,n])=>`<div class="stat"><b>${n}</b><span>${l}</span></div>`).join('');}
 
 function renderCalendar(){
   const grid=$('#calendarGrid'),label=$('#calendarMonthLabel');if(!grid||!label)return;const y=calendarCursor.getFullYear(),m=calendarCursor.getMonth();label.textContent=monthLabel(calendarCursor);
@@ -290,36 +283,6 @@ document.addEventListener('click',async e=>{
 });
 $('#galleryUploadForm')?.addEventListener('submit',async e=>{e.preventDefault();const file=$('#galleryPhoto')?.files?.[0],categoryId=$('#galleryCategory')?.value;if(!file){toast('Escolha uma foto.','error');return;}if(!categoryId){toast('Escolha a categoria.','error');return;}const btn=e.currentTarget.querySelector('button[type="submit"]');setBusy(btn,true,'ENVIANDO...');try{const fd=new FormData();fd.append('photo',file);fd.append('categoryId',categoryId);fd.append('title',$('#galleryTitle').value||'');fd.append('caption',$('#galleryCaption').value||'');const r=await fetch('/api/admin/gallery',{method:'POST',body:fd,credentials:'same-origin'});let d={};try{d=await r.json();}catch{}if(!r.ok)throw new Error(d.error||`Erro ${r.status}`);e.currentTarget.reset();await refresh();toast('Foto adicionada e otimizada automaticamente.');}catch(err){toast(err.message,'error');}finally{setBusy(btn,false);}});
 
-
-function renderSecurityAlerts(){
-  const card=$('#securityAlertCard'),box=$('#securityAlerts');if(!card||!box)return;
-  const rows=Array.isArray(adminConfig?.securityAlerts)?adminConfig.securityAlerts:[];
-  card.classList.toggle('hidden',rows.length===0);
-  box.innerHTML=rows.slice(0,8).map(a=>{const d=new Date(a.at);return `<div class="security-alert-row"><div><b>3 tentativas incorretas bloqueadas</b><small>${esc(d.toLocaleString('pt-BR'))} • usuário: ${esc(a.username||'')} • IP: ${esc(a.ip||'não identificado')}</small></div><span>Bloqueado 15 min</span></div>`}).join('');
-}
-function renderHome(){
-  const next=$('#homeNextBookings'),rev=$('#homeRevenue');if(!next||!rev)return;
-  const now=todayISO();const upcoming=bookings.filter(b=>b.date>=now&&!['Cancelado','Concluído'].includes(b.status)).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).slice(0,5);
-  next.innerHTML=upcoming.length?upcoming.map(b=>`<div class="home-booking"><time>${esc(b.time)}</time><div><b>${esc(b.name)}</b><small>${fmtDate(b.date)} • ${esc(bookingServiceNames(b).join(' + ')||'Procedimento')}</small></div><span>${esc(b.status)}</span></div>`).join(''):'<div class="empty-state small-empty">Nenhum próximo agendamento.</div>';
-  const month=now.slice(0,7),done=bookings.filter(b=>b.status==='Concluído'&&String(b.date).startsWith(month));const total=done.reduce((s,b)=>s+Number(b.total||0),0);
-  const days={};done.forEach(b=>days[b.date]=(days[b.date]||0)+Number(b.total||0));const vals=Object.values(days),max=Math.max(1,...vals);
-  rev.innerHTML=`<div class="home-money">${money(total)}</div><small>${done.length} procedimento(s) concluído(s)</small><div class="mini-chart">${Object.entries(days).sort().slice(-12).map(([d,v])=>`<i style="height:${Math.max(8,Math.round(v/max*100))}%" title="${fmtDate(d)} • ${money(v)}"></i>`).join('')||'<span>Os ganhos aparecerão aqui quando houver procedimentos concluídos.</span>'}</div>`;
-}
-async function renderPromotion(){
-  if(!$('#promotionForm')||!adminConfig)return;const p=adminConfig.promotion||{};
-  $('#promoEnabled').checked=p.enabled===true;$('#promoTitle').value=p.title||'Promoção Studio RB';$('#promoScope').value=p.scope||'all';$('#promoType').value=p.type||'percent';$('#promoValue').value=Number(p.value||0)||'';$('#promoStart').value=p.startDate||'';$('#promoEnd').value=p.endDate||'';$('#promoMessage').value=p.message||'';
-  renderPromoServicePicker();renderPromoPreview();
-}
-function renderPromoServicePicker(){const box=$('#promoServicePicker');if(!box)return;const selected=new Set((adminConfig?.promotion?.serviceIds||[]).map(String));const show=$('#promoScope').value==='selected';box.classList.toggle('hidden',!show);if(!show)return;box.innerHTML='<b>Escolha os procedimentos</b><div class="promo-service-grid">'+(adminConfig.services||[]).filter(s=>s.active!==false&&!isMaintenanceServiceAdmin(s)).map(s=>`<label><input type="checkbox" value="${esc(s.id)}" ${selected.has(String(s.id))?'checked':''}><span>${esc(s.name)}</span></label>`).join('')+'</div>'}
-function promoFormData(){return{enabled:$('#promoEnabled').checked,title:$('#promoTitle').value.trim(),scope:$('#promoScope').value,type:$('#promoType').value,value:Number($('#promoValue').value||0),startDate:$('#promoStart').value,endDate:$('#promoEnd').value,message:$('#promoMessage').value.trim(),serviceIds:$$('#promoServicePicker input:checked').map(x=>x.value)}}
-function renderPromoPreview(){const box=$('#promoPreview');if(!box)return;const p=promoFormData();const value=p.type==='percent'?`${p.value||0}% OFF`:`${money(p.value||0)} OFF`;box.innerHTML=`<span>PRÉVIA NO SITE</span><b>${esc(p.title||'Promoção Studio RB')} • ${value}</b><small>${esc(p.message||'O desconto será mostrado nos procedimentos participantes.')}</small>`}
-$('#promoScope')?.addEventListener('change',()=>{if(adminConfig)adminConfig.promotion={...(adminConfig.promotion||{}),scope:$('#promoScope').value};renderPromoServicePicker();renderPromoPreview()});
-['promoEnabled','promoTitle','promoType','promoValue','promoStart','promoEnd','promoMessage'].forEach(id=>$('#'+id)?.addEventListener('input',renderPromoPreview));
-$('#promotionForm')?.addEventListener('submit',async e=>{e.preventDefault();const btn=e.submitter;setBusy(btn,true,'SALVANDO...');try{const payload=promoFormData();const d=await api('/api/admin/promotion',{method:'PUT',body:JSON.stringify(payload)});adminConfig.promotion=d.promotion;renderPromotion();toast('Promoção salva. O site das clientes já está atualizado.')}catch(err){toast(err.message,'error')}finally{setBusy(btn,false)}});
-$('#deletePromotion')?.addEventListener('click',async()=>{try{const d=await api('/api/admin/promotion',{method:'DELETE'});adminConfig.promotion=d.promotion;renderPromotion();toast('Promoção desativada.')}catch(e){toast(e.message,'error')}});
-$('#homeManual')?.addEventListener('click',()=>$('#manualBtn')?.click());
-document.addEventListener('click',e=>{const b=e.target.closest('[data-jump]');if(b)showAdminSection(b.dataset.jump)});
-
 check();
 
 
@@ -477,11 +440,8 @@ function showAdminSection(name){
   document.querySelectorAll('.admin-section-menu [data-admin-section]').forEach(btn=>{
     btn.classList.toggle('active', btn.dataset.adminSection===name);
   });
-  if(name==='inicio')renderHome();
   if(name==='clientes')renderClientSearch();
-  if(name==='promocoes')renderPromotion();
   if(name==='financeiro')renderFinance();
-  if(name==='avaliacoes')renderAdminReviews();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 document.querySelector('.admin-section-menu')?.addEventListener('click',e=>{

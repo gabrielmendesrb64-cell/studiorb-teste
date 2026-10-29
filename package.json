@@ -1,6 +1,26 @@
 {
-  "name":"lancheflow","version":"1.0.0","private":true,"type":"module",
-  "scripts":{"start":"node server.js","dev":"node --watch server.js","check":"node --check server.js"},
-  "engines":{"node":">=20"},
-  "dependencies":{"express":"^4.21.2","better-sqlite3":"^11.8.1","socket.io":"^4.8.1","bcryptjs":"^2.4.3","jsonwebtoken":"^9.0.2","helmet":"^8.0.0","express-rate-limit":"^7.5.0","dotenv":"^16.4.7"}
+  "name": "lsh-studio-rb",
+  "version": "7.8.0",
+  "private": true,
+  "description": "Studio RB V18 - visual baseado no catálogo, PIX R$20, comprovante e uploads mobile robustos",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "check": "node --check server.js && node --check public/studio-rb-v18.js && node --check public/admin-v18.js"
+  },
+  "dependencies": {
+    "compression": "^1.7.4",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "express-session": "^1.18.0",
+    "helmet": "^7.1.0",
+    "memorystore": "^1.6.7",
+    "nodemailer": "^6.9.15",
+    "pg": "^8.13.1",
+    "express-async-errors": "^3.1.1",
+    "multer": "^2.0.2",
+    "sharp": "^0.34.3"
+  }
 }

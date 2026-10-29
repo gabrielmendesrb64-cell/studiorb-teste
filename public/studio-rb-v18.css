@@ -356,27 +356,79 @@
   .space-card{padding:15px}
 }
 
-/* V51 — promoções */
-.service-card{position:relative}.promo-public-badge{position:absolute;z-index:3;top:12px;left:12px;background:linear-gradient(135deg,#ff5da8,#d93d84);color:#1c0812;font-size:10px;font-weight:950;letter-spacing:.09em;padding:7px 10px;border-radius:999px;box-shadow:0 8px 22px rgba(222,61,133,.25)}.service-card.is-promo{border-color:rgba(255,93,168,.5)!important}.promo-price{display:flex!important;align-items:baseline;gap:8px}.promo-price del{font-size:12px;color:#9e8c95;font-weight:600}.promo-price strong{font-size:20px;color:#ff75b5}
 
-/* V52 — REDESIGN COMPLETO */
-:root{--v52-pink:#ff72b5;--v52-pink2:#ff9ccc;--v52-bg:#070607;--v52-panel:#100c0f;--v52-line:rgba(255,128,187,.22)}
-body{background:var(--v52-bg);background-image:radial-gradient(circle at 82% 4%,rgba(255,95,165,.12),transparent 25%),radial-gradient(circle at 10% 30%,rgba(119,35,74,.09),transparent 28%)}
-.topbar{max-width:1180px;margin:14px auto 0;border:1px solid var(--v52-line);border-radius:22px;padding:12px 18px;background:rgba(9,7,8,.84);backdrop-filter:blur(20px);top:10px}.brand-mark{font-family:Georgia,serif;font-size:27px}.topbar nav{gap:22px}.topbar nav>a:not(.nav-cta){opacity:.76}.nav-cta,.btn-hot{box-shadow:0 10px 35px rgba(255,94,166,.22);border-radius:14px!important}
-.hero{min-height:690px;max-width:1280px;margin:0 auto;padding:100px 6% 70px;grid-template-columns:1.05fr .95fr;overflow:hidden}.hero h1{font-family:Georgia,serif;font-weight:400;font-size:clamp(54px,6.5vw,94px);line-height:.95;letter-spacing:-.045em;max-width:760px}.hero h1 em{display:block;color:var(--v52-pink2);font-weight:400}.hero-copy>p{font-size:19px;max-width:590px;line-height:1.7}.hero-photo-wrap{min-height:540px}.blob-frame{border-radius:220px 220px 32px 32px;overflow:hidden;border:1px solid var(--v52-line);box-shadow:0 30px 90px rgba(0,0,0,.55)}
-.section-head h2,.about-copy h2,.info-card h2{font-family:Georgia,serif;font-weight:400;font-size:clamp(38px,5vw,64px);letter-spacing:-.03em}.catalog,.portfolio,.procedure-info,.space-section,.reviews-section,.booking-section,.lookup{max-width:1180px;margin:auto;padding-left:24px;padding-right:24px}.services-grid{gap:16px}.service-card{border-radius:22px!important;overflow:hidden;border:1px solid var(--v52-line)!important;background:linear-gradient(180deg,#151014,#0d0a0c)!important;transition:.25s transform,.25s border-color}.service-card:hover{transform:translateY(-5px);border-color:rgba(255,128,187,.55)!important}.service-card img{aspect-ratio:1.25/1;object-fit:cover}.service-card .service-info{padding:17px}.gallery-grid img{border-radius:20px!important}.space-card,.info-card,.booking-form,.pix-card,.lookup-card{border:1px solid var(--v52-line)!important;background:linear-gradient(145deg,rgba(24,15,20,.94),rgba(10,8,9,.98))!important;box-shadow:0 24px 70px rgba(0,0,0,.22)}
-.public-reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.review-card{min-height:220px;padding:22px;border:1px solid var(--v52-line);border-radius:22px;background:linear-gradient(145deg,#151014,#0d0a0c);display:flex;flex-direction:column;justify-content:space-between}.review-card .stars,.stars{color:#ff7fba;letter-spacing:3px}.review-card p{font-family:Georgia,serif;font-size:20px;line-height:1.45}.review-card small{display:block;color:#a998a1;margin-top:4px}.review-empty{grid-column:1/-1;padding:24px;border:1px dashed var(--v52-line);border-radius:18px;color:#ad9ca5}.lookup-card{max-width:900px;margin:auto}.client-history-item{margin-top:12px!important;padding:18px!important;border-radius:18px!important}.history-top{display:flex;justify-content:space-between;gap:12px}.inline-review{margin-top:14px;padding-top:14px;border-top:1px solid var(--v52-line)}.inline-review textarea{width:100%;min-height:82px;margin:9px 0;background:#090708;border:1px solid var(--v52-line);color:#fff;border-radius:13px;padding:12px}.review-stars{display:flex;flex-direction:row-reverse;justify-content:flex-end;gap:3px}.review-stars input{display:none}.review-stars span{font-size:27px;color:#56434c;cursor:pointer}.review-stars label:has(input:checked) span,.review-stars label:has(input:checked)~label span{color:#ff7fba}.review-sent{padding:12px;border-radius:12px;background:rgba(66,189,111,.12);color:#9be5b4}
-footer{border-top:1px solid var(--v52-line)!important;margin-top:70px!important}
-@media(max-width:800px){.topbar{margin:8px;border-radius:18px}.topbar nav>a:not(.nav-cta){display:none}.hero{min-height:auto;padding-top:70px;grid-template-columns:1fr}.hero h1{font-size:54px}.hero-photo-wrap{min-height:410px}.public-reviews{grid-template-columns:1fr}.catalog,.portfolio,.procedure-info,.space-section,.reviews-section,.booking-section,.lookup{padding-left:14px;padding-right:14px}}
-
-/* V53 — SITE PÚBLICO LUXURY */
-:root{--lux-pink:#f36aa9;--lux-pink2:#ff9cc9;--lux-cream:#fff8fb;--lux-bg:#070507;--lux-card:#110c0f;--lux-line:rgba(255,143,194,.18)}
-body{background:#070507!important;background-image:radial-gradient(circle at 85% 10%,rgba(243,106,169,.08),transparent 24%)!important}.topbar{height:78px!important;padding:0 clamp(18px,5vw,72px)!important;background:rgba(6,4,6,.82)!important;backdrop-filter:blur(18px)!important;border-bottom:1px solid rgba(255,255,255,.05)!important}.brand-mark{font-family:Georgia,serif!important;font-size:28px!important;color:var(--lux-pink2)!important}.brand b{font-family:Georgia,serif!important;font-weight:400!important;font-size:19px!important}.brand small{letter-spacing:.13em!important;text-transform:uppercase!important;font-size:8px!important}.topbar nav a{font-size:12px!important}.nav-cta{background:linear-gradient(135deg,#ff89bd,#ec579d)!important;color:#160a10!important;border-radius:999px!important;padding:11px 19px!important}
-.hero{min-height:760px!important;padding:70px clamp(22px,6vw,90px)!important;display:grid!important;grid-template-columns:1.02fr .98fr!important;gap:55px!important;align-items:center!important;overflow:hidden!important}.hero:before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,5,7,.98) 0%,rgba(7,5,7,.86) 44%,rgba(7,5,7,.08) 76%),radial-gradient(circle at 30% 50%,rgba(243,106,169,.07),transparent 30%);pointer-events:none}.hero-copy{position:relative;z-index:3;max-width:700px!important}.hero-copy h1{font:400 clamp(58px,6vw,94px)/.94 Georgia,serif!important;letter-spacing:-.055em!important;margin:15px 0 25px!important}.hero-copy h1 em{color:var(--lux-pink2)!important;font-weight:400!important}.hero-copy p{font-size:18px!important;line-height:1.7!important;color:#d8cbd2!important;max-width:590px!important}.hero-actions{gap:12px!important;margin-top:30px!important}.btn{border-radius:999px!important;padding:14px 22px!important}.btn-hot{background:linear-gradient(135deg,#ff91c2,#ef5da2)!important;color:#160910!important;box-shadow:0 15px 40px rgba(238,86,157,.18)!important}.btn-line{background:rgba(12,8,11,.65)!important;border:1px solid rgba(255,144,195,.35)!important}.hero-photo-wrap{height:620px!important;position:relative!important;z-index:2!important}.blob-frame{position:absolute!important;inset:0!important;border-radius:220px 24px 220px 24px!important;overflow:hidden!important;border:1px solid rgba(255,150,199,.22)!important;box-shadow:0 35px 90px rgba(0,0,0,.38)!important}.blob-frame img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center 30%!important;filter:saturate(.82) contrast(1.02)!important}.hero-photo-wrap:after{content:'Emilly Ribeiro • Lash Designer';position:absolute;right:22px;bottom:22px;background:rgba(9,6,8,.72);backdrop-filter:blur(12px);border:1px solid rgba(255,153,201,.24);padding:12px 16px;border-radius:999px;font:italic 14px Georgia,serif;color:#ffe1ee}
-.section-head h2,.about-copy h2,.info-card h2{font-family:Georgia,serif!important;font-weight:400!important;letter-spacing:-.035em!important}.section-head h2{font-size:clamp(38px,4vw,58px)!important}.kicker{letter-spacing:.22em!important;font-size:10px!important;color:var(--lux-pink2)!important}.about{padding:100px clamp(22px,6vw,90px)!important;gap:70px!important}.about-photo{border-radius:28px!important;overflow:hidden!important;border:1px solid var(--lux-line)!important;box-shadow:0 30px 70px rgba(0,0,0,.28)!important}.about-photo img{object-fit:cover!important;object-position:center 25%!important}.about-copy p{font-size:17px!important;line-height:1.8!important}.mini-tags span{border-radius:999px!important;background:#120c10!important;border:1px solid var(--lux-line)!important;padding:9px 14px!important}
-.catalog,.portfolio,.procedure-info,.space-section,.reviews-section,.booking-section,.lookup{padding-left:clamp(22px,6vw,90px)!important;padding-right:clamp(22px,6vw,90px)!important}.service-card,.space-card,.review-card,.lookup-card,.info-card,.booking-form,.pix-card{background:linear-gradient(145deg,#120d10,#0b080a)!important;border:1px solid var(--lux-line)!important;border-radius:24px!important;box-shadow:0 20px 55px rgba(0,0,0,.13)!important}.service-card{overflow:hidden!important;transition:.25s!important}.service-card:hover{transform:translateY(-5px)!important;border-color:rgba(255,129,187,.45)!important;box-shadow:0 26px 60px rgba(0,0,0,.26)!important}.service-card img{aspect-ratio:1.18/1!important;object-fit:cover!important}.gallery-grid img{border-radius:22px!important}.rules>div{border-radius:18px!important;background:#0c090b!important;border:1px solid rgba(255,255,255,.06)!important}.rules b{color:var(--lux-pink2)!important}.space-card>span{font-size:27px!important;color:var(--lux-pink2)!important}.public-reviews{gap:14px!important}.booking-shell{gap:18px!important}.form-block{border-radius:18px!important;background:#0c090b!important}.booking-services label,.time-slots button{border-radius:14px!important}.lookup-card{max-width:1040px!important;margin:auto!important;padding:34px!important}footer{border-top:1px solid var(--lux-line)!important;padding:38px clamp(22px,6vw,90px)!important;background:#050405!important}
-@media(max-width:850px){.hero{grid-template-columns:1fr!important;padding-top:45px!important;min-height:auto!important}.hero:before{background:linear-gradient(0deg,#070507 0%,rgba(7,5,7,.75) 48%,rgba(7,5,7,.12) 100%)!important}.hero-photo-wrap{height:520px!important;grid-row:1}.hero-copy{grid-row:2}.hero-copy h1{font-size:58px!important}.about{grid-template-columns:1fr!important;padding-top:65px!important}.topbar nav a:not(.nav-cta){display:none!important}}
-@media(max-width:520px){.topbar{height:68px!important}.hero{padding:24px 14px 55px!important;gap:28px!important}.hero-photo-wrap{height:420px!important}.blob-frame{border-radius:120px 20px 120px 20px!important}.hero-copy h1{font-size:46px!important}.hero-copy p{font-size:15px!important}.hero-actions{display:grid!important}.hero-actions .btn{text-align:center!important}.about,.catalog,.portfolio,.procedure-info,.space-section,.reviews-section,.booking-section,.lookup{padding-left:14px!important;padding-right:14px!important}.section-head h2{font-size:36px!important}.lookup-card{padding:22px!important}}
-
-/* V54 — catálogo público sem agendamento */
-.owner-access{max-width:1180px;margin:0 auto;padding:30px clamp(22px,6vw,90px) 90px!important}.owner-access-card{max-width:720px;margin:auto;text-align:center;padding:36px;border:1px solid var(--lux-line);border-radius:26px;background:linear-gradient(145deg,#120d10,#0b080a);box-shadow:0 24px 65px rgba(0,0,0,.18)}.owner-access-card h2{font:400 clamp(34px,4vw,50px)/1.05 Georgia,serif;margin:12px 0}.owner-access-card p{color:#cdbec6;line-height:1.7}.owner-note{display:inline-block;margin-top:8px;color:#a9929e;font-size:13px}.catalog{padding-bottom:55px!important}.services-grid{margin-top:30px!important}@media(max-width:520px){.owner-access{padding:10px 14px 55px!important}.owner-access-card{padding:24px 18px}.topbar nav{display:block!important}.nav-cta{font-size:11px!important;padding:10px 13px!important}}
+/* V51 — TEMA NATALINO */
+body.xmas-theme{--bg:#0b0607;--panel:#160b0d;--panel2:#1d1013;--pink:#c1272d;--pink2:#f3cb63;--rose:#2f6f45;--white:#fffaf4;--muted:#eadfcc;--line:rgba(243,203,99,.22);background:
+ radial-gradient(circle at 15% 0,rgba(193,39,45,.18),transparent 25%),
+ radial-gradient(circle at 85% 10%,rgba(38,107,62,.22),transparent 28%),
+ linear-gradient(180deg,#090506 0%,#12080a 60%,#0b0607 100%)}
+body.xmas-theme:before{background:
+ radial-gradient(circle at 10% 16%,rgba(193,39,45,.15),transparent 24%),
+ radial-gradient(circle at 88% 10%,rgba(243,203,99,.12),transparent 24%),
+ radial-gradient(circle at 88% 78%,rgba(47,111,69,.16),transparent 24%)}
+.xmas-theme .topbar{background:rgba(12,6,8,.84);border-bottom:1px solid rgba(243,203,99,.18)}
+.top-ribbon{position:sticky;top:0;z-index:21;text-align:center;padding:10px 16px;background:linear-gradient(90deg,#7a1318,#b81d24,#7a1318);color:#fff6e6;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.08)}
+.xmas-theme .topbar{top:40px}
+.xmas-theme .brand-mark{background:radial-gradient(circle at 35% 30%,#ffe7a0,#f3cb63 45%,#7c1318 78%);box-shadow:0 0 28px rgba(243,203,99,.28)}
+.xmas-theme .kicker,.xmas-theme .service-select-hint,.xmas-theme .footer-admin{color:#f3cb63}
+.xmas-theme .hero h1 em,.xmas-theme .about h2 span,.xmas-theme .rules b,.xmas-theme .pix-value,.xmas-theme .service-card .price{color:#f3cb63}
+.xmas-theme .btn-hot{background:linear-gradient(135deg,#f3cb63,#dba93a);color:#3d1305;box-shadow:0 12px 34px rgba(243,203,99,.18)}
+.xmas-theme .btn-line{border-color:rgba(243,203,99,.22);background:rgba(255,255,255,.03)}
+.hero-xmas{padding-top:clamp(72px,9vw,120px)}
+.hero-badges{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 0}
+.hero-badges span,.mini-tags span{background:rgba(243,203,99,.08);border:1px solid rgba(243,203,99,.18);color:#fff3d0}
+.countdown-card{margin-top:22px;max-width:390px;padding:18px 20px;border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(243,203,99,.16);box-shadow:0 18px 40px rgba(0,0,0,.18)}
+.countdown-card small{display:block;color:#f6d690;text-transform:uppercase;letter-spacing:.12em;font-weight:800;margin-bottom:10px}
+.countdown-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.countdown-grid div{padding:14px 10px;border-radius:18px;background:rgba(10,5,6,.55);text-align:center;border:1px solid rgba(243,203,99,.12)}
+.countdown-grid b{display:block;font-size:30px;color:#fff9ed}
+.countdown-grid span{font-size:12px;color:#e6d7c1;text-transform:uppercase;letter-spacing:.08em}
+.xmas-frame{border-color:rgba(243,203,99,.28);box-shadow:0 0 0 10px rgba(243,203,99,.04),0 0 72px rgba(193,39,45,.16)}
+.ornament{position:absolute;display:grid;place-items:center;width:64px;height:64px;border-radius:50%;font-size:30px;background:rgba(12,7,8,.72);border:1px solid rgba(243,203,99,.18);backdrop-filter:blur(10px);box-shadow:0 16px 32px rgba(0,0,0,.22)}
+.ornament-a{left:8%;top:18%}
+.ornament-b{right:12%;bottom:14%}
+.snow-layer{position:fixed;inset:0;pointer-events:none;z-index:3;overflow:hidden}
+.snow-layer span{position:absolute;top:-10px;width:6px;height:6px;background:rgba(255,255,255,.75);border-radius:50%;filter:blur(.4px);animation:snowFall linear infinite}
+.snow-layer span:nth-child(1){left:5%;animation-duration:10s;animation-delay:-0s;width:5px;height:5px;opacity:0.9}
+.snow-layer span:nth-child(2){left:12%;animation-duration:12s;animation-delay:-2s;width:4px;height:4px;opacity:0.8}
+.snow-layer span:nth-child(3){left:18%;animation-duration:9s;animation-delay:-1s;width:6px;height:6px;opacity:0.7}
+.snow-layer span:nth-child(4){left:26%;animation-duration:14s;animation-delay:-4s;width:5px;height:5px;opacity:0.65}
+.snow-layer span:nth-child(5){left:34%;animation-duration:11s;animation-delay:-0s;width:4px;height:4px;opacity:0.9}
+.snow-layer span:nth-child(6){left:42%;animation-duration:15s;animation-delay:-6s;width:7px;height:7px;opacity:0.7}
+.snow-layer span:nth-child(7){left:49%;animation-duration:13s;animation-delay:-3s;width:4px;height:4px;opacity:0.85}
+.snow-layer span:nth-child(8){left:56%;animation-duration:10s;animation-delay:-5s;width:6px;height:6px;opacity:0.7}
+.snow-layer span:nth-child(9){left:63%;animation-duration:12s;animation-delay:-1s;width:5px;height:5px;opacity:0.8}
+.snow-layer span:nth-child(10){left:70%;animation-duration:16s;animation-delay:-4s;width:7px;height:7px;opacity:0.55}
+.snow-layer span:nth-child(11){left:77%;animation-duration:11s;animation-delay:-2s;width:4px;height:4px;opacity:0.7}
+.snow-layer span:nth-child(12){left:83%;animation-duration:14s;animation-delay:-6s;width:5px;height:5px;opacity:0.8}
+.snow-layer span:nth-child(13){left:88%;animation-duration:10s;animation-delay:-3s;width:6px;height:6px;opacity:0.7}
+.snow-layer span:nth-child(14){left:92%;animation-duration:15s;animation-delay:-5s;width:4px;height:4px;opacity:0.65}
+.snow-layer span:nth-child(15){left:15%;animation-duration:17s;animation-delay:-7s;width:6px;height:6px;opacity:0.5}
+.snow-layer span:nth-child(16){left:29%;animation-duration:13s;animation-delay:-9s;width:5px;height:5px;opacity:0.7}
+.snow-layer span:nth-child(17){left:51%;animation-duration:18s;animation-delay:-10s;width:7px;height:7px;opacity:0.5}
+.snow-layer span:nth-child(18){left:74%;animation-duration:12s;animation-delay:-8s;width:5px;height:5px;opacity:0.7}
+@keyframes snowFall{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(20px,110vh,0)}}
+.christmas-upgrade,.space-section,.holiday-banner{padding:0 clamp(20px,7vw,110px) 90px}
+.xmas-upgrade-grid,.space-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.xmas-upgrade-card,.space-card,.holiday-banner-card{border:1px solid rgba(243,203,99,.14);background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.015));border-radius:28px;padding:24px;box-shadow:0 18px 45px rgba(0,0,0,.16)}
+.xmas-upgrade-card span,.space-card span{display:grid;place-items:center;width:54px;height:54px;border-radius:18px;background:rgba(243,203,99,.09);font-size:24px;margin-bottom:16px}
+.xmas-upgrade-card h3,.space-card h3,.holiday-banner-card h2{margin:0 0 10px;font-family:Georgia,serif;font-weight:500}
+.xmas-upgrade-card p,.space-card p,.holiday-banner-card p,.mini-feature span{color:#eadfcc;line-height:1.65}
+.holiday-banner{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:stretch}
+.holiday-banner-card.left{background:radial-gradient(circle at top right,rgba(243,203,99,.14),transparent 30%),linear-gradient(180deg,rgba(193,39,45,.18),rgba(255,255,255,.02))}
+.holiday-banner-card.right{display:grid;gap:12px}
+.mini-feature{padding:18px;border-radius:22px;background:rgba(10,5,6,.36);border:1px solid rgba(243,203,99,.12)}
+.mini-feature b{display:block;margin-bottom:6px;color:#fff5d8}
+.xmas-theme .info-card,.xmas-theme .pix-card{background:radial-gradient(circle at 100% 0,rgba(243,203,99,.12),transparent 40%),#11090b}
+.xmas-theme .gallery-tabs button.active,.xmas-theme .time-slots button.active{background:#f3cb63;color:#381508;border-color:#f3cb63}
+.xmas-theme .booking-service input[type="checkbox"]{border-color:#f3cb63}
+.xmas-theme .booking-service input[type="checkbox"]:checked{background:#f3cb63;border-color:#f3cb63}
+.xmas-theme .service-card:hover,.xmas-theme .service-card.selected{border-color:rgba(243,203,99,.52);box-shadow:0 12px 34px rgba(243,203,99,.08)}
+.xmas-theme .service-card:after{border-color:rgba(243,203,99,.16)}
+.xmas-theme .float-wa{background:linear-gradient(180deg,#2db866,#25d366)}
+.xmas-theme .payment-dialog{background:#100709;border-color:rgba(243,203,99,.2)}
+.xmas-theme .copy-row button{background:#f3cb63;color:#3d1305}
+.xmas-theme .proof-drop{border-color:rgba(243,203,99,.34);background:rgba(243,203,99,.04)}
+.xmas-theme footer{border-top-color:rgba(243,203,99,.16)}
+@media(max-width:900px){.xmas-theme .topbar{top:40px}.xmas-upgrade-grid,.space-grid,.holiday-banner{grid-template-columns:1fr}.countdown-card{max-width:none}.ornament{width:52px;height:52px;font-size:24px}}
+@media(max-width:600px){.top-ribbon{font-size:11px;padding:10px 12px}.xmas-theme .topbar{top:36px}.hero-badges{gap:8px}.hero-badges span{font-size:12px}.countdown-grid b{font-size:24px}.christmas-upgrade,.space-section,.holiday-banner{padding:0 14px 48px}.xmas-upgrade-card,.space-card,.holiday-banner-card{padding:18px;border-radius:22px}.ornament{display:none}}
