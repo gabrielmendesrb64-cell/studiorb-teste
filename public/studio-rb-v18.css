@@ -356,79 +356,23 @@
   .space-card{padding:15px}
 }
 
-
-/* V51 — TEMA NATALINO */
-body.xmas-theme{--bg:#0b0607;--panel:#160b0d;--panel2:#1d1013;--pink:#c1272d;--pink2:#f3cb63;--rose:#2f6f45;--white:#fffaf4;--muted:#eadfcc;--line:rgba(243,203,99,.22);background:
- radial-gradient(circle at 15% 0,rgba(193,39,45,.18),transparent 25%),
- radial-gradient(circle at 85% 10%,rgba(38,107,62,.22),transparent 28%),
- linear-gradient(180deg,#090506 0%,#12080a 60%,#0b0607 100%)}
-body.xmas-theme:before{background:
- radial-gradient(circle at 10% 16%,rgba(193,39,45,.15),transparent 24%),
- radial-gradient(circle at 88% 10%,rgba(243,203,99,.12),transparent 24%),
- radial-gradient(circle at 88% 78%,rgba(47,111,69,.16),transparent 24%)}
-.xmas-theme .topbar{background:rgba(12,6,8,.84);border-bottom:1px solid rgba(243,203,99,.18)}
-.top-ribbon{position:sticky;top:0;z-index:21;text-align:center;padding:10px 16px;background:linear-gradient(90deg,#7a1318,#b81d24,#7a1318);color:#fff6e6;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.08)}
-.xmas-theme .topbar{top:40px}
-.xmas-theme .brand-mark{background:radial-gradient(circle at 35% 30%,#ffe7a0,#f3cb63 45%,#7c1318 78%);box-shadow:0 0 28px rgba(243,203,99,.28)}
-.xmas-theme .kicker,.xmas-theme .service-select-hint,.xmas-theme .footer-admin{color:#f3cb63}
-.xmas-theme .hero h1 em,.xmas-theme .about h2 span,.xmas-theme .rules b,.xmas-theme .pix-value,.xmas-theme .service-card .price{color:#f3cb63}
-.xmas-theme .btn-hot{background:linear-gradient(135deg,#f3cb63,#dba93a);color:#3d1305;box-shadow:0 12px 34px rgba(243,203,99,.18)}
-.xmas-theme .btn-line{border-color:rgba(243,203,99,.22);background:rgba(255,255,255,.03)}
-.hero-xmas{padding-top:clamp(72px,9vw,120px)}
-.hero-badges{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 0}
-.hero-badges span,.mini-tags span{background:rgba(243,203,99,.08);border:1px solid rgba(243,203,99,.18);color:#fff3d0}
-.countdown-card{margin-top:22px;max-width:390px;padding:18px 20px;border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(243,203,99,.16);box-shadow:0 18px 40px rgba(0,0,0,.18)}
-.countdown-card small{display:block;color:#f6d690;text-transform:uppercase;letter-spacing:.12em;font-weight:800;margin-bottom:10px}
-.countdown-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.countdown-grid div{padding:14px 10px;border-radius:18px;background:rgba(10,5,6,.55);text-align:center;border:1px solid rgba(243,203,99,.12)}
-.countdown-grid b{display:block;font-size:30px;color:#fff9ed}
-.countdown-grid span{font-size:12px;color:#e6d7c1;text-transform:uppercase;letter-spacing:.08em}
-.xmas-frame{border-color:rgba(243,203,99,.28);box-shadow:0 0 0 10px rgba(243,203,99,.04),0 0 72px rgba(193,39,45,.16)}
-.ornament{position:absolute;display:grid;place-items:center;width:64px;height:64px;border-radius:50%;font-size:30px;background:rgba(12,7,8,.72);border:1px solid rgba(243,203,99,.18);backdrop-filter:blur(10px);box-shadow:0 16px 32px rgba(0,0,0,.22)}
-.ornament-a{left:8%;top:18%}
-.ornament-b{right:12%;bottom:14%}
-.snow-layer{position:fixed;inset:0;pointer-events:none;z-index:3;overflow:hidden}
-.snow-layer span{position:absolute;top:-10px;width:6px;height:6px;background:rgba(255,255,255,.75);border-radius:50%;filter:blur(.4px);animation:snowFall linear infinite}
-.snow-layer span:nth-child(1){left:5%;animation-duration:10s;animation-delay:-0s;width:5px;height:5px;opacity:0.9}
-.snow-layer span:nth-child(2){left:12%;animation-duration:12s;animation-delay:-2s;width:4px;height:4px;opacity:0.8}
-.snow-layer span:nth-child(3){left:18%;animation-duration:9s;animation-delay:-1s;width:6px;height:6px;opacity:0.7}
-.snow-layer span:nth-child(4){left:26%;animation-duration:14s;animation-delay:-4s;width:5px;height:5px;opacity:0.65}
-.snow-layer span:nth-child(5){left:34%;animation-duration:11s;animation-delay:-0s;width:4px;height:4px;opacity:0.9}
-.snow-layer span:nth-child(6){left:42%;animation-duration:15s;animation-delay:-6s;width:7px;height:7px;opacity:0.7}
-.snow-layer span:nth-child(7){left:49%;animation-duration:13s;animation-delay:-3s;width:4px;height:4px;opacity:0.85}
-.snow-layer span:nth-child(8){left:56%;animation-duration:10s;animation-delay:-5s;width:6px;height:6px;opacity:0.7}
-.snow-layer span:nth-child(9){left:63%;animation-duration:12s;animation-delay:-1s;width:5px;height:5px;opacity:0.8}
-.snow-layer span:nth-child(10){left:70%;animation-duration:16s;animation-delay:-4s;width:7px;height:7px;opacity:0.55}
-.snow-layer span:nth-child(11){left:77%;animation-duration:11s;animation-delay:-2s;width:4px;height:4px;opacity:0.7}
-.snow-layer span:nth-child(12){left:83%;animation-duration:14s;animation-delay:-6s;width:5px;height:5px;opacity:0.8}
-.snow-layer span:nth-child(13){left:88%;animation-duration:10s;animation-delay:-3s;width:6px;height:6px;opacity:0.7}
-.snow-layer span:nth-child(14){left:92%;animation-duration:15s;animation-delay:-5s;width:4px;height:4px;opacity:0.65}
-.snow-layer span:nth-child(15){left:15%;animation-duration:17s;animation-delay:-7s;width:6px;height:6px;opacity:0.5}
-.snow-layer span:nth-child(16){left:29%;animation-duration:13s;animation-delay:-9s;width:5px;height:5px;opacity:0.7}
-.snow-layer span:nth-child(17){left:51%;animation-duration:18s;animation-delay:-10s;width:7px;height:7px;opacity:0.5}
-.snow-layer span:nth-child(18){left:74%;animation-duration:12s;animation-delay:-8s;width:5px;height:5px;opacity:0.7}
-@keyframes snowFall{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(20px,110vh,0)}}
-.christmas-upgrade,.space-section,.holiday-banner{padding:0 clamp(20px,7vw,110px) 90px}
-.xmas-upgrade-grid,.space-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-.xmas-upgrade-card,.space-card,.holiday-banner-card{border:1px solid rgba(243,203,99,.14);background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.015));border-radius:28px;padding:24px;box-shadow:0 18px 45px rgba(0,0,0,.16)}
-.xmas-upgrade-card span,.space-card span{display:grid;place-items:center;width:54px;height:54px;border-radius:18px;background:rgba(243,203,99,.09);font-size:24px;margin-bottom:16px}
-.xmas-upgrade-card h3,.space-card h3,.holiday-banner-card h2{margin:0 0 10px;font-family:Georgia,serif;font-weight:500}
-.xmas-upgrade-card p,.space-card p,.holiday-banner-card p,.mini-feature span{color:#eadfcc;line-height:1.65}
-.holiday-banner{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:stretch}
-.holiday-banner-card.left{background:radial-gradient(circle at top right,rgba(243,203,99,.14),transparent 30%),linear-gradient(180deg,rgba(193,39,45,.18),rgba(255,255,255,.02))}
-.holiday-banner-card.right{display:grid;gap:12px}
-.mini-feature{padding:18px;border-radius:22px;background:rgba(10,5,6,.36);border:1px solid rgba(243,203,99,.12)}
-.mini-feature b{display:block;margin-bottom:6px;color:#fff5d8}
-.xmas-theme .info-card,.xmas-theme .pix-card{background:radial-gradient(circle at 100% 0,rgba(243,203,99,.12),transparent 40%),#11090b}
-.xmas-theme .gallery-tabs button.active,.xmas-theme .time-slots button.active{background:#f3cb63;color:#381508;border-color:#f3cb63}
-.xmas-theme .booking-service input[type="checkbox"]{border-color:#f3cb63}
-.xmas-theme .booking-service input[type="checkbox"]:checked{background:#f3cb63;border-color:#f3cb63}
-.xmas-theme .service-card:hover,.xmas-theme .service-card.selected{border-color:rgba(243,203,99,.52);box-shadow:0 12px 34px rgba(243,203,99,.08)}
-.xmas-theme .service-card:after{border-color:rgba(243,203,99,.16)}
-.xmas-theme .float-wa{background:linear-gradient(180deg,#2db866,#25d366)}
-.xmas-theme .payment-dialog{background:#100709;border-color:rgba(243,203,99,.2)}
-.xmas-theme .copy-row button{background:#f3cb63;color:#3d1305}
-.xmas-theme .proof-drop{border-color:rgba(243,203,99,.34);background:rgba(243,203,99,.04)}
-.xmas-theme footer{border-top-color:rgba(243,203,99,.16)}
-@media(max-width:900px){.xmas-theme .topbar{top:40px}.xmas-upgrade-grid,.space-grid,.holiday-banner{grid-template-columns:1fr}.countdown-card{max-width:none}.ornament{width:52px;height:52px;font-size:24px}}
-@media(max-width:600px){.top-ribbon{font-size:11px;padding:10px 12px}.xmas-theme .topbar{top:36px}.hero-badges{gap:8px}.hero-badges span{font-size:12px}.countdown-grid b{font-size:24px}.christmas-upgrade,.space-section,.holiday-banner{padding:0 14px 48px}.xmas-upgrade-card,.space-card,.holiday-banner-card{padding:18px;border-radius:22px}.ornament{display:none}}
+/* RB 2.0 — visual moderno, preservando cores preto/rosa/branco */
+:root{--bg:#09090c;--panel:#151117;--panel2:#1d151d;--pink:#ef4f97;--pink2:#ff91bb;--line:rgba(255,123,181,.20);--white:#fffafb;--muted:#c3b4be}
+body{background:radial-gradient(circle at 100% 0,rgba(210,57,125,.095),transparent 36%),#09090c}
+body:before{opacity:.34}
+.topbar{padding:16px clamp(18px,5vw,76px);border-color:rgba(255,255,255,.075);background:rgba(11,9,13,.93)}
+.brand-mark{border-radius:15px;width:45px;height:45px;background:linear-gradient(145deg,#ffb1cf,#e85392 65%,#87244b);box-shadow:0 8px 28px #ef4f9729}
+.topbar nav a{font-weight:600}.topbar .nav-cta{background:#ef4f97;color:white}
+.hero{min-height:650px;grid-template-columns:1fr .85fr;padding-top:74px;padding-bottom:90px;gap:5vw;background:linear-gradient(135deg,#0b0a0d,#140d14 70%,#0a090c)}
+.hero h1{font-size:clamp(49px,6vw,86px);max-width:740px;letter-spacing:-.045em;line-height:1.05}
+.hero h1 em{font-style:normal;color:#ff87b6;text-shadow:none}
+.hero-copy>p{max-width:580px;font-size:18px}.hero .neon-orbit,.hero .spark{display:none}
+.hero-showcase{width:min(100%,510px);aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:35px;border-radius:30px;border:1px solid #ffffff14;background:radial-gradient(circle at 50% 45%,#4a1d36,#1a101c 52%,#100e13 78%);box-shadow:0 34px 80px #0007,inset 0 0 0 8px #ffffff03}
+.showcase-eyebrow,.showcase-bottom{font-size:11px;letter-spacing:.2em;font-weight:800;color:#f6abc9}.showcase-monogram{font:italic 110px Georgia,serif;letter-spacing:-.1em;color:#ffd0e4;text-shadow:0 18px 40px #ff5ca740}.hero-showcase p{font:italic 24px Georgia,serif;color:#fff;margin:12px 0 30px}.showcase-bottom i{color:#f36aa2;font-style:normal}
+.about{border-top-color:#ffffff11;grid-template-columns:.6fr 1.4fr}.about-monogram{background:linear-gradient(145deg,#f9bbd5,#b92d6d 70%,#321025);border-radius:30px;display:grid;place-items:center}.about-monogram>div{text-align:center}.about-monogram span{display:block;font:italic 110px Georgia,serif;color:white}.about-monogram small{letter-spacing:.27em;font-weight:800;color:#fff9}
+.catalog,.portfolio,.booking-section,.procedure-info,.lookup{padding-top:80px;padding-bottom:80px}.section-head h2{letter-spacing:-.025em}
+.services-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:18px}.service-card{display:flex;flex-direction:column;min-height:315px;padding:0;border-radius:24px;background:#171218;border:1px solid #ffffff14;box-shadow:0 12px 32px #0002;overflow:hidden}.service-card:hover{border-color:#ef4f9788;transform:translateY(-4px)}.service-card:after{display:none}.service-card .service-photo{width:100%;height:180px;min-height:180px;object-fit:cover}.service-placeholder{height:145px;display:grid;place-content:center;text-align:center;gap:3px;background:linear-gradient(135deg,#402238,#19131c 70%);border-bottom:1px solid #ffffff12}.service-placeholder span{font:italic 60px Georgia,serif;line-height:1;color:#fda9cd}.service-placeholder small{letter-spacing:.23em;font-size:9px;color:#f6b9d0}.service-info{flex:1;display:flex;flex-direction:column;padding:22px!important}.service-info .kicker{font-size:10px;color:#ef8ab5}.service-info h3{font-size:23px;line-height:1.13;margin:8px 0!important}.service-info p{flex:1;min-height:44px;font-size:13px}.service-bottom{border-top:1px solid #ffffff14;padding-top:14px;margin-top:18px;align-items:center}.service-select-hint{padding:11px 13px;border-radius:12px;background:#ef4f97;color:#fff!important;white-space:nowrap}.service-card .price{color:#ffb3d1;font-size:23px}.maintenance-price{font-size:12px}
+.booking-form,.pix-card,.lookup-card,.info-card{background:#171118;border-color:#ffffff18;box-shadow:0 15px 48px #0002}.booking-form,.pix-card{border-radius:26px}.gallery-item{border-radius:20px}.btn-hot{color:white;background:linear-gradient(135deg,#fc69a8,#da347a)}
+@media(max-width:1100px){.services-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:900px){.hero{grid-template-columns:1fr;min-height:auto}.hero-photo-wrap{order:0}.hero-showcase{max-width:550px;aspect-ratio:1.5}}
+@media(max-width:600px){.hero{padding-top:45px;padding-bottom:55px}.hero-showcase{aspect-ratio:1.45;padding:15px}.showcase-monogram{font-size:74px}.hero-showcase p{font-size:18px;margin:6px 0 16px}.showcase-eyebrow,.showcase-bottom{font-size:9px}.services-grid{grid-template-columns:1fr!important}.service-card{min-height:0;border-radius:20px}.service-card .service-photo{height:170px}.service-placeholder{height:112px}.service-info h3{font-size:21px}.service-info p{min-height:0}.service-info{padding:17px!important}.about-monogram{display:none}.about{grid-template-columns:1fr}.hero h1{font-size:clamp(44px,11vw,62px)}}

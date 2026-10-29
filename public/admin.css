@@ -878,21 +878,10 @@ dialog h2{
 
 .manual-service-field{display:grid;gap:6px}.manual-service-field>span{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#c8aab9}.manual-service-field select{width:100%}
 
-
-/* V50 — PAINEL NATALINO */
-.admin-noel{background:
- radial-gradient(circle at 10% 0,rgba(193,39,45,.16),transparent 25%),
- radial-gradient(circle at 88% 10%,rgba(243,203,99,.10),transparent 25%),
- radial-gradient(circle at 86% 78%,rgba(47,111,69,.16),transparent 22%),
- linear-gradient(180deg,#080506 0%,#11090b 100%)}
-.admin-noel .admin-top{top:38px;background:rgba(12,6,8,.8);border-bottom-color:rgba(243,203,99,.16)}
-.admin-holiday-banner{position:sticky;top:0;z-index:42;text-align:center;padding:10px 16px;background:linear-gradient(90deg,#7a1318,#b81d24,#7a1318);color:#fff7e7;font-size:13px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.08)}
-.admin-noel .eyebrow,.admin-noel .selected-date,.admin-noel .save-state{color:#f3cb63}
-.admin-noel .btn-pink{background:linear-gradient(135deg,#f3cb63,#d9a53c);color:#3f1707;border-color:transparent}
-.admin-noel .btn-ghost:hover{background:rgba(243,203,99,.05)}
-.admin-noel .login-card,.admin-noel .panel-card,.admin-noel .stat{border-color:rgba(243,203,99,.14);background:linear-gradient(180deg,#130c0e 0%,#0f090b 100%)}
-.admin-noel .circle-btn,.admin-noel .calendar-day,.admin-noel .segmented button,.admin-noel .admin-section-menu button{border-color:rgba(243,203,99,.14)}
-.admin-noel .segmented button.active,.admin-noel .admin-section-menu button.active,.admin-noel .calendar-day.active{background:#f3cb63;color:#3f1707;border-color:#f3cb63}
-.admin-noel .booking-item,.admin-noel .block-item,.admin-noel .gallery-item-admin,.admin-noel .customer-card,.admin-noel .finance-card{border-color:rgba(243,203,99,.12)}
-.admin-noel .stat b,.admin-noel .panel-head h2,.admin-noel .dash-head h1,.admin-noel .login-card h1{color:#fff6e4}
-@media(max-width:700px){.admin-holiday-banner{font-size:11px;padding:9px 12px}.admin-noel .admin-top{top:36px}}
+/* RB 2.0 — painel profissional */
+.admin-body{background:#09090c;color:#fdf8fb}.admin-top{height:76px;background:#111015;border-bottom:1px solid #ffffff16}.admin-brand img{width:62px}.admin-brand b{font-size:18px}.admin-main{max-width:1480px;padding:32px clamp(16px,3vw,44px) 80px}
+.dash-head{padding:12px 0 28px;margin:0;align-items:center;border-bottom:1px solid #ffffff12}.dash-head h1{font:600 clamp(30px,3vw,43px) Inter,system-ui,sans-serif;letter-spacing:-.04em;margin:8px 0}.dash-sub{font-size:14px;color:#beacb8}.eyebrow{color:#fb80b3}
+.stats{margin:22px 0;gap:14px}.stat{border-radius:18px;padding:22px;background:#17131a;border-color:#ffffff13}.stat b{font:700 34px Inter,system-ui,sans-serif}.stat span{letter-spacing:.06em}
+.admin-section-menu{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:#171219;border:1px solid #ffffff15;border-radius:19px;padding:10px;margin-bottom:24px;box-shadow:0 12px 32px #0002}.admin-menu-label{font-size:10px;letter-spacing:.12em;font-weight:800;color:#9e8c98;margin:0 8px}.admin-section-menu button{padding:12px 15px!important;border-radius:12px!important;color:#d6c9d1;background:transparent!important;border:1px solid transparent!important;cursor:pointer;font-weight:700;white-space:nowrap}.admin-section-menu button:hover{background:#ffffff0c!important}.admin-section-menu button.active{background:#ef4f97!important;color:#fff!important;border-color:transparent!important;box-shadow:0 8px 16px #ef4f9723}
+.panel-card{border-radius:20px;border:1px solid #ffffff14;background:#17131a;padding:24px;box-shadow:0 14px 42px #0003}.panel-head h2{font-family:Inter,system-ui,sans-serif;font-size:24px;font-weight:700;letter-spacing:-.025em}.login-card{background:#17131a;border-radius:24px;padding:36px;border:1px solid #ffffff18}.login-card h1{font-family:Inter,system-ui,sans-serif;font-weight:750;letter-spacing:-.035em;font-size:36px}.calendar-card-wide{margin-bottom:20px}.calendar-day{border-radius:12px!important}.service-edit-row{background:#130f15;border:1px solid #ffffff12;border-radius:18px!important;padding:18px!important}.services-settings,.gallery-settings{width:100%}.btn-pink{background:#ef4f97;color:white}.btn-pink:hover{background:#e23883}.finance-stat{background:#110d13;border-color:#ffffff18}.finance-stat.main b{color:#f876ab}
+@media(max-width:850px){.admin-section-menu{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin}.admin-menu-label{display:none}.admin-main{padding:18px 14px 80px}.dash-head{align-items:flex-start;gap:18px;flex-direction:column}.panel-card{padding:16px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.dash-head h1{font-size:32px}}

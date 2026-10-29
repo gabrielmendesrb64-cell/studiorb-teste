@@ -8,31 +8,9 @@ async function api(url,opts={}){const r=await fetch(url,{cache:'no-store',...opt
 function duration(){return (cfg.services||[]).filter(s=>selectedServices.has(s.id)).reduce((a,s)=>a+Number(s.duration||60),0)}
 function total(){return (cfg.services||[]).filter(s=>selectedServices.has(s.id)).reduce((a,s)=>a+Number(s.price||0),0)}
 function serviceVisual(s){
-  if (s.image || s.description) return {image:s.image || 'assets/service-placeholder.svg',description:s.description || 'Procedimento realizado com cuidado e técnica no Studio RB.'};
-  const n=String(s.name||'').toLowerCase();
-  const rules=[
-    [/volume brasileiro/,['assets/services/volume-brasileiro.webp','Entrega volume e delicadeza ao olhar.']],
-    [/volume (bela|3d)/,['assets/services/volume-3d.webp','Olhar preenchido, delicado e apaixonante.']],
-    [/lash lifting/,['assets/services/lash-lifting.webp','Curva, alonga e levanta os cílios naturais.']],
-    [/volume (ruby|5d)/,['assets/services/volume-5d.webp','Efeito volumoso e marcante no olhar.']],
-    [/volume (diva|8d)/,['assets/services/volume-8d.webp','Olhar alongado, sensual e bem definido.']],
-    [/volume fox/,['assets/services/volume-fox.webp','Olhar alongado e marcante.']],
-    [/mega brasileiro/,['assets/services/mega-brasileiro.webp','Olhar dramático e volumoso.']],
-    [/volume luxo/,['assets/services/volume-luxo.webp','Olhar marcante e volumoso.']],
-    [/mega fox/,['assets/services/mega-fox.webp','Alongado nos cantos externos, com efeito puxado.']],
-    [/design.*henna|henna/,['assets/services/henna.webp','Realça o formato da sobrancelha e corrige pequenas falhas.']],
-    [/design.*sobrancelha/,['assets/services/design.webp','Valoriza o olhar e harmoniza o rosto.']],
-    [/brow lamination/,['assets/services/brow-lamination.webp','Alinha os fios e dá volume com efeito penteado.']],
-    [/shadow/,['assets/services/micro-shadow.webp','Efeito sombreado suave e sofisticado.']],
-    [/fio a fio|fio.*fio/,['assets/services/micro-fio.webp','Simula fios naturais para corrigir falhas com naturalidade.']],
-    [/micropigmentação labial|micro.*labial/,['assets/services/micro-labial.webp','Realça a cor natural dos lábios e melhora o contorno.']],
-    [/hidraglos/,['assets/services/hidraglos.webp','Hidratação profunda e aparência renovada para os lábios.']],
-    [/spa labial/,['assets/services/spa-labial.webp','Esfoliação, hidratação e pigmentação temporária.']],
-    [/buço|depilação/,['assets/services/depilacao-buco.webp','Depilação de buço com acabamento delicado.']]
-  ];
-  for(const [re,v] of rules) if(re.test(n)) return {image:v[0],description:v[1]};
-  return {image:'assets/service-placeholder.svg',description:'Procedimento realizado com cuidado e técnica no Studio RB.'};
+  return {image:s.image||'', description:s.description||'Atendimento personalizado com todo cuidado que você merece.'};
 }
+
 function isMaintenanceService(s){
   return /^manut/i.test(String(s.id||'')) || /^manuten[cç][aã]o\b/i.test(String(s.name||'').trim());
 }
@@ -99,7 +77,7 @@ function renderServices(){
   $('#servicesGrid').innerHTML=catalog.map(s=>{
     const v=serviceVisual(s),maintenance=findMaintenance(s,all);
     const maintenanceHtml=maintenance?`<div class="maintenance-price"><span>Manutenção</span><strong>${money(maintenance.price)}</strong></div>`:'';
-    return `<article class="service-card" data-service="${esc(s.id)}"><img class="service-photo" src="${esc(v.image)}" alt="${esc(s.name)}" loading="lazy"><div class="service-info"><span class="kicker">STUDIO RB</span><h3>${esc(s.name)}</h3><p>${esc(v.description)}</p><div class="service-bottom"><div class="price-wrap"><div class="price">${money(s.price)}</div>${maintenanceHtml}</div><span class="service-select-hint">Selecionar</span></div></div></article>`;
+    return `<article class="service-card ${v.image?"has-photo":"no-photo"}" data-service="${esc(s.id)}">${v.image?`<img class="service-photo" src="${esc(v.image)}" alt="${esc(s.name)}" loading="lazy">`:`<div class="service-placeholder"><span>RB</span><small>STUDIO RB</small></div>`}<div class="service-info"><span class="kicker">PROCEDIMENTO</span><h3>${esc(s.name)}</h3><p>${esc(v.description)}</p><div class="service-bottom"><div class="price-wrap"><div class="price">${money(s.price)}</div>${maintenanceHtml}</div><span class="service-select-hint">Agendar ↗</span></div></div></article>`;
   }).join('')||'<div class="loading-card">Nenhum procedimento cadastrado.</div>';
   renderBookingMenu();
 }
@@ -202,8 +180,6 @@ $('#sendWhatsappProof')?.addEventListener('click',()=>{
 });
 
 $('#lookupForm')?.addEventListener('submit',async e=>{e.preventDefault();const q=$('#lookupQuery').value.trim();if(!q)return;try{const d=await api(`/api/my-bookings?q=${encodeURIComponent(q)}`);$('#lookupResults').innerHTML=(d.bookings||[]).map(b=>`<div class="lookup-item"><b>${esc((b.services||[]).map(s=>s.name).join(' + '))}</b><div>${esc(b.date)} • ${esc(b.time)}</div><div class="status">${esc(b.status)}</div><small>${b.paymentStatus?`Pagamento: ${esc(b.paymentStatus)}`:''}</small></div>`).join('')||'<p class="muted">Nenhum agendamento encontrado.</p>'}catch(err){toast(err.message)}});
-function initChristmasCountdown(){const wrap=$('#christmasCountdown');if(!wrap)return;const update=()=>{const now=new Date();const year=now.getMonth()===11 && now.getDate()>25?now.getFullYear()+1:now.getFullYear();const target=new Date(year,11,25,0,0,0);const diff=Math.max(0,target-now);const days=Math.floor(diff/86400000);const hours=Math.floor((diff%86400000)/3600000);const minutes=Math.floor((diff%3600000)/60000);const set=(id,val)=>{const el=$(id);if(el)el.textContent=String(val).padStart(2,'0')};set('#cdDays',days);set('#cdHours',hours);set('#cdMinutes',minutes)};update();setInterval(update,60000)}
-
-async function init(){try{cfg=await api('/api/config');const dep=money(cfg.depositAmount||20);if($('#heroDeposit'))$('#heroDeposit').textContent=dep;if($('#pixValue'))$('#pixValue').textContent=dep;renderServices();renderGallery();const phone=String(cfg.whatsapp||'').replace(/\D/g,'');$('#floatingWhatsapp').href=`https://wa.me/${phone}`;$('#footerContact').innerHTML=`<span>${esc(cfg.address||'')}</span><span>${esc(cfg.instagram||'')}</span>`;const today=new Date();$('#bookingDate').min=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;initChristmasCountdown()}catch(e){toast('Não foi possível carregar o site.')}}
+async function init(){try{cfg=await api('/api/config');const dep=money(cfg.depositAmount||20);if($('#heroDeposit'))$('#heroDeposit').textContent=dep;if($('#pixValue'))$('#pixValue').textContent=dep;renderServices();renderGallery();const phone=String(cfg.whatsapp||'').replace(/\D/g,'');$('#floatingWhatsapp').href=`https://wa.me/${phone}`;$('#footerContact').innerHTML=`<span>${esc(cfg.address||'')}</span><span>${esc(cfg.instagram||'')}</span>`;const today=new Date();$('#bookingDate').min=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`}catch(e){toast('Não foi possível carregar o site.')}}
 init();
 
